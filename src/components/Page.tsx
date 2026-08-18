@@ -133,7 +133,9 @@ export const Page = React.forwardRef<HTMLElement, PageProps>(function Page(
 
   const refs = getRefs(currentTerm);
   const explanationText = getExplanation(currentTerm, explanationMode);
-  const pageNumber = 101 + termIndex * 7;
+  // Each glossary entry is one real page in the alphabetical book order.
+  const pageNumber = termIndex + 1;
+  const pageCounter = `Page ${pageNumber} of ${totalTerms}`;
 
   return (
     <article className="page" id="page" ref={ref}>
@@ -202,7 +204,7 @@ export const Page = React.forwardRef<HTMLElement, PageProps>(function Page(
           </div>
 
           <div className="folio-top" id="folioTop">
-            Leaf {String(termIndex + 1).padStart(2, '0')} of {totalTerms}
+            {pageCounter}
           </div>
         </header>
 
@@ -255,7 +257,7 @@ export const Page = React.forwardRef<HTMLElement, PageProps>(function Page(
               <span className="sense-num">1.</span>
               <div className="definition-mode">{modeNames[explanationMode]}</div>
               <p className={`definition ${fromSearchQuestion ? 'search-hit' : ''}`}>{explanationText}</p>
-              {currentTerm.example && <p className="example">{currentTerm.example}</p>}
+              <p className="example">{currentTerm.example || ''}</p>
             </div>
 
             <div className="lower-grid">
@@ -374,7 +376,7 @@ export const Page = React.forwardRef<HTMLElement, PageProps>(function Page(
             <span className="nav-arrow">←</span> Previous
           </button>
           <span className="center" id="pageNumber">
-            {pageNumber}
+            {pageCounter}
           </span>
           <button
             type="button"

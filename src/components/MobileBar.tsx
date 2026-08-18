@@ -1,19 +1,28 @@
 import React from 'react';
 
 interface MobileBarProps {
-  onSurprise: () => void;
+  isMenuOpen: boolean;
+  onOpenMenu: () => void;
   onFocusSearch: () => void;
 }
 
 export const MobileBar: React.FC<MobileBarProps> = ({
-  onSurprise,
+  isMenuOpen,
+  onOpenMenu,
   onFocusSearch
 }) => {
   return (
     <div className="mobile-bar">
-      <button onClick={onSurprise} id="mobileSurprise" aria-label="Surprise me" title="Surprise term">
+      <button
+        onClick={onOpenMenu}
+        id="mobileMenu"
+        aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+        aria-expanded={isMenuOpen}
+        aria-controls="mobileSidebar"
+        title={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+      >
         <svg viewBox="0 0 24 24">
-          <path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
+          <path d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
       <div className="mobile-title">
@@ -37,4 +46,3 @@ export const MobileBar: React.FC<MobileBarProps> = ({
     </div>
   );
 };
-

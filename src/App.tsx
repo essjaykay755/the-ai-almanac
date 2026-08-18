@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { Term, ExplanationMode, OverlayType } from './types/almanac';
-import { terms, sortedTerms, termsByWord, timeline, specialModes, crossRefs } from './data/terms';
+import { sortedTerms, termsByWord, timeline, specialModes, crossRefs } from './data/terms';
 import { Cover } from './components/Cover';
+import { AboutPage } from './components/AboutPage';
 import { Page } from './components/Page';
 import { Tabs } from './components/Tabs';
 import { Stamp } from './components/Stamp';
@@ -27,6 +29,18 @@ const modeNames: Record<ExplanationMode, string> = {
   technical: 'Technical',
   vibe: 'Vibe Coder'
 };
+
+type BookView = 'term' | 'about';
+
+type TermSelectionOptions = {
+  fromSearch?: boolean;
+  addTrail?: boolean;
+  direction?: 'forward' | 'backward';
+};
+
+function getBookViewFromHash(): BookView {
+  return typeof window !== 'undefined' && window.location.hash === '#about' ? 'about' : 'term';
+}
 
 function loadStorage<T>(key: string, fallback: T): T {
   try {
@@ -53,13 +67,28 @@ function cleanClone(node: HTMLElement): HTMLElement {
   return c;
 }
 
+function resetPageScroll(page: HTMLElement | null): void {
+  const inner = page?.querySelector<HTMLElement>('.page-inner');
+  if (!inner) return;
+  inner.scrollTop = 0;
+  inner.scrollLeft = 0;
+}
+
+function cloneWithScroll(node: HTMLElement, scrollTop: number, scrollLeft: number): HTMLElement {
+  const clone = cleanClone(node);
+  clone.scrollTop = scrollTop;
+  clone.scrollLeft = scrollLeft;
+  return clone;
+}
+
 function getExplanationForTerm(term: Term, mode: ExplanationMode): string {
   const s = specialModes[term.word];
   if (mode === 'dictionary') return term.definition;
   if (s && s[mode]) return s[mode];
   if (mode === 'plain') return `Put simply: ${term.definition}`;
   if (mode === 'technical') {
-    return `${term.definition} In implementation terms, this usually intersects with ${term.related.slice(0, 2).join(' and ')}.`;
+    const rel = term.related.slice(0, 2).join(' and ');
+    return `${term.definition}${rel ? ` In implementation terms, this usually intersects with ${rel}.` : ''}`;
   }
   return `${term.note} ${(term.example || '').replace(/[“”]/g, '')}`;
 }
@@ -71,7 +100,9 @@ function createDestinationSnapshot(
   termIndex: number,
   totalTerms: number,
   isBookmarked: boolean = false,
-  nextTrail: string[] = []
+  nextTrail: string[] = [],
+  fromSearchQuestion: string = '',
+  searchQueryValue: string = ''
 ): HTMLElement {
   const clone = cleanClone(sampleInner);
 
@@ -99,17 +130,21 @@ function createDestinationSnapshot(
   const defEl = clone.querySelector('.definition');
   if (defEl) {
     defEl.textContent = getExplanationForTerm(term, mode);
+    defEl.classList.toggle('search-hit', Boolean(fromSearchQuestion));
   }
 
   // 4. Example
   const exEl = clone.querySelector('.example') as HTMLElement | null;
   if (exEl) {
-    if (term.example) {
-      exEl.textContent = term.example;
-      exEl.style.display = 'block';
-    } else {
-      exEl.style.display = 'none';
-    }
+    exEl.textContent = term.example || '';
+    exEl.style.display = term.example ? 'block' : 'none';
+  }
+
+  // Keep the controlled search input in sync with the target React render.
+  const searchInput = clone.querySelector('#search') as HTMLInputElement | null;
+  if (searchInput) {
+    searchInput.value = searchQueryValue;
+    searchInput.setAttribute('value', searchQueryValue);
   }
 
   // 5. Lower grid (Origin & In Practice)
@@ -121,7 +156,7 @@ function createDestinationSnapshot(
 
   // 6. Thread & Trail
   const trailEl = clone.querySelector('.trail');
-  if (trailEl && nextTrail && nextTrail.length > 0) {
+  if (trailEl) {
     trailEl.innerHTML = nextTrail
       .slice(-10)
       .map((w) => `<button type="button" tabindex="-1" aria-hidden="true">${w}</button>`)
@@ -178,16 +213,34 @@ function createDestinationSnapshot(
       </aside>
     `;
     marginEl.innerHTML = marginHtml;
+
+    const marginNote = marginEl.querySelector('.margin-note');
+    if (marginNote) {
+      const isSearchResult = Boolean(fromSearchQuestion);
+      marginNote.classList.toggle('search-note', isSearchResult);
+
+      const noteHeading = marginNote.querySelector('strong');
+      if (noteHeading) {
+        noteHeading.textContent = isSearchResult ? 'The Almanac suggests' : 'Marginalia';
+      }
+
+      const noteText = marginNote.querySelector('p');
+      if (noteText) {
+        noteText.textContent = isSearchResult
+          ? `“${fromSearchQuestion}” points most closely to this entry.`
+          : term.note || '';
+      }
+    }
   }
 
-  // 8. Folio top, Page number
+  // 8. Folio top, page counter
   const pageNumEl = clone.querySelector('#pageNumber') || clone.querySelector('.page-footer .center');
   if (pageNumEl) {
-    pageNumEl.textContent = String(101 + termIndex * 7);
+    pageNumEl.textContent = `Page ${termIndex + 1} of ${totalTerms}`;
   }
   const folioTopEl = clone.querySelector('.folio-top');
   if (folioTopEl) {
-    folioTopEl.textContent = `Leaf ${String(termIndex + 1).padStart(2, '0')} of ${totalTerms}`;
+    folioTopEl.textContent = `Page ${termIndex + 1} of ${totalTerms}`;
   }
 
   // 9. Bookmark button
@@ -214,14 +267,6 @@ export const App: React.FC = () => {
       .toUpperCase();
   }, [today]);
 
-  // Daily Term
-  const dailyTerm = useMemo(() => {
-    const dayIndex =
-      Math.abs(Number(`${today.getFullYear()}${today.getMonth() + 1}${today.getDate()}`)) %
-      sortedTerms.length;
-    return sortedTerms[dayIndex] || sortedTerms[0];
-  }, [today]);
-
   // Read initial term from hash
   const getHashTerm = useCallback((): Term | null => {
     if (typeof window === 'undefined') return null;
@@ -238,6 +283,8 @@ export const App: React.FC = () => {
   const [currentTerm, setCurrentTerm] = useState<Term>(() => {
     return getHashTerm() || termsByWord['vibe coding'] || sortedTerms[0];
   });
+  const initialBookView = getBookViewFromHash();
+  const [bookView, setBookView] = useState<BookView>(initialBookView);
 
   const [explanationMode, setExplanationMode] = useState<ExplanationMode>('dictionary');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -263,6 +310,8 @@ export const App: React.FC = () => {
 
   // Overlays & Stamp State
   const [activeOverlay, setActiveOverlay] = useState<OverlayType>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuMounted, setIsMobileMenuMounted] = useState(false);
   const [stampText, setStampText] = useState<string | null>(null);
   const [isStampVisible, setIsStampVisible] = useState(false);
   const stampTimerRef = useRef<number | null>(null);
@@ -271,6 +320,7 @@ export const App: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const paperBlockRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLElement>(null);
+  const solidTurnRef = useRef<HTMLDivElement>(null);
   const turnFxRef = useRef<HTMLDivElement>(null);
   const turnLeafRef = useRef<HTMLDivElement>(null);
   const turnBackRef = useRef<HTMLDivElement>(null);
@@ -279,12 +329,15 @@ export const App: React.FC = () => {
   const turnShadeRef = useRef<HTMLDivElement>(null);
   const isTurningRef = useRef<boolean>(false);
   const isProgrammaticHashRef = useRef<boolean>(false);
+  const bookViewRef = useRef<BookView>(initialBookView);
+  const pendingTermRef = useRef<{ term: Term; options?: TermSelectionOptions } | null>(null);
 
   // Compute depth and index
   const termIndex = useMemo(() => {
     const idx = sortedTerms.findIndex((t) => t.word === currentTerm.word);
     return idx >= 0 ? idx : 0;
   }, [currentTerm]);
+  const totalPages = sortedTerms.length;
 
   const availableLetters = useMemo(() => {
     return new Set(sortedTerms.map((t) => t.word[0].toUpperCase()));
@@ -330,6 +383,90 @@ export const App: React.FC = () => {
     [soundEnabled]
   );
 
+  const setLocationHash = useCallback((hash: string) => {
+    if (typeof window === 'undefined' || window.location.hash === hash) return;
+    isProgrammaticHashRef.current = true;
+    window.location.hash = hash;
+  }, []);
+
+  const commitBookView = useCallback((view: BookView) => {
+    bookViewRef.current = view;
+    setBookView(view);
+  }, []);
+
+  const animateAboutTurn = useCallback(
+    async (nextView: BookView, onComplete?: () => void, hashOverride?: string) => {
+      if (bookViewRef.current === nextView) {
+        onComplete?.();
+        return;
+      }
+      if (isTurningRef.current) return;
+
+      const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const nextHash = hashOverride ?? (nextView === 'about'
+        ? '#about'
+        : `#term=${encodeURIComponent(currentTerm.word)}`);
+
+      if (prefersReducedMotion) {
+        flushSync(() => commitBookView(nextView));
+        setLocationHash(nextHash);
+        onComplete?.();
+        return;
+      }
+
+      isTurningRef.current = true;
+      if (soundEnabled) {
+        playPageTurnSound();
+      }
+
+      const solidTurn = solidTurnRef.current;
+      if (!solidTurn) {
+        flushSync(() => commitBookView(nextView));
+        setLocationHash(nextHash);
+        isTurningRef.current = false;
+        onComplete?.();
+        return;
+      }
+
+      solidTurn.classList.remove('active', 'opening', 'closing');
+      solidTurn.style.animation = 'none';
+      solidTurn.classList.add('active');
+      solidTurn.style.transform = nextView === 'about'
+        ? 'perspective(1700px) rotateY(-86deg)'
+        : 'perspective(1700px) rotateY(0deg)';
+      flushSync(() => commitBookView(nextView));
+      setLocationHash(nextHash);
+
+      // Start from the hinge and turn a rigid plane across the book. There is
+      // no polygon clipping or soft-page fold in this cover transition.
+      void solidTurn.offsetWidth;
+      solidTurn.style.animation = '';
+      solidTurn.style.transform = '';
+      solidTurn.classList.add(nextView === 'about' ? 'opening' : 'closing');
+
+      await new Promise<void>((resolve) => {
+        let finished = false;
+        const finish = () => {
+          if (finished) return;
+          finished = true;
+          solidTurn.removeEventListener('animationend', finish);
+          window.clearTimeout(timeout);
+          resolve();
+        };
+        const timeout = window.setTimeout(finish, 1050);
+        solidTurn.addEventListener('animationend', finish);
+      });
+
+      solidTurn.classList.remove('active', 'opening', 'closing');
+      solidTurn.style.animation = '';
+      isTurningRef.current = false;
+      onComplete?.();
+    },
+    [commitBookView, currentTerm.word, setLocationHash, soundEnabled]
+  );
+
   // Single-leaf page turn — soft-page geometry adapted from StPageFlip's fold model
   const animatePageTurn = useCallback(
     async (
@@ -361,9 +498,9 @@ export const App: React.FC = () => {
             setFromSearchQuestion('');
           }
         });
+        resetPageScroll(pageRef.current);
         recordHistory(nextTerm.word);
-        isProgrammaticHashRef.current = true;
-        window.location.hash = `#term=${encodeURIComponent(nextTerm.word)}`;
+        setLocationHash(`#term=${encodeURIComponent(nextTerm.word)}`);
         onComplete?.();
         return;
       }
@@ -395,9 +532,9 @@ export const App: React.FC = () => {
             setFromSearchQuestion('');
           }
         });
+        resetPageScroll(pageRef.current);
         recordHistory(nextTerm.word);
-        isProgrammaticHashRef.current = true;
-        window.location.hash = `#term=${encodeURIComponent(nextTerm.word)}`;
+        setLocationHash(`#term=${encodeURIComponent(nextTerm.word)}`);
         isTurningRef.current = false;
         onComplete?.();
         return;
@@ -410,6 +547,13 @@ export const App: React.FC = () => {
       const turnBottomEl: HTMLElement = turnBottom;
       const turnShadeEl: HTMLElement = turnShade;
 
+      // Do not let the clicked page control restore focus against the newly
+      // rendered content and introduce a small scroll offset at the handoff.
+      const activeElement = document.activeElement;
+      if (activeElement instanceof HTMLElement && paperBlockEl.contains(activeElement)) {
+        activeElement.blur();
+      }
+
       paperBlockEl.classList.add('turning-book');
       turnFxEl.classList.add('active');
 
@@ -420,9 +564,79 @@ export const App: React.FC = () => {
       const safeNextIndex = nextIndex >= 0 ? nextIndex : 0;
       const isSaved = bookmarks.includes(nextTerm.word);
       const targetTrail = options?.nextTrail || trail;
+      const targetSearchQuestion = options?.fromSearch ? options.searchQ || '' : '';
+      const targetSearchQuery = options?.fromSearch ? '' : searchQuery;
 
       const pageInner = pageEl.querySelector('.page-inner');
+      let destinationRoot: {
+        render: (children: React.ReactNode) => void;
+        unmount: () => void;
+      } | null = null;
+      const unmountDestinationPage = () => {
+        const root = destinationRoot as { unmount: () => void } | null;
+        if (root) {
+          root.unmount();
+        }
+        destinationRoot = null;
+      };
+
+      const mountDestinationPage = (container: HTMLElement, sampleInner: HTMLElement) => {
+        try {
+          destinationRoot = createRoot(container);
+          const destinationSearchRef = React.createRef<HTMLInputElement>();
+          flushSync(() => {
+            destinationRoot?.render(
+              <Page
+                currentTerm={nextTerm}
+                termIndex={safeNextIndex}
+                totalTerms={totalPages}
+                isBookmarked={isSaved}
+                explanationMode={explanationMode}
+                searchQuery={targetSearchQuery}
+                fromSearchQuestion={targetSearchQuestion}
+                trail={targetTrail}
+                searchRef={destinationSearchRef}
+                onSelectTerm={() => {}}
+                onPrevTerm={() => {}}
+                onNextTerm={() => {}}
+                onToggleBookmark={() => {}}
+                onChangeMode={() => {}}
+                onSearchChange={() => {}}
+                onClearTrail={() => {}}
+                onOpenPicker={() => {}}
+                onOpenClip={() => {}}
+                onOpenTimeline={() => {}}
+                onCopyLink={() => {}}
+                onSpeak={() => {}}
+              />
+            );
+          });
+        } catch {
+          unmountDestinationPage();
+          const fallback = createDestinationSnapshot(
+            nextTerm,
+            explanationMode,
+            sampleInner,
+            safeNextIndex,
+            totalPages,
+            isSaved,
+            targetTrail,
+            targetSearchQuestion,
+            targetSearchQuery
+          );
+          fallback.scrollTop = 0;
+          fallback.scrollLeft = 0;
+          container.appendChild(fallback);
+        }
+      };
+
       if (pageInner) {
+        const pageInnerEl = pageInner as HTMLElement;
+        const currentScrollTop = pageInnerEl.scrollTop;
+        const currentScrollLeft = pageInnerEl.scrollLeft;
+        const cloneCurrentPage = () =>
+          cloneWithScroll(pageInnerEl, currentScrollTop, currentScrollLeft);
+
         if (direction === 'forward') {
           // Forward turn:
           if (turnBackEl) {
@@ -432,50 +646,32 @@ export const App: React.FC = () => {
 
           // turnFront = current page (peels away to the left in 3D)
           turnFrontEl.innerHTML = '';
-          turnFrontEl.appendChild(cleanClone(pageInner as HTMLElement));
+          turnFrontEl.appendChild(cloneCurrentPage());
           turnFrontEl.style.display = 'block';
 
           // turnBottom = destination page (revealed underneath from right to left)
           turnBottomEl.innerHTML = '';
-          const destSnap = createDestinationSnapshot(
-            nextTerm,
-            explanationMode,
-            pageInner as HTMLElement,
-            safeNextIndex,
-            sortedTerms.length,
-            isSaved,
-            targetTrail
-          );
-          turnBottomEl.appendChild(destSnap);
           turnBottomEl.style.clipPath = 'polygon(0 0, 0 0, 0 0)';
           turnBottomEl.style.display = 'block';
+          mountDestinationPage(turnBottomEl, pageInner as HTMLElement);
         } else {
           // Backward turn (exact opposite of forward):
           // turnBack = destination page (revealed on base from left to right as current page uncurls)
           if (turnBackEl) {
             turnBackEl.innerHTML = '';
-            const destSnap = createDestinationSnapshot(
-              nextTerm,
-              explanationMode,
-              pageInner as HTMLElement,
-              safeNextIndex,
-              sortedTerms.length,
-              isSaved,
-              targetTrail
-            );
-            turnBackEl.appendChild(destSnap);
             turnBackEl.style.display = 'block';
+            mountDestinationPage(turnBackEl, pageInner as HTMLElement);
           }
 
           // turnBottom = current page (unmasks revealing destSnap underneath)
           turnBottomEl.innerHTML = '';
-          turnBottomEl.appendChild(cleanClone(pageInner as HTMLElement));
+          turnBottomEl.appendChild(cloneCurrentPage());
           turnBottomEl.style.clipPath = 'none';
           turnBottomEl.style.display = 'block';
 
           // turnFront = current page (3D curled folding flap uncurling back across from left to right)
           turnFrontEl.innerHTML = '';
-          turnFrontEl.appendChild(cleanClone(pageInner as HTMLElement));
+          turnFrontEl.appendChild(cloneCurrentPage());
           turnFrontEl.style.display = 'block';
         }
       }
@@ -665,11 +861,23 @@ export const App: React.FC = () => {
           setFromSearchQuestion('');
         }
       });
+      resetPageScroll(pageEl);
       recordHistory(nextTerm.word);
-      isProgrammaticHashRef.current = true;
-      window.location.hash = `#term=${encodeURIComponent(nextTerm.word)}`;
+      setLocationHash(`#term=${encodeURIComponent(nextTerm.word)}`);
+
+      // The destination layer is still covering the page. Give the live React page a
+      // layout/paint frame (and any pending web-font metrics) before removing
+      // the cover, so the handoff cannot reveal a one-frame vertical jump.
+      if (typeof document !== 'undefined' && document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+      await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => resolve());
+      });
+
       turnFxEl.classList.remove('active');
       paperBlockEl.classList.remove('turning-book');
+      unmountDestinationPage();
       if (turnBackEl) {
         turnBackEl.style.cssText = '';
         turnBackEl.innerHTML = '';
@@ -682,15 +890,12 @@ export const App: React.FC = () => {
       isTurningRef.current = false;
       onComplete?.();
     },
-    [explanationMode, soundEnabled, bookmarks, trail]
+    [explanationMode, soundEnabled, bookmarks, trail, searchQuery, recordHistory, setLocationHash, totalPages]
   );
 
   // Select a term (via search, related link, index, etc.)
   const handleSelectTerm = useCallback(
-    (
-      termToSelect: Term,
-      options?: { fromSearch?: boolean; addTrail?: boolean; direction?: 'forward' | 'backward' }
-    ) => {
+    (termToSelect: Term, options?: TermSelectionOptions) => {
       if (isTurningRef.current) return;
 
       // Resolve term object if incomplete
@@ -702,13 +907,24 @@ export const App: React.FC = () => {
       const fromSearch = options?.fromSearch ?? false;
       const addTrail = options?.addTrail ?? true;
 
+      if (bookViewRef.current === 'about') {
+        pendingTermRef.current = { term: resolved, options };
+        animateAboutTurn('term', () => {
+          const pending = pendingTermRef.current;
+          pendingTermRef.current = null;
+          if (pending) {
+            handleSelectTerm(pending.term, pending.options);
+          }
+        }, `#term=${encodeURIComponent(resolved.word)}`);
+        return;
+      }
+
       if (resolved.word.toLowerCase() === currentTerm.word.toLowerCase()) {
         if (fromSearch) {
           setFromSearchQuestion(searchQuery);
           setSearchQuery('');
         }
-        isProgrammaticHashRef.current = true;
-        window.location.hash = `#term=${encodeURIComponent(resolved.word)}`;
+        setLocationHash(`#term=${encodeURIComponent(resolved.word)}`);
         return;
       }
 
@@ -738,7 +954,7 @@ export const App: React.FC = () => {
         () => {}
       );
     },
-    [currentTerm, searchQuery, trail, animatePageTurn]
+    [animateAboutTurn, currentTerm, searchQuery, trail, animatePageTurn, setLocationHash]
   );
 
   // Single page flip navigation directly to target term
@@ -762,6 +978,33 @@ export const App: React.FC = () => {
     handleSelectTerm(sortedTerms[nextIndex], { addTrail: true, direction: 'forward' });
   }, [currentTerm, handleSelectTerm]);
 
+  const handleOpenAbout = useCallback(() => {
+    setIsMobileMenuOpen(false);
+    pendingTermRef.current = null;
+    animateAboutTurn('about');
+  }, [animateAboutTurn]);
+
+  const handleCloseAbout = useCallback(() => {
+    setIsMobileMenuOpen(false);
+    pendingTermRef.current = null;
+    animateAboutTurn('term');
+  }, [animateAboutTurn]);
+
+  const handleFocusSearch = useCallback(() => {
+    setIsMobileMenuOpen(false);
+    if (bookViewRef.current === 'about') {
+      animateAboutTurn('term', () => {
+        window.requestAnimationFrame(() => {
+          searchInputRef.current?.focus();
+          searchInputRef.current?.select();
+        });
+      });
+      return;
+    }
+    searchInputRef.current?.focus();
+    searchInputRef.current?.select();
+  }, [animateAboutTurn]);
+
   // Listen to hash changes (browser back/forward)
   useEffect(() => {
     const handleHashChange = () => {
@@ -769,14 +1012,33 @@ export const App: React.FC = () => {
         isProgrammaticHashRef.current = false;
         return;
       }
+
+      if (getBookViewFromHash() === 'about') {
+        if (bookViewRef.current !== 'about') {
+          animateAboutTurn('about');
+        }
+        return;
+      }
+
       const target = getHashTerm();
+      if (bookViewRef.current === 'about') {
+        pendingTermRef.current = target ? { term: target, options: { addTrail: false } } : null;
+        animateAboutTurn('term', () => {
+          const pending = pendingTermRef.current;
+          pendingTermRef.current = null;
+          if (pending) {
+            handleSelectTerm(pending.term, pending.options);
+          }
+        }, window.location.hash);
+        return;
+      }
       if (target && target.word.toLowerCase() !== currentTerm.word.toLowerCase()) {
         handleSelectTerm(target, { addTrail: false });
       }
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [currentTerm, getHashTerm, handleSelectTerm]);
+  }, [animateAboutTurn, currentTerm, getHashTerm, handleSelectTerm]);
 
   // Global keyboard shortcuts (⌘K, Ctrl+K, Escape, ArrowLeft/P, ArrowRight/N)
   useEffect(() => {
@@ -788,10 +1050,13 @@ export const App: React.FC = () => {
 
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        searchInputRef.current?.focus();
-        searchInputRef.current?.select();
+        handleFocusSearch();
       } else if (e.key === 'Escape') {
         setActiveOverlay(null);
+        setIsMobileMenuOpen(false);
+        if (bookViewRef.current === 'about') {
+          handleCloseAbout();
+        }
       } else if (!isInputActive && !activeOverlay) {
         if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'p') {
           e.preventDefault();
@@ -804,7 +1069,7 @@ export const App: React.FC = () => {
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [activeOverlay, handlePrevTerm, handleNextTerm]);
+  }, [activeOverlay, handleCloseAbout, handleFocusSearch, handlePrevTerm, handleNextTerm]);
 
   // Bookmarks Toggle
   const handleToggleBookmark = useCallback(() => {
@@ -905,46 +1170,84 @@ export const App: React.FC = () => {
     triggerStamp(nextState ? 'SOUND ON' : 'SOUND OFF');
   }, [soundEnabled, triggerStamp]);
 
+  const openMobileMenu = useCallback(() => {
+    setIsMobileMenuMounted(true);
+    setIsMobileMenuOpen(true);
+  }, []);
+
+  const closeMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen(false);
+  }, []);
+
+  const handleMobileMenuAnimationEnd = useCallback(() => {
+    if (!isMobileMenuOpen) {
+      setIsMobileMenuMounted(false);
+    }
+  }, [isMobileMenuOpen]);
+
+  const renderCover = (isMobileOpen = false, isMobileClosing = false) => (
+    <Cover
+      totalTerms={totalPages}
+      bookmarkCount={bookmarks.length}
+      historyCount={historyTerms.length}
+      collectionCount={Object.keys(collections).length}
+      soundEnabled={soundEnabled}
+      isMobileOpen={isMobileOpen}
+      isMobileClosing={isMobileClosing}
+      isAboutActive={bookView === 'about'}
+      onCloseMobile={closeMobileMenu}
+      onMobileAnimationEnd={handleMobileMenuAnimationEnd}
+      onToggleSound={handleToggleSound}
+      onOpenOverlay={(overlay) => {
+        closeMobileMenu();
+        if (soundEnabled) {
+          if (overlay === 'clip') {
+            playPaperTearSound();
+          } else {
+            playPaperSmallSound();
+          }
+        }
+        setActiveOverlay(overlay);
+      }}
+      onFocusSearch={handleFocusSearch}
+      onOpenAbout={handleOpenAbout}
+      onSurprise={() => {
+        closeMobileMenu();
+        handleSurprise();
+      }}
+    />
+  );
+
   return (
     <>
       <MobileBar
-        onSurprise={handleSurprise}
-        onFocusSearch={() => {
-          searchInputRef.current?.focus();
-          searchInputRef.current?.select();
+        isMenuOpen={isMobileMenuOpen}
+        onOpenMenu={() => {
+          if (isMobileMenuOpen) {
+            closeMobileMenu();
+          } else {
+            openMobileMenu();
+          }
         }}
+        onFocusSearch={handleFocusSearch}
       />
+
+      {isMobileMenuMounted && (
+        <button
+          type="button"
+          className={`mobile-sidebar-scrim${isMobileMenuOpen ? '' : ' mobile-sidebar-scrim-closing'}`}
+          aria-label="Close navigation menu"
+          onClick={closeMobileMenu}
+        />
+      )}
+
+      {isMobileMenuMounted && renderCover(true, !isMobileMenuOpen)}
 
       <main className="stage">
         <section className="book">
-          <Cover
-            totalTerms={terms.length}
-            bookmarkCount={bookmarks.length}
-            historyCount={historyTerms.length}
-            collectionCount={Object.keys(collections).length}
-            dailyTerm={dailyTerm}
-            formattedDate={formattedDate}
-            soundEnabled={soundEnabled}
-            onToggleSound={handleToggleSound}
-            onOpenOverlay={(overlay) => {
-              if (soundEnabled) {
-                if (overlay === 'clip') {
-                  playPaperTearSound();
-                } else {
-                  playPaperSmallSound();
-                }
-              }
-              setActiveOverlay(overlay);
-            }}
-            onFocusSearch={() => {
-              searchInputRef.current?.focus();
-              searchInputRef.current?.select();
-            }}
-            onGoToDaily={() => riffleToTerm(dailyTerm)}
-            onSurprise={handleSurprise}
-          />
+          {renderCover()}
 
-          <div className="paper-block" ref={paperBlockRef} id="paperBlock">
+          <div className={`paper-block ${bookView === 'about' ? 'about-active' : ''}`} ref={paperBlockRef} id="paperBlock">
             <div className="page-stack" aria-hidden="true">
               <i className="stack-sheet"></i>
               <i className="stack-sheet"></i>
@@ -953,39 +1256,45 @@ export const App: React.FC = () => {
               <i className="stack-sheet"></i>
             </div>
 
-            <Page
-              ref={pageRef}
-              currentTerm={currentTerm}
-              termIndex={termIndex}
-              totalTerms={sortedTerms.length}
-              isBookmarked={bookmarks.includes(currentTerm.word)}
-              explanationMode={explanationMode}
-              searchQuery={searchQuery}
-              fromSearchQuestion={fromSearchQuestion}
-              trail={trail}
-              searchRef={searchInputRef}
-              onSelectTerm={handleSelectTerm}
-              onPrevTerm={handlePrevTerm}
-              onNextTerm={handleNextTerm}
-              onToggleBookmark={handleToggleBookmark}
-              onChangeMode={(m) => setExplanationMode(m)}
-              onSearchChange={setSearchQuery}
-              onClearTrail={() => setTrail([currentTerm.word])}
-              onOpenPicker={() => setActiveOverlay('picker')}
-              onOpenClip={() => {
-                if (soundEnabled) playPaperTearSound();
-                setActiveOverlay('clip');
-              }}
-              onOpenTimeline={() => setActiveOverlay('timeline')}
-              onCopyLink={handleCopyLink}
-              onSpeak={handleSpeak}
-            />
+            {bookView === 'about' ? (
+              <AboutPage totalTerms={totalPages} onBack={handleCloseAbout} />
+            ) : (
+              <Page
+                ref={pageRef}
+                currentTerm={currentTerm}
+                termIndex={termIndex}
+                totalTerms={totalPages}
+                isBookmarked={bookmarks.includes(currentTerm.word)}
+                explanationMode={explanationMode}
+                searchQuery={searchQuery}
+                fromSearchQuestion={fromSearchQuestion}
+                trail={trail}
+                searchRef={searchInputRef}
+                onSelectTerm={handleSelectTerm}
+                onPrevTerm={handlePrevTerm}
+                onNextTerm={handleNextTerm}
+                onToggleBookmark={handleToggleBookmark}
+                onChangeMode={(m) => setExplanationMode(m)}
+                onSearchChange={setSearchQuery}
+                onClearTrail={() => setTrail([currentTerm.word])}
+                onOpenPicker={() => setActiveOverlay('picker')}
+                onOpenClip={() => {
+                  if (soundEnabled) playPaperTearSound();
+                  setActiveOverlay('clip');
+                }}
+                onOpenTimeline={() => setActiveOverlay('timeline')}
+                onCopyLink={handleCopyLink}
+                onSpeak={handleSpeak}
+              />
+            )}
 
-            <Tabs
-              currentLetter={currentTerm.word[0].toUpperCase()}
-              availableLetters={availableLetters}
-              onSelectLetter={handleSelectLetter}
-            />
+            {bookView !== 'about' && (
+              <Tabs
+                currentLetter={currentTerm.word[0].toUpperCase()}
+                availableLetters={availableLetters}
+                onSelectLetter={handleSelectLetter}
+              />
+            )}
 
             {/* Single-leaf soft page turn */}
             <div className="turn-fx" ref={turnFxRef} id="turnFx" aria-hidden="true">
@@ -995,6 +1304,10 @@ export const App: React.FC = () => {
                 <div className="turn-face turn-front" ref={turnFrontRef} id="turnFront"></div>
                 <div className="turn-shade" ref={turnShadeRef} id="turnShade"></div>
               </div>
+            </div>
+
+            <div className="solid-turn" ref={solidTurnRef} aria-hidden="true">
+              <AboutPage totalTerms={totalPages} onBack={handleCloseAbout} />
             </div>
           </div>
         </section>
@@ -1044,7 +1357,7 @@ export const App: React.FC = () => {
       <ClipOverlay
         isOpen={activeOverlay === 'clip'}
         term={currentTerm}
-        pageNumber={101 + termIndex * 7}
+        pageNumber={termIndex + 1}
         formattedDate={formattedDate}
         onClose={() => setActiveOverlay(null)}
         onShowStamp={triggerStamp}
