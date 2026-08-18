@@ -430,12 +430,17 @@ export const App: React.FC = () => {
         return;
       }
 
+      const paperBlock = paperBlockRef.current;
+      const book = paperBlock?.parentElement;
+      paperBlock?.classList.add('cover-turning');
+      book?.classList.add('cover-turning');
+
       solidTurn.classList.remove('active', 'opening', 'closing');
       solidTurn.style.animation = 'none';
       solidTurn.classList.add('active');
       solidTurn.style.transform = nextView === 'about'
-        ? 'perspective(1700px) rotateY(-86deg)'
-        : 'perspective(1700px) rotateY(0deg)';
+        ? 'translateZ(0) rotateY(-86deg)'
+        : 'translateZ(0) rotateY(0deg)';
       flushSync(() => commitBookView(nextView));
       setLocationHash(nextHash);
 
@@ -455,12 +460,14 @@ export const App: React.FC = () => {
           window.clearTimeout(timeout);
           resolve();
         };
-        const timeout = window.setTimeout(finish, 1050);
+        const timeout = window.setTimeout(finish, 900);
         solidTurn.addEventListener('animationend', finish);
       });
 
       solidTurn.classList.remove('active', 'opening', 'closing');
       solidTurn.style.animation = '';
+      paperBlock?.classList.remove('cover-turning');
+      book?.classList.remove('cover-turning');
       isTurningRef.current = false;
       onComplete?.();
     },
@@ -1185,6 +1192,27 @@ export const App: React.FC = () => {
     }
   }, [isMobileMenuOpen]);
 
+  const handlePageChangeMode = useCallback((mode: ExplanationMode) => {
+    setExplanationMode(mode);
+  }, []);
+
+  const handlePageClearTrail = useCallback(() => {
+    setTrail([currentTerm.word]);
+  }, [currentTerm.word]);
+
+  const handlePageOpenPicker = useCallback(() => {
+    setActiveOverlay('picker');
+  }, []);
+
+  const handlePageOpenClip = useCallback(() => {
+    if (soundEnabled) playPaperTearSound();
+    setActiveOverlay('clip');
+  }, [soundEnabled]);
+
+  const handlePageOpenTimeline = useCallback(() => {
+    setActiveOverlay('timeline');
+  }, []);
+
   const renderCover = (isMobileOpen = false, isMobileClosing = false) => (
     <Cover
       totalTerms={totalPages}
@@ -1256,9 +1284,7 @@ export const App: React.FC = () => {
               <i className="stack-sheet"></i>
             </div>
 
-            {bookView === 'about' ? (
-              <AboutPage totalTerms={totalPages} onBack={handleCloseAbout} />
-            ) : (
+            <div className="term-page-layer" aria-hidden={bookView === 'about'}>
               <Page
                 ref={pageRef}
                 currentTerm={currentTerm}
@@ -1274,18 +1300,21 @@ export const App: React.FC = () => {
                 onPrevTerm={handlePrevTerm}
                 onNextTerm={handleNextTerm}
                 onToggleBookmark={handleToggleBookmark}
-                onChangeMode={(m) => setExplanationMode(m)}
+                onChangeMode={handlePageChangeMode}
                 onSearchChange={setSearchQuery}
-                onClearTrail={() => setTrail([currentTerm.word])}
-                onOpenPicker={() => setActiveOverlay('picker')}
-                onOpenClip={() => {
-                  if (soundEnabled) playPaperTearSound();
-                  setActiveOverlay('clip');
-                }}
-                onOpenTimeline={() => setActiveOverlay('timeline')}
+                onClearTrail={handlePageClearTrail}
+                onOpenPicker={handlePageOpenPicker}
+                onOpenClip={handlePageOpenClip}
+                onOpenTimeline={handlePageOpenTimeline}
                 onCopyLink={handleCopyLink}
                 onSpeak={handleSpeak}
               />
+            </div>
+
+            {bookView === 'about' && (
+              <div className="about-page-layer">
+                <AboutPage totalTerms={totalPages} onBack={handleCloseAbout} />
+              </div>
             )}
 
             {bookView !== 'about' && (

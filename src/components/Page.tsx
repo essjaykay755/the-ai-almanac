@@ -35,7 +35,7 @@ const modeNames: Record<ExplanationMode, string> = {
   vibe: 'Vibe Coder'
 };
 
-export const Page = React.forwardRef<HTMLElement, PageProps>(function Page(
+const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
   {
     currentTerm,
     termIndex,
@@ -393,3 +393,5 @@ export const Page = React.forwardRef<HTMLElement, PageProps>(function Page(
     </article>
   );
 });
+
+export const Page = React.memo(PageContent);

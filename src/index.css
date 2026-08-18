@@ -561,6 +561,40 @@ button {
   visibility: hidden;
 }
 
+.term-page-layer,
+.about-page-layer {
+  position: absolute;
+  inset: 0;
+  min-width: 0;
+  min-height: 0;
+}
+
+.term-page-layer {
+  z-index: 3;
+}
+
+.about-page-layer {
+  z-index: 4;
+}
+
+.paper-block.about-active .term-page-layer {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Keep the cover turn in its own flat compositing context. The regular paper
+   turn still owns the book's 3D context when this class is absent. */
+.book.cover-turning {
+  isolation: isolate;
+  perspective: 1700px;
+  transform-style: flat;
+  will-change: transform;
+}
+
+.paper-block.cover-turning {
+  transform-style: flat;
+}
+
 .solid-turn {
   position: absolute;
   z-index: 75;
@@ -576,7 +610,7 @@ button {
   transform-style: preserve-3d;
   backface-visibility: hidden;
   will-change: transform;
-  contain: layout paint;
+  contain: strict;
 }
 
 .solid-turn > .about-page {
@@ -621,46 +655,31 @@ button {
 
 .solid-turn.active {
   display: block;
-  transform: perspective(1700px) rotateY(0deg);
+  transform: translateZ(0) rotateY(0deg);
 }
 
 .solid-turn.opening {
   transform-origin: left center;
-  animation: solidTurnOpening 0.92s var(--motion) both;
+  animation: solidTurnOpening 0.72s var(--motion) both;
 }
 
 .solid-turn.closing {
   transform-origin: left center;
-  animation: solidTurnClosing 0.92s var(--motion) both;
+  animation: solidTurnOpening 0.72s var(--motion) reverse both;
 }
 
 @keyframes solidTurnOpening {
   0% {
-    transform: perspective(1700px) rotateY(-86deg);
+    transform: translateZ(0) rotateY(-86deg);
   }
   42% {
-    transform: perspective(1700px) rotateY(-28deg);
+    transform: translateZ(0) rotateY(-28deg);
   }
   78% {
-    transform: perspective(1700px) rotateY(-6deg);
+    transform: translateZ(0) rotateY(-6deg);
   }
   100% {
-    transform: perspective(1700px) rotateY(0deg);
-  }
-}
-
-@keyframes solidTurnClosing {
-  0% {
-    transform: perspective(5000px) rotateY(0deg);
-  }
-  32% {
-    transform: perspective(5000px) rotateY(-12deg);
-  }
-  68% {
-    transform: perspective(5000px) rotateY(-42deg);
-  }
-  100% {
-    transform: perspective(5000px) rotateY(-86deg);
+    transform: translateZ(0) rotateY(0deg);
   }
 }
 
