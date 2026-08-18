@@ -103,7 +103,8 @@ button {
   position: relative;
   display: grid;
   grid-template-columns: 284px minmax(0, 1fr);
-  min-height: clamp(720px, 86vh, 880px);
+  height: 890px;
+  min-height: 890px;
   border-radius: 15px 7px 7px 15px;
   box-shadow: 0 26px 52px rgba(0, 0, 0, 0.36);
   transform-style: preserve-3d;
@@ -113,6 +114,7 @@ button {
 .cover {
   position: relative;
   z-index: 8;
+  height: 100%;
   color: #e9d4aa;
   padding: 38px 26px 28px;
   background:
@@ -344,6 +346,7 @@ button {
 
 .paper-block {
   position: relative;
+  height: 100%;
   min-width: 0;
   transform-style: preserve-3d;
   overflow: visible;
@@ -455,7 +458,8 @@ button {
 .page {
   position: relative;
   z-index: 3;
-  min-height: clamp(720px, 86vh, 880px);
+  height: 100%;
+  min-height: 100%;
   overflow: visible;
   background:
     linear-gradient(90deg, rgba(91, 68, 38, 0.11), transparent 4%, transparent 96%, rgba(91, 68, 38, 0.07)),
@@ -491,10 +495,34 @@ button {
 .page-inner {
   position: relative;
   z-index: 2;
-  min-height: clamp(720px, 86vh, 880px);
-  padding: 26px clamp(40px, 5vw, 76px) 46px clamp(42px, 5vw, 78px);
-  overflow: hidden;
+  height: 100%;
+  min-height: 100%;
+  padding: 26px clamp(40px, 5vw, 76px) 52px clamp(42px, 5vw, 78px);
+  overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(110, 85, 52, 0.22) transparent;
+}
+
+.page-inner::-webkit-scrollbar {
+  width: 5px;
+}
+
+.page-inner::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.page-inner::-webkit-scrollbar-thumb {
+  background: rgba(110, 85, 52, 0.22);
+  border-radius: 3px;
+}
+
+.page-inner::-webkit-scrollbar-thumb:hover {
+  background: rgba(110, 85, 52, 0.42);
 }
 
 .depth-left, .depth-right {
@@ -2037,11 +2065,11 @@ button {
   }
   .book {
     grid-template-columns: 224px 1fr;
-    height: auto;
-    min-height: 800px;
+    height: 890px;
+    min-height: 890px;
   }
   .cover {
-    height: auto;
+    height: 100%;
     padding: 31px 20px;
   }
   .brand h1 {
@@ -2058,12 +2086,12 @@ button {
     margin-top: 20px;
   }
   .page {
-    height: auto;
-    min-height: 800px;
+    height: 100%;
+    min-height: 100%;
   }
   .page-inner {
-    height: auto;
-    min-height: 800px;
+    height: 100%;
+    min-height: 100%;
     padding: 26px 50px 46px 54px;
     justify-content: flex-start;
   }
