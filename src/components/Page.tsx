@@ -15,6 +15,8 @@ interface PageProps {
   trail: string[];
   searchRef: React.RefObject<HTMLInputElement | null>;
   onSelectTerm: (term: Term, options?: { fromSearch?: boolean; addTrail?: boolean }) => void;
+  onPrevTerm?: () => void;
+  onNextTerm?: () => void;
   onToggleBookmark: () => void;
   onChangeMode: (mode: ExplanationMode) => void;
   onSearchChange: (q: string) => void;
@@ -45,6 +47,8 @@ export const Page = React.forwardRef<HTMLElement, PageProps>(function Page(
     trail,
     searchRef,
     onSelectTerm,
+    onPrevTerm,
+    onNextTerm,
     onToggleBookmark,
     onChangeMode,
     onSearchChange,
@@ -130,7 +134,6 @@ export const Page = React.forwardRef<HTMLElement, PageProps>(function Page(
   const refs = getRefs(currentTerm);
   const explanationText = getExplanation(currentTerm, explanationMode);
   const pageNumber = 101 + termIndex * 7;
-  const depthPct = totalTerms <= 1 ? 50 : Math.round((termIndex / (totalTerms - 1)) * 100);
 
   return (
     <article className="page" id="page" ref={ref}>
@@ -360,13 +363,29 @@ export const Page = React.forwardRef<HTMLElement, PageProps>(function Page(
         </div>
 
         <footer className="page-footer">
-          <span className="left">AI Almanac · Field Edition</span>
+          <button
+            type="button"
+            className="footer-nav footer-prev left"
+            onClick={onPrevTerm}
+            title="Previous definition (Left arrow or P)"
+            aria-label="Previous definition"
+            id="prevDefBtn"
+          >
+            <span className="nav-arrow">←</span> Previous
+          </button>
           <span className="center" id="pageNumber">
             {pageNumber}
           </span>
-          <span className="right" id="depthLabel">
-            Index position {depthPct}%
-          </span>
+          <button
+            type="button"
+            className="footer-nav footer-next right"
+            onClick={onNextTerm}
+            title="Next definition (Right arrow or N)"
+            aria-label="Next definition"
+            id="nextDefBtn"
+          >
+            Next <span className="nav-arrow">→</span>
+          </button>
         </footer>
       </div>
     </article>

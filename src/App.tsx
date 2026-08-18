@@ -180,7 +180,7 @@ function createDestinationSnapshot(
     marginEl.innerHTML = marginHtml;
   }
 
-  // 8. Folio top, Page number, Depth label
+  // 8. Folio top, Page number
   const pageNumEl = clone.querySelector('#pageNumber') || clone.querySelector('.page-footer .center');
   if (pageNumEl) {
     pageNumEl.textContent = String(101 + termIndex * 7);
@@ -188,11 +188,6 @@ function createDestinationSnapshot(
   const folioTopEl = clone.querySelector('.folio-top');
   if (folioTopEl) {
     folioTopEl.textContent = `Leaf ${String(termIndex + 1).padStart(2, '0')} of ${totalTerms}`;
-  }
-  const depthLabelEl = clone.querySelector('#depthLabel') || clone.querySelector('.page-footer .right');
-  if (depthLabelEl) {
-    const pct = totalTerms <= 1 ? 50 : Math.round((termIndex / (totalTerms - 1)) * 100);
-    depthLabelEl.textContent = `Index position ${pct}%`;
   }
 
   // 9. Bookmark button
@@ -970,6 +965,8 @@ export const App: React.FC = () => {
               trail={trail}
               searchRef={searchInputRef}
               onSelectTerm={handleSelectTerm}
+              onPrevTerm={handlePrevTerm}
+              onNextTerm={handleNextTerm}
               onToggleBookmark={handleToggleBookmark}
               onChangeMode={(m) => setExplanationMode(m)}
               onSearchChange={setSearchQuery}
