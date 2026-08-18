@@ -1,8 +1,8 @@
 :root {
-  --desk: #15110d;
-  --desk2: #211912;
-  --cover: #17130f;
-  --cover2: #221b14;
+  --desk: #38261b;
+  --desk2: #281b13;
+  --cover: #1a1410;
+  --cover2: #251c14;
   --gold: #c5a263;
   --gold2: #9d7b43;
   --paper: #f2e8d4;
@@ -31,6 +31,13 @@ html, body {
   min-height: 100%;
 }
 
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 html {
   background: var(--desk);
 }
@@ -41,9 +48,10 @@ body {
   font-family: var(--serif);
   overflow-x: hidden;
   background:
-    radial-gradient(ellipse at 50% -15%, rgba(146, 104, 51, 0.2), transparent 40%),
-    radial-gradient(circle at 18% 80%, rgba(255, 255, 255, 0.03), transparent 22%),
-    linear-gradient(135deg, var(--desk), var(--desk2));
+    radial-gradient(ellipse at 50% 0%, rgba(214, 166, 103, 0.28), transparent 55%),
+    radial-gradient(circle at 18% 85%, rgba(185, 136, 78, 0.16), transparent 38%),
+    radial-gradient(circle at 85% 15%, rgba(170, 120, 68, 0.18), transparent 34%),
+    linear-gradient(155deg, #442f22 0%, #342318 45%, #2a1c13 100%);
 }
 
 body:before {
@@ -51,7 +59,7 @@ body:before {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.2;
+  opacity: 0.25;
   mix-blend-mode: soft-light;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.62' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.33'/%3E%3C/svg%3E");
 }
@@ -82,11 +90,12 @@ button {
 
 .stage {
   width: min(1500px, calc(100% - 44px));
-  min-height: 930px;
-  margin: 24px auto;
+  min-height: 0;
+  margin: 20px auto 28px;
   position: relative;
   padding-right: 50px;
-  overflow: clip;
+  padding-bottom: 28px;
+  overflow: visible;
   box-sizing: border-box;
 }
 
@@ -94,9 +103,11 @@ button {
   position: relative;
   display: grid;
   grid-template-columns: 284px minmax(0, 1fr);
-  min-height: 900px;
-  filter: drop-shadow(0 30px 54px rgba(0, 0, 0, 0.42));
+  min-height: clamp(720px, 86vh, 880px);
+  border-radius: 15px 7px 7px 15px;
+  box-shadow: 0 26px 52px rgba(0, 0, 0, 0.36);
   transform-style: preserve-3d;
+  overflow: visible;
 }
 
 .cover {
@@ -109,6 +120,7 @@ button {
     radial-gradient(circle at 24% 13%, rgba(255, 255, 255, 0.035), transparent 24%),
     var(--cover);
   border-radius: 15px 0 0 15px;
+  background-clip: padding-box;
   box-shadow:
     inset -18px 0 28px rgba(0, 0, 0, 0.36),
     inset 1px 0 rgba(255, 255, 255, 0.05);
@@ -120,6 +132,7 @@ button {
   content: "";
   position: absolute;
   inset: 0;
+  border-radius: 15px 0 0 15px;
   opacity: 0.11;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='145' height='145'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -333,6 +346,7 @@ button {
   position: relative;
   min-width: 0;
   transform-style: preserve-3d;
+  overflow: visible;
 }
 
 .paper-block.turning-book {
@@ -347,6 +361,7 @@ button {
   pointer-events: none;
   border-radius: 0 8px 9px 0;
   filter: drop-shadow(7px 14px 18px rgba(0, 0, 0, 0.20));
+  overflow: visible;
 }
 
 .page-stack:before {
@@ -440,7 +455,7 @@ button {
 .page {
   position: relative;
   z-index: 3;
-  min-height: 900px;
+  min-height: clamp(720px, 86vh, 880px);
   overflow: visible;
   background:
     linear-gradient(90deg, rgba(91, 68, 38, 0.11), transparent 4%, transparent 96%, rgba(91, 68, 38, 0.07)),
@@ -476,8 +491,8 @@ button {
 .page-inner {
   position: relative;
   z-index: 2;
-  min-height: 900px;
-  padding: 30px 76px 49px 78px;
+  min-height: clamp(720px, 86vh, 880px);
+  padding: 26px clamp(40px, 5vw, 76px) 46px clamp(42px, 5vw, 78px);
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -1182,8 +1197,8 @@ button {
   position: absolute;
   z-index: 90;
   right: -36px;
-  top: 70px;
-  bottom: 42px;
+  top: 32px;
+  bottom: 28px;
   width: 44px;
   display: grid;
   grid-template-rows: repeat(26, 1fr);
