@@ -22,10 +22,10 @@ import {
 import { getPronunciation } from './utils/pronunciation';
 
 const modeNames: Record<ExplanationMode, string> = {
-  dictionary: 'Standard Dictionary',
-  plain: 'Explain like I’m a founder',
-  technical: 'Vibe coder spec',
-  quote: 'In the wild'
+  dictionary: 'Dictionary',
+  plain: 'Plain English',
+  technical: 'Technical',
+  vibe: 'Vibe Coder'
 };
 
 function loadStorage<T>(key: string, fallback: T): T {
@@ -123,6 +123,7 @@ function createDestinationSnapshot(
   const trailEl = clone.querySelector('.trail');
   if (trailEl && nextTrail && nextTrail.length > 0) {
     trailEl.innerHTML = nextTrail
+      .slice(-10)
       .map((w) => `<button type="button" tabindex="-1" aria-hidden="true">${w}</button>`)
       .join('');
   }
@@ -180,7 +181,7 @@ function createDestinationSnapshot(
   }
 
   // 8. Folio top, Page number, Depth label
-  const pageNumEl = clone.querySelector('#pageNumber');
+  const pageNumEl = clone.querySelector('#pageNumber') || clone.querySelector('.page-footer .center');
   if (pageNumEl) {
     pageNumEl.textContent = String(101 + termIndex * 7);
   }
@@ -188,7 +189,7 @@ function createDestinationSnapshot(
   if (folioTopEl) {
     folioTopEl.textContent = `Leaf ${String(termIndex + 1).padStart(2, '0')} of ${totalTerms}`;
   }
-  const depthLabelEl = clone.querySelector('#depthLabel');
+  const depthLabelEl = clone.querySelector('#depthLabel') || clone.querySelector('.page-footer .right');
   if (depthLabelEl) {
     const pct = totalTerms <= 1 ? 50 : Math.round((termIndex / (totalTerms - 1)) * 100);
     depthLabelEl.textContent = `Index position ${pct}%`;
@@ -277,6 +278,7 @@ export const App: React.FC = () => {
   const pageRef = useRef<HTMLElement>(null);
   const turnFxRef = useRef<HTMLDivElement>(null);
   const turnLeafRef = useRef<HTMLDivElement>(null);
+  const turnBackRef = useRef<HTMLDivElement>(null);
   const turnFrontRef = useRef<HTMLDivElement>(null);
   const turnBottomRef = useRef<HTMLDivElement>(null);
   const turnShadeRef = useRef<HTMLDivElement>(null);
@@ -338,6 +340,11 @@ export const App: React.FC = () => {
     async (
       nextTerm: Term,
       direction: 'forward' | 'backward' = 'forward',
+      options?: {
+        nextTrail?: string[];
+        fromSearch?: boolean;
+        searchQ?: string;
+      },
       onComplete?: () => void
     ) => {
       if (isTurningRef.current) {
@@ -347,7 +354,19 @@ export const App: React.FC = () => {
         typeof window !== 'undefined' &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches
       ) {
-        setCurrentTerm(nextTerm);
+        flushSync(() => {
+          setCurrentTerm(nextTerm);
+          if (options?.nextTrail) {
+            setTrail(options.nextTrail);
+          }
+          if (options?.fromSearch) {
+            setFromSearchQuestion(options.searchQ || '');
+            setSearchQuery('');
+          } else {
+            setFromSearchQuestion('');
+          }
+        });
+        recordHistory(nextTerm.word);
         isProgrammaticHashRef.current = true;
         window.location.hash = `#term=${encodeURIComponent(nextTerm.word)}`;
         onComplete?.();
@@ -363,12 +382,25 @@ export const App: React.FC = () => {
       const turnFx = turnFxRef.current;
       const pageEl = pageRef.current;
       const turnLeaf = turnLeafRef.current;
+      const turnBack = turnBackRef.current;
       const turnFront = turnFrontRef.current;
       const turnBottom = turnBottomRef.current;
       const turnShade = turnShadeRef.current;
 
-      if (!paperBlock || !turnFx || !pageEl || !turnLeaf || !turnFront || !turnBottom || !turnShade) {
-        setCurrentTerm(nextTerm);
+      if (!pageEl || !paperBlock || !turnFx || !turnLeaf || !turnFront || !turnBottom || !turnShade) {
+        flushSync(() => {
+          setCurrentTerm(nextTerm);
+          if (options?.nextTrail) {
+            setTrail(options.nextTrail);
+          }
+          if (options?.fromSearch) {
+            setFromSearchQuestion(options.searchQ || '');
+            setSearchQuery('');
+          } else {
+            setFromSearchQuestion('');
+          }
+        });
+        recordHistory(nextTerm.word);
         isProgrammaticHashRef.current = true;
         window.location.hash = `#term=${encodeURIComponent(nextTerm.word)}`;
         isTurningRef.current = false;
@@ -378,6 +410,7 @@ export const App: React.FC = () => {
 
       const paperBlockEl: HTMLElement = paperBlock;
       const turnFxEl: HTMLElement = turnFx;
+      const turnBackEl: HTMLElement | null = turnBack;
       const turnFrontEl: HTMLElement = turnFront;
       const turnBottomEl: HTMLElement = turnBottom;
       const turnShadeEl: HTMLElement = turnShade;
@@ -391,17 +424,23 @@ export const App: React.FC = () => {
       const nextIndex = sortedTerms.findIndex((t) => t.word.toLowerCase() === nextTerm.word.toLowerCase());
       const safeNextIndex = nextIndex >= 0 ? nextIndex : 0;
       const isSaved = bookmarks.includes(nextTerm.word);
+      const targetTrail = options?.nextTrail || trail;
 
       const pageInner = pageEl.querySelector('.page-inner');
       if (pageInner) {
         if (direction === 'forward') {
           // Forward turn:
-          // turnFront = current page (peels away to the left)
-          // turnBottom = destination page (revealed underneath from right to left)
+          if (turnBackEl) {
+            turnBackEl.style.display = 'none';
+            turnBackEl.innerHTML = '';
+          }
+
+          // turnFront = current page (peels away to the left in 3D)
           turnFrontEl.innerHTML = '';
           turnFrontEl.appendChild(cleanClone(pageInner as HTMLElement));
           turnFrontEl.style.display = 'block';
 
+          // turnBottom = destination page (revealed underneath from right to left)
           turnBottomEl.innerHTML = '';
           const destSnap = createDestinationSnapshot(
             nextTerm,
@@ -409,31 +448,39 @@ export const App: React.FC = () => {
             pageInner as HTMLElement,
             safeNextIndex,
             sortedTerms.length,
-            isSaved
+            isSaved,
+            targetTrail
           );
           turnBottomEl.appendChild(destSnap);
           turnBottomEl.style.clipPath = 'polygon(0 0, 0 0, 0 0)';
           turnBottomEl.style.display = 'block';
         } else {
-          // Backward turn:
-          // turnBottom = current page (stays fixed underneath)
-          // turnFront = destination page (curls in from left spine over onto right page)
+          // Backward turn (exact opposite of forward):
+          // turnBack = destination page (revealed on base from left to right as current page uncurls)
+          if (turnBackEl) {
+            turnBackEl.innerHTML = '';
+            const destSnap = createDestinationSnapshot(
+              nextTerm,
+              explanationMode,
+              pageInner as HTMLElement,
+              safeNextIndex,
+              sortedTerms.length,
+              isSaved,
+              targetTrail
+            );
+            turnBackEl.appendChild(destSnap);
+            turnBackEl.style.display = 'block';
+          }
+
+          // turnBottom = current page (unmasks revealing destSnap underneath)
           turnBottomEl.innerHTML = '';
           turnBottomEl.appendChild(cleanClone(pageInner as HTMLElement));
           turnBottomEl.style.clipPath = 'none';
           turnBottomEl.style.display = 'block';
 
+          // turnFront = current page (3D curled folding flap uncurling back across from left to right)
           turnFrontEl.innerHTML = '';
-          const destSnap = createDestinationSnapshot(
-            nextTerm,
-            explanationMode,
-            pageInner as HTMLElement,
-            safeNextIndex,
-            sortedTerms.length,
-            isSaved
-          );
-          turnFrontEl.appendChild(destSnap);
-          turnFrontEl.style.clipPath = 'polygon(0 0, 0 0, 0 0)';
+          turnFrontEl.appendChild(cleanClone(pageInner as HTMLElement));
           turnFrontEl.style.display = 'block';
         }
       }
@@ -557,20 +604,16 @@ export const App: React.FC = () => {
         turnFrontEl.style.clipPath = `polygon(${flipPoly})`;
         turnFrontEl.style.transform = `translate3d(${active.x}px,${active.y}px,0) rotate(${drawAngle}rad)`;
 
-        if (direction === 'forward') {
-          let under: ({ x: number; y: number } | null)[] = [c.topI];
-          if (c.topI) under.push({ x: w, y: 0 });
-          under.push({ x: w, y: h });
-          if (c.sideI && dist(c.sideI, c.topI) >= 10) under.push(c.sideI);
-          under.push(c.bottomI, c.topI);
-          const validUnder = under.filter(Boolean) as { x: number; y: number }[];
-          if (validUnder.length >= 3) {
-            turnBottomEl.style.clipPath = `polygon(${validUnder.map((pt) => `${pt.x.toFixed(2)}px ${pt.y.toFixed(2)}px`).join(',')})`;
-          } else {
-            turnBottomEl.style.clipPath = 'polygon(0 0, 0 0, 0 0)';
-          }
+        let under: ({ x: number; y: number } | null)[] = [c.topI];
+        if (c.topI) under.push({ x: w, y: 0 });
+        under.push({ x: w, y: h });
+        if (c.sideI && dist(c.sideI, c.topI) >= 10) under.push(c.sideI);
+        under.push(c.bottomI, c.topI);
+        const validUnder = under.filter(Boolean) as { x: number; y: number }[];
+        if (validUnder.length >= 3) {
+          turnBottomEl.style.clipPath = `polygon(${validUnder.map((pt) => `${pt.x.toFixed(2)}px ${pt.y.toFixed(2)}px`).join(',')})`;
         } else {
-          turnBottomEl.style.clipPath = 'none';
+          turnBottomEl.style.clipPath = 'polygon(0 0, 0 0, 0 0)';
         }
 
         const progress = Math.max(0, Math.min(100, Math.abs(((c.pos.x - w) / (2 * w)) * 100)));
@@ -617,19 +660,34 @@ export const App: React.FC = () => {
 
       flushSync(() => {
         setCurrentTerm(nextTerm);
+        if (options?.nextTrail) {
+          setTrail(options.nextTrail);
+        }
+        if (options?.fromSearch) {
+          setFromSearchQuestion(options.searchQ || '');
+          setSearchQuery('');
+        } else {
+          setFromSearchQuestion('');
+        }
       });
+      recordHistory(nextTerm.word);
       isProgrammaticHashRef.current = true;
       window.location.hash = `#term=${encodeURIComponent(nextTerm.word)}`;
       turnFxEl.classList.remove('active');
       paperBlockEl.classList.remove('turning-book');
+      if (turnBackEl) {
+        turnBackEl.style.cssText = '';
+        turnBackEl.innerHTML = '';
+      }
       turnFrontEl.style.cssText = '';
       turnShadeEl.style.cssText = '';
       turnBottomEl.style.cssText = '';
       turnBottomEl.innerHTML = '';
+      turnFrontEl.innerHTML = '';
       isTurningRef.current = false;
       onComplete?.();
     },
-    [explanationMode, soundEnabled, bookmarks]
+    [explanationMode, soundEnabled, bookmarks, trail]
   );
 
   // Select a term (via search, related link, index, etc.)
@@ -664,28 +722,28 @@ export const App: React.FC = () => {
       const direction: 'forward' | 'backward' =
         options?.direction ?? (targetIndex !== -1 && currentIndex !== -1 && targetIndex < currentIndex ? 'backward' : 'forward');
 
-      if (addTrail) {
-        setTrail((prev) => {
-          if (prev[prev.length - 1]?.toLowerCase() === resolved.word.toLowerCase()) return prev;
-          return [...prev.slice(-6), resolved.word];
-        });
-      }
+      // Compute the next trail without updating React state prematurely (limit to 10 items)
+      const nextTrail = addTrail
+        ? (trail[trail.length - 1]?.toLowerCase() === resolved.word.toLowerCase()
+            ? trail
+            : [...trail.slice(-9), resolved.word])
+        : trail;
 
-      recordHistory(resolved.word);
       const searchQ = searchQuery;
-      if (fromSearch) {
-        setSearchQuery('');
-      }
 
-      animatePageTurn(resolved, direction, () => {
-        if (fromSearch) {
-          setFromSearchQuestion(searchQ);
-        } else {
-          setFromSearchQuestion('');
-        }
-      });
+      // Defer all state mutations until page turn animation completes
+      animatePageTurn(
+        resolved,
+        direction,
+        {
+          nextTrail,
+          fromSearch,
+          searchQ
+        },
+        () => {}
+      );
     },
-    [currentTerm, searchQuery, recordHistory, animatePageTurn]
+    [currentTerm, searchQuery, trail, animatePageTurn]
   );
 
   // Single page flip navigation directly to target term
@@ -935,6 +993,7 @@ export const App: React.FC = () => {
             {/* Single-leaf soft page turn */}
             <div className="turn-fx" ref={turnFxRef} id="turnFx" aria-hidden="true">
               <div className="turn-leaf" ref={turnLeafRef} id="turnLeaf">
+                <div className="turn-back" ref={turnBackRef} id="turnBack"></div>
                 <div className="turn-bottom" ref={turnBottomRef} id="turnBottom"></div>
                 <div className="turn-face turn-front" ref={turnFrontRef} id="turnFront"></div>
                 <div className="turn-shade" ref={turnShadeRef} id="turnShade"></div>

@@ -289,9 +289,9 @@ export const Page = React.forwardRef<HTMLElement, PageProps>(function Page(
                 </button>
               </div>
               <div className="trail" id="trail">
-                {trail.map((word) => (
+                {trail.slice(-10).map((word, idx) => (
                   <button
-                    key={word}
+                    key={`${word}-${idx}`}
                     onClick={() => {
                       onSelectTerm({ word } as Term, { addTrail: false });
                     }}
