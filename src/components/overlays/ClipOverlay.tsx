@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import type { Term, ClipStyle } from '../../types/almanac';
 import { drawClipToCanvas, downloadCanvasAsPng } from '../../utils/canvasExport';
+import { playPaperTearSound } from '../../utils/sound';
 
 interface ClipOverlayProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
 
   const handleDownloadPng = () => {
     if (!canvasRef.current) return;
+    playPaperTearSound();
     drawClipToCanvas(canvasRef.current, term, clipStyle, pageNumber, formattedDate);
     const filename = `ai-almanac-${term.word.toLowerCase().replace(/\s+/g, '-')}.png`;
     downloadCanvasAsPng(canvasRef.current, filename);

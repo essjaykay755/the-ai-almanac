@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { Term, ExplanationMode, CrossRefInfo } from '../types/almanac';
 import { searchTerms, type SearchMatch } from '../utils/search';
 import { specialModes, crossRefs } from '../data/terms';
+import { getPronunciation } from '../utils/pronunciation';
 
 interface PageProps {
   currentTerm: Term;
@@ -32,39 +33,34 @@ const modeNames: Record<ExplanationMode, string> = {
   vibe: 'Vibe Coder'
 };
 
-export const Page: React.FC<PageProps> = ({
-  currentTerm,
-  termIndex,
-  totalTerms,
-  isBookmarked,
-  explanationMode,
-  searchQuery,
-  fromSearchQuestion,
-  trail,
-  searchRef,
-  onSelectTerm,
-  onToggleBookmark,
-  onChangeMode,
-  onSearchChange,
-  onClearTrail,
-  onOpenPicker,
-  onOpenClip,
-  onOpenTimeline,
-  onCopyLink,
-  onSpeak
-}) => {
+export const Page = React.forwardRef<HTMLElement, PageProps>(function Page(
+  {
+    currentTerm,
+    termIndex,
+    totalTerms,
+    isBookmarked,
+    explanationMode,
+    searchQuery,
+    fromSearchQuestion,
+    trail,
+    searchRef,
+    onSelectTerm,
+    onToggleBookmark,
+    onChangeMode,
+    onSearchChange,
+    onClearTrail,
+    onOpenPicker,
+    onOpenClip,
+    onOpenTimeline,
+    onCopyLink,
+    onSpeak
+  },
+  ref
+) {
   const [suggestions, setSuggestions] = useState<SearchMatch[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState(0);
-  const [isRevealing, setIsRevealing] = useState(false);
   const searchShellRef = useRef<HTMLDivElement>(null);
-
-  // Trigger ink reveal animation when term changes
-  useEffect(() => {
-    setIsRevealing(true);
-    const timer = setTimeout(() => setIsRevealing(false), 500);
-    return () => clearTimeout(timer);
-  }, [currentTerm.word]);
 
   // Update suggestions on search query change
   useEffect(() => {
@@ -137,7 +133,7 @@ export const Page: React.FC<PageProps> = ({
   const depthPct = totalTerms <= 1 ? 50 : Math.round((termIndex / (totalTerms - 1)) * 100);
 
   return (
-    <article className="page" id="page">
+    <article className="page" id="page" ref={ref}>
       <div className="page-inner" id="pageInner">
         <header className="topline">
           <div className="edition" id="editionLabel">
@@ -208,7 +204,7 @@ export const Page: React.FC<PageProps> = ({
         </header>
 
         <div className="page-layout">
-          <section className={`entry ${isRevealing ? 'ink-reveal' : ''}`} id="entry" aria-live="polite">
+          <section className="entry" id="entry" aria-live="polite">
             <button
               className={`bookmark-btn ${isBookmarked ? 'saved' : ''}`}
               id="bookmarkBtn"
@@ -226,15 +222,13 @@ export const Page: React.FC<PageProps> = ({
             </button>
 
             <div className="headword-line">
-              <h2 className="word">
-                {currentTerm.word}
-                <span className="part">{currentTerm.part}</span>
-              </h2>
+              <h1 className="word">{currentTerm.word}</h1>
+              <span className="part">{currentTerm.part}</span>
             </div>
 
             <div className="pronounce-row">
-              {currentTerm.pron && <span>{currentTerm.pron}</span>}
-              <button className="speak" id="speakBtn" onClick={onSpeak} aria-label={`Pronounce ${currentTerm.word}`}>
+              <span className="pronounce-text">{getPronunciation(currentTerm.word, currentTerm.pron)}</span>
+              <button className="speak" id="speakBtn" onClick={onSpeak} aria-label={`Pronounce ${currentTerm.word}`} title={`Pronounce ${currentTerm.word}`}>
                 <svg viewBox="0 0 24 24">
                   <path d="M5 10v4h4l5 4V6l-5 4H5z" />
                   <path d="M17 9c1 1 1.5 2 1.5 3S18 14 17 15M19 6.5c2 1.6 3 3.5 3 5.5s-1 3.9-3 5.5" />
@@ -377,4 +371,4 @@ export const Page: React.FC<PageProps> = ({
       </div>
     </article>
   );
-};
+});

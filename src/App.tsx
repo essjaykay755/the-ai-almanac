@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import type { Term, ExplanationMode, OverlayType } from './types/almanac';
-import { terms, sortedTerms, termsByWord, timeline } from './data/terms';
+import { terms, sortedTerms, termsByWord, timeline, specialModes } from './data/terms';
 import { Cover } from './components/Cover';
 import { Page } from './components/Page';
 import { Tabs } from './components/Tabs';
@@ -14,10 +15,11 @@ import { PickerOverlay } from './components/overlays/PickerOverlay';
 import { ClipOverlay } from './components/overlays/ClipOverlay';
 import {
   playPageTurnSound,
-  playRiffleSound,
+  playPaperTearSound,
   playPaperSmallSound,
   playStampSound
 } from './utils/sound';
+import { getPronunciation } from './utils/pronunciation';
 
 function loadStorage<T>(key: string, fallback: T): T {
   try {
@@ -32,6 +34,100 @@ function saveStorage<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {}
+}
+
+function cleanClone(node: HTMLElement): HTMLElement {
+  const c = node.cloneNode(true) as HTMLElement;
+  c.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+  c.querySelectorAll('button, input').forEach((n) => {
+    (n as HTMLElement).tabIndex = -1;
+    n.setAttribute('aria-hidden', 'true');
+  });
+  return c;
+}
+
+function getExplanationForTerm(term: Term, mode: ExplanationMode): string {
+  const s = specialModes[term.word];
+  if (mode === 'dictionary') return term.definition;
+  if (s && s[mode]) return s[mode];
+  if (mode === 'plain') return `Put simply: ${term.definition}`;
+  if (mode === 'technical') {
+    return `${term.definition} In implementation terms, this usually intersects with ${term.related.slice(0, 2).join(' and ')}.`;
+  }
+  return `${term.note} ${(term.example || '').replace(/[“”]/g, '')}`;
+}
+
+function createDestinationSnapshot(
+  term: Term,
+  mode: ExplanationMode,
+  sampleInner: HTMLElement,
+  termIndex: number,
+  totalTerms: number,
+  isBookmarked: boolean = false
+): HTMLElement {
+  const clone = cleanClone(sampleInner);
+  const wordEl = clone.querySelector('.word');
+  if (wordEl) {
+    wordEl.textContent = term.word;
+  }
+  const partEl = clone.querySelector('.headword-line .part');
+  if (partEl) {
+    partEl.textContent = term.part;
+  }
+  const pronEl = clone.querySelector('.pronounce-text');
+  if (pronEl) {
+    pronEl.textContent = getPronunciation(term.word, term.pron);
+  }
+  const defEl = clone.querySelector('.definition');
+  if (defEl) {
+    defEl.textContent = getExplanationForTerm(term, mode);
+  }
+  const exEl = clone.querySelector('.example');
+  if (exEl) {
+    exEl.textContent = term.example || '';
+  }
+  const lowerGridPs = clone.querySelectorAll('.lower-grid p');
+  if (lowerGridPs.length >= 2) {
+    lowerGridPs[0].textContent = term.origin || 'A standard term in modern AI practice.';
+    lowerGridPs[1].textContent = term.note || 'Use the term precisely in context.';
+  }
+  const noteP = clone.querySelector('.margin-note p');
+  if (noteP) {
+    noteP.textContent = term.note || '';
+  }
+  const filedUnder = clone.querySelector('.margin-section:nth-last-of-type(1) p');
+  if (filedUnder) {
+    filedUnder.textContent = term.category || 'AI Concepts';
+  }
+  const pageNumEl = clone.querySelector('#pageNumber');
+  if (pageNumEl) {
+    pageNumEl.textContent = String(101 + termIndex * 7);
+  }
+  const folioTopEl = clone.querySelector('.folio-top');
+  if (folioTopEl) {
+    folioTopEl.textContent = `Leaf ${String(termIndex + 1).padStart(2, '0')} of ${totalTerms}`;
+  }
+  const depthLabelEl = clone.querySelector('#depthLabel');
+  if (depthLabelEl) {
+    const pct = totalTerms <= 1 ? 50 : Math.round((termIndex / (totalTerms - 1)) * 100);
+    depthLabelEl.textContent = `Index position ${pct}%`;
+  }
+  const xref = clone.querySelector('.xref');
+  if (xref && term.related) {
+    xref.innerHTML = term.related
+      .map(
+        (r) =>
+          `<button type="button" tabindex="-1" aria-hidden="true"><span>${r}</span></button>`
+      )
+      .join('');
+  }
+  const bookmarkBtn = clone.querySelector('.bookmark-btn');
+  if (bookmarkBtn) {
+    bookmarkBtn.classList.toggle('saved', isBookmarked);
+    const star = bookmarkBtn.querySelector('.bookmark-star');
+    if (star) star.textContent = isBookmarked ? '★' : '☆';
+  }
+  return clone;
 }
 
 export const App: React.FC = () => {
@@ -100,21 +196,17 @@ export const App: React.FC = () => {
   const [isStampVisible, setIsStampVisible] = useState(false);
   const stampTimerRef = useRef<number | null>(null);
 
-  // Refs for 3D turn and Riffle animations
+  // Refs for page turn animations
   const searchInputRef = useRef<HTMLInputElement>(null);
   const paperBlockRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLElement>(null);
   const turnFxRef = useRef<HTMLDivElement>(null);
   const turnLeafRef = useRef<HTMLDivElement>(null);
   const turnFrontRef = useRef<HTMLDivElement>(null);
-  const turnGhostRef = useRef<HTMLDivElement>(null);
+  const turnBottomRef = useRef<HTMLDivElement>(null);
   const turnShadeRef = useRef<HTMLDivElement>(null);
-  const turnEdgeRef = useRef<HTMLDivElement>(null);
-  const castShadowRef = useRef<HTMLDivElement>(null);
-  const cornerCurlRef = useRef<HTMLDivElement>(null);
-  const underGlowRef = useRef<HTMLDivElement>(null);
-  const riffleStackRef = useRef<HTMLDivElement>(null);
   const isTurningRef = useRef<boolean>(false);
+  const isProgrammaticHashRef = useRef<boolean>(false);
 
   // Compute depth and index
   const termIndex = useMemo(() => {
@@ -126,31 +218,33 @@ export const App: React.FC = () => {
     return new Set(sortedTerms.map((t) => t.word[0].toUpperCase()));
   }, []);
 
-  // Update root CSS variable for page-depth
+  // Update root CSS variable for page-depth and stack heights
   useEffect(() => {
     const pct =
       sortedTerms.length <= 1
         ? 50
         : Math.round((termIndex / (sortedTerms.length - 1)) * 100);
     const clamped = Math.max(4, Math.min(96, pct));
+    const p = clamped / 100;
     document.documentElement.style.setProperty('--page-depth', `${clamped}%`);
+    document.documentElement.style.setProperty('--stack-turned', `${(4 + 7 * p).toFixed(1)}px`);
+    document.documentElement.style.setProperty('--stack-remaining', `${(4 + 7 * (1 - p)).toFixed(1)}px`);
   }, [termIndex]);
 
-  // Sync to history & localStorage
+  // Record history
   const recordHistory = useCallback((word: string) => {
     setHistoryTerms((prev) => {
-      const filtered = prev.filter((w) => w.toLowerCase() !== word.toLowerCase());
-      const updated = [word, ...filtered].slice(0, 20);
+      const updated = [word, ...prev.filter((w) => w.toLowerCase() !== word.toLowerCase())].slice(0, 40);
       saveStorage('aiAlmanacHistory', updated);
       return updated;
     });
   }, []);
 
-  // Stamp popup helper
+  // Trigger stamp animation
   const triggerStamp = useCallback(
     (text: string) => {
       if (stampTimerRef.current) {
-        clearTimeout(stampTimerRef.current);
+        window.clearTimeout(stampTimerRef.current);
       }
       setStampText(text);
       setIsStampVisible(true);
@@ -164,19 +258,23 @@ export const App: React.FC = () => {
     [soundEnabled]
   );
 
-  // 3D Page Turn Animation
+  // Single-leaf page turn — soft-page geometry adapted from StPageFlip's fold model
   const animatePageTurn = useCallback(
     async (
       nextTerm: Term,
-      direction: 'forward' | 'backward' = 'forward',
+      _direction: 'forward' | 'backward' = 'forward',
       onComplete?: () => void
     ) => {
+      if (isTurningRef.current) {
+        return;
+      }
       if (
-        isTurningRef.current ||
-        (typeof window !== 'undefined' &&
-          window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
       ) {
         setCurrentTerm(nextTerm);
+        isProgrammaticHashRef.current = true;
+        window.location.hash = `#term=${encodeURIComponent(nextTerm.word)}`;
         onComplete?.();
         return;
       }
@@ -191,15 +289,13 @@ export const App: React.FC = () => {
       const pageEl = pageRef.current;
       const turnLeaf = turnLeafRef.current;
       const turnFront = turnFrontRef.current;
-      const turnGhost = turnGhostRef.current;
+      const turnBottom = turnBottomRef.current;
       const turnShade = turnShadeRef.current;
-      const turnEdge = turnEdgeRef.current;
-      const castShadow = castShadowRef.current;
-      const cornerCurl = cornerCurlRef.current;
-      const underGlow = underGlowRef.current;
 
-      if (!paperBlock || !turnFx || !pageEl || !turnLeaf || !turnFront) {
+      if (!paperBlock || !turnFx || !pageEl || !turnLeaf || !turnFront || !turnBottom || !turnShade) {
         setCurrentTerm(nextTerm);
+        isProgrammaticHashRef.current = true;
+        window.location.hash = `#term=${encodeURIComponent(nextTerm.word)}`;
         isTurningRef.current = false;
         onComplete?.();
         return;
@@ -207,161 +303,227 @@ export const App: React.FC = () => {
 
       paperBlock.classList.add('turning-book');
       turnFx.classList.add('active');
-      pageEl.classList.add('turning-under');
 
-      // Clone existing page inner into turning face
+      const w = Math.max(1, turnFx.getBoundingClientRect().width);
+      const h = Math.max(1, turnFx.getBoundingClientRect().height);
+
+      const nextIndex = sortedTerms.findIndex((t) => t.word.toLowerCase() === nextTerm.word.toLowerCase());
+      const safeNextIndex = nextIndex >= 0 ? nextIndex : 0;
+      const isSaved = bookmarks.includes(nextTerm.word);
+
       const pageInner = pageEl.querySelector('.page-inner');
       if (pageInner) {
         turnFront.innerHTML = '';
-        const clone = pageInner.cloneNode(true) as HTMLElement;
-        clone.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
-        clone.querySelectorAll('button, input').forEach((n) => {
-          (n as HTMLElement).tabIndex = -1;
-          n.setAttribute('aria-hidden', 'true');
-        });
-        turnFront.appendChild(clone);
+        turnFront.appendChild(cleanClone(pageInner as HTMLElement));
+        turnFront.style.display = 'block';
+
+        turnBottom.innerHTML = '';
+        const destSnap = createDestinationSnapshot(
+          nextTerm,
+          explanationMode,
+          pageInner as HTMLElement,
+          safeNextIndex,
+          sortedTerms.length,
+          isSaved
+        );
+        turnBottom.appendChild(destSnap);
+        // Start completely unrevealed (zero area) so destination word never flashes beforehand
+        turnBottom.style.clipPath = 'polygon(0 0, 0 0, 0 0)';
+        turnBottom.style.display = 'block';
       }
 
-      if (turnGhost) {
-        turnGhost.textContent = `${currentTerm.word} — ${currentTerm.definition}`;
-      }
+      const dist = (a: { x: number; y: number } | null, b: { x: number; y: number } | null) =>
+        !a || !b ? Infinity : Math.hypot(b.x - a.x, b.y - a.y);
+      const rot = (pt: { x: number; y: number }, origin: { x: number; y: number }, ang: number) => ({
+        x: pt.x * Math.cos(ang) + pt.y * Math.sin(ang) + origin.x,
+        y: pt.y * Math.cos(ang) - pt.x * Math.sin(ang) + origin.y
+      });
+      const inRect = (r: { left: number; top: number; width: number; height: number }, p: { x: number; y: number } | null) =>
+        p && p.x >= r.left && p.x <= r.left + r.width && p.y >= r.top && p.y <= r.top + r.height ? p : null;
+      const lineX = (one: { x: number; y: number }[], two: { x: number; y: number }[]) => {
+        const A1 = one[0].y - one[1].y, A2 = two[0].y - two[1].y;
+        const B1 = one[1].x - one[0].x, B2 = two[1].x - two[0].x;
+        const C1 = one[0].x * one[1].y - one[1].x * one[0].y;
+        const C2 = two[0].x * two[1].y - two[1].x * two[0].y;
+        const d = A1 * B2 - A2 * B1;
+        if (Math.abs(d) < 1e-8) return null;
+        const x = -((C1 * B2 - C2 * B1) / d);
+        const y = -((A1 * C2 - A2 * C1) / d);
+        return isFinite(x) && isFinite(y) ? { x, y } : null;
+      };
+      const segX = (r: { left: number; top: number; width: number; height: number }, a: { x: number; y: number }[], b: { x: number; y: number }[]) =>
+        inRect(r, lineX(a, b));
+      const limitCircle = (center: { x: number; y: number }, radius: number, p: { x: number; y: number }) => {
+        if (dist(center, p) <= radius) return p;
+        const a = center.x, b = center.y, n = p.x, m = p.y;
+        const den = (a - n) * (a - n) + (b - m) * (b - m);
+        if (!den) return p;
+        let x = Math.sqrt((radius * radius * (a - n) * (a - n)) / den) + a;
+        if (p.x < 0) x *= -1;
+        const y = (a - n) !== 0 ? ((x - a) * (b - m)) / (a - n) + b : radius;
+        return { x, y };
+      };
+      const angleLines = (a: { x: number; y: number }[], b: { x: number; y: number }[]) => {
+        if (!a?.[0] || !a?.[1] || !b?.[0] || !b?.[1]) return 0;
+        const A1 = a[0].y - a[1].y, A2 = b[0].y - b[1].y;
+        const B1 = a[1].x - a[0].x, B2 = b[1].x - b[0].x;
+        const den = Math.hypot(A1, B1) * Math.hypot(A2, B2);
+        return den ? Math.acos(Math.max(-1, Math.min(1, (A1 * A2 + B1 * B2) / den))) : 0;
+      };
 
-      // Switch underlying React term midway
-      setCurrentTerm(nextTerm);
+      function calculate(pointer: { x: number; y: number }) {
+        let pos = { ...pointer };
+        let angle = 0;
+        let rect = {
+          topLeft: { x: 0, y: 0 },
+          topRight: { x: 0, y: 0 },
+          bottomLeft: { x: 0, y: 0 },
+          bottomRight: { x: 0, y: 0 }
+        };
+        let topI: { x: number; y: number } | null = null;
+        let sideI: { x: number; y: number } | null = null;
+        let bottomI: { x: number; y: number } | null = null;
 
-      const isForward = direction === 'forward';
-      turnLeaf.style.transformOrigin = isForward ? 'left center' : 'right center';
-      turnLeaf.style.borderRadius = isForward ? '0 9px 9px 0' : '9px 0 0 9px';
-
-      const leafFrames = isForward
-        ? [
-            { transform: 'translateZ(0) rotateY(0deg) rotateZ(0deg)', filter: 'brightness(1)', offset: 0 },
-            { transform: 'translateZ(8px) rotateY(-18deg) rotateZ(-.12deg)', filter: 'brightness(.99)', offset: 0.18 },
-            { transform: 'translateZ(22px) rotateY(-74deg) rotateZ(-.38deg)', filter: 'brightness(.94)', offset: 0.44 },
-            { transform: 'translateZ(18px) rotateY(-112deg) rotateZ(-.42deg)', filter: 'brightness(.91)', offset: 0.58 },
-            { transform: 'translateZ(5px) rotateY(-164deg) rotateZ(.1deg)', filter: 'brightness(.83)', offset: 0.84 },
-            { transform: 'translateZ(0) rotateY(-180deg) rotateZ(0deg)', filter: 'brightness(.78)', offset: 1 }
-          ]
-        : [
-            { transform: 'translateZ(0) rotateY(180deg)', filter: 'brightness(.78)', offset: 0 },
-            { transform: 'translateZ(9px) rotateY(150deg)', filter: 'brightness(.86)', offset: 0.18 },
-            { transform: 'translateZ(22px) rotateY(102deg) rotateZ(.35deg)', filter: 'brightness(.93)', offset: 0.46 },
-            { transform: 'translateZ(14px) rotateY(48deg) rotateZ(.2deg)', filter: 'brightness(.98)', offset: 0.72 },
-            { transform: 'translateZ(0) rotateY(0deg)', filter: 'brightness(1)', offset: 1 }
+        const update = () => {
+          const left = w - pos.x + 1;
+          const top = h - pos.y;
+          let a = 2 * Math.acos(left / Math.hypot(top, left));
+          if (top < 0) a = -a;
+          const da = Math.PI - a;
+          if (!isFinite(a) || (da >= 0 && da < 0.003)) throw Error('fold');
+          a = -a;
+          angle = a;
+          const pts = [
+            { x: 0, y: -h },
+            { x: w, y: -h },
+            { x: 0, y: 0 },
+            { x: w, y: 0 }
           ];
+          rect = {
+            topLeft: rot(pts[0], pos, a),
+            topRight: rot(pts[1], pos, a),
+            bottomLeft: rot(pts[2], pos, a),
+            bottomRight: rot(pts[3], pos, a)
+          };
+        };
 
-      const leafAnim = turnLeaf.animate(leafFrames, {
-        duration: 760,
-        easing: 'cubic-bezier(.22,.68,.16,1)',
-        fill: 'forwards'
-      });
-
-      turnShade?.animate(
-        [
-          { opacity: 0 },
-          { opacity: 0.2, offset: 0.15 },
-          { opacity: 0.72, offset: 0.48 },
-          { opacity: 0.32, offset: 0.72 },
-          { opacity: 0 }
-        ],
-        { duration: 760, easing: 'ease-in-out' }
-      );
-
-      turnEdge?.animate(
-        [
-          { opacity: 0.1, transform: 'scaleX(.5)' },
-          { opacity: 1, transform: 'scaleX(1.8)', offset: 0.48 },
-          { opacity: 0.15, transform: 'scaleX(.6)' }
-        ],
-        { duration: 760, easing: 'ease-in-out' }
-      );
-
-      if (castShadow) {
-        castShadow.style.left = isForward ? '0' : '72%';
-        castShadow.style.background = isForward
-          ? 'linear-gradient(90deg,rgba(28,18,9,.5),rgba(28,18,9,.16) 48%,transparent)'
-          : 'linear-gradient(270deg,rgba(28,18,9,.5),rgba(28,18,9,.16) 48%,transparent)';
-        castShadow.animate(
-          [
-            { opacity: 0, transform: 'scaleX(.1)' },
-            { opacity: 0.72, transform: 'scaleX(1)', offset: 0.5 },
-            { opacity: 0, transform: 'scaleX(.22)' }
-          ],
-          { duration: 760, easing: 'ease-in-out' }
-        );
+        try {
+          update();
+          let limited = limitCircle({ x: 0, y: h }, w, pos);
+          if (limited.x !== pos.x || limited.y !== pos.y) {
+            pos = limited;
+            update();
+          }
+          const radius = Math.hypot(w, h);
+          if (rect.topRight.x <= 0) {
+            limited = limitCircle({ x: 0, y: 0 }, radius, rect.bottomLeft);
+            if (limited.x !== pos.x || limited.y !== pos.y) {
+              pos = limited;
+              update();
+            }
+          }
+          const bound = { left: -1, top: -1, width: w + 2, height: h + 2 };
+          topI = segX(bound, [rect.topLeft, rect.topRight], [{ x: 0, y: 0 }, { x: w, y: 0 }]);
+          sideI = segX(bound, [pos, rect.topLeft], [{ x: w, y: 0 }, { x: w, y: h }]);
+          bottomI = segX(bound, [rect.bottomLeft, rect.bottomRight], [{ x: 0, y: h }, { x: w, y: h }]);
+          return { pos, angle, rect, topI, sideI, bottomI };
+        } catch {
+          return null;
+        }
       }
 
-      if (cornerCurl) {
-        cornerCurl.style.left = isForward ? 'auto' : '0';
-        cornerCurl.style.right = isForward ? '0' : 'auto';
-        cornerCurl.style.transform = isForward ? 'none' : 'scaleX(-1)';
-        cornerCurl.animate(
-          [
-            { opacity: 0, transform: (isForward ? '' : 'scaleX(-1) ') + 'scale(.35)' },
-            { opacity: 0.9, transform: (isForward ? '' : 'scaleX(-1) ') + 'scale(1)', offset: 0.28 },
-            { opacity: 0.25, transform: (isForward ? '' : 'scaleX(-1) ') + 'scale(.58)', offset: 0.58 },
-            { opacity: 0, transform: (isForward ? '' : 'scaleX(-1) ') + 'scale(.2)' }
-          ],
-          { duration: 620, easing: 'ease-out' }
-        );
+      function renderFold(c: ReturnType<typeof calculate>) {
+        if (!c) return false;
+        let flip: ({ x: number; y: number } | null)[] = [c.rect.topLeft, c.topI];
+        if (c.sideI) flip.push(c.sideI);
+        flip.push(c.bottomI, c.rect.bottomLeft);
+        const validFlip = flip.filter(Boolean) as { x: number; y: number }[];
+        if (validFlip.length < 3) return false;
+        const active = c.rect.topLeft;
+        const drawAngle = -c.angle;
+        const flipPoly = validFlip
+          .map((pt) => {
+            const rel = { x: pt.x - active.x, y: pt.y - active.y };
+            const q = rot(rel, { x: 0, y: 0 }, drawAngle);
+            return `${q.x.toFixed(2)}px ${q.y.toFixed(2)}px`;
+          })
+          .join(',');
+        turnFront.style.clipPath = `polygon(${flipPoly})`;
+        turnFront.style.transform = `translate3d(${active.x}px,${active.y}px,0) rotate(${drawAngle}rad)`;
+
+        let under: ({ x: number; y: number } | null)[] = [c.topI];
+        if (c.topI) under.push({ x: w, y: 0 });
+        under.push({ x: w, y: h });
+        if (c.sideI && dist(c.sideI, c.topI) >= 10) under.push(c.sideI);
+        under.push(c.bottomI, c.topI);
+        const validUnder = under.filter(Boolean) as { x: number; y: number }[];
+        if (validUnder.length >= 3) {
+          turnBottom.style.clipPath = `polygon(${validUnder.map((pt) => `${pt.x.toFixed(2)}px ${pt.y.toFixed(2)}px`).join(',')})`;
+        } else {
+          turnBottom.style.clipPath = 'polygon(0 0, 0 0, 0 0)';
+        }
+
+        const progress = Math.max(0, Math.min(100, Math.abs(((c.pos.x - w) / (2 * w)) * 100)));
+        const shadowPos = c.sideI || c.topI;
+        const second = shadowPos !== c.sideI && c.sideI ? c.sideI : c.bottomI;
+        if (shadowPos && second) {
+          const shadowAngle = angleLines([shadowPos, second], [{ x: 0, y: 0 }, { x: w, y: 0 }]);
+          const width = Math.max(8, ((3 * w) / 4) * (progress / 100));
+          const opacity = Math.max(0, (100 - progress) * 0.004);
+          const r = shadowAngle + (3 * Math.PI) / 2;
+          turnShade.style.display = 'block';
+          turnShade.style.width = `${width}px`;
+          turnShade.style.height = `${2 * h}px`;
+          turnShade.style.opacity = String(opacity);
+          turnShade.style.transform = `translate3d(${shadowPos.x}px,${shadowPos.y - 100}px,0) rotate(${r}rad)`;
+        }
+        turnFront.style.filter = `drop-shadow(2px 2px ${4 + progress * 0.04}px rgba(43,29,16,${0.09 + progress * 0.0022}))`;
+        return true;
       }
 
-      underGlow?.animate([{ opacity: 0 }, { opacity: 0.45, offset: 0.48 }, { opacity: 0 }], {
-        duration: 760
+      const margin = Math.max(18, Math.min(h * 0.1, 82));
+      const a = { x: w - margin, y: h - margin };
+      const b = { x: -w, y: h };
+      const duration = 940;
+      const start = performance.now();
+      let last: ReturnType<typeof calculate> = null;
+
+      await new Promise<void>((resolve) => {
+        function frame(now: number) {
+          const raw = Math.min(1, (now - start) / duration);
+          const p = raw < 0.5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
+          const pos = { x: a.x + (b.x - a.x) * p, y: a.y + (b.y - a.y) * p };
+          const c = calculate(pos);
+          if (c && renderFold(c)) last = c;
+          else if (last) renderFold(last);
+          if (raw < 1) requestAnimationFrame(frame);
+          else resolve();
+        }
+        requestAnimationFrame(frame);
       });
 
-      await leafAnim.finished.catch(() => {});
-
+      flushSync(() => {
+        setCurrentTerm(nextTerm);
+      });
+      isProgrammaticHashRef.current = true;
+      window.location.hash = `#term=${encodeURIComponent(nextTerm.word)}`;
       turnFx.classList.remove('active');
       paperBlock.classList.remove('turning-book');
-      pageEl.classList.remove('turning-under');
-      turnLeaf.getAnimations().forEach((a) => a.cancel());
+      turnFront.style.cssText = '';
+      turnShade.style.cssText = '';
+      turnBottom.style.cssText = '';
+      turnBottom.innerHTML = '';
       isTurningRef.current = false;
       onComplete?.();
     },
-    [currentTerm, soundEnabled]
-  );
-
-  // Riffle animation helper
-  const riffleToTerm = useCallback(
-    async (targetTerm: Term) => {
-      if (isTurningRef.current) return;
-      const stack = riffleStackRef.current;
-      const pageEl = pageRef.current;
-      if (!stack || !pageEl) {
-        setCurrentTerm(targetTerm);
-        return;
-      }
-
-      stack.classList.add('active');
-      pageEl.classList.add('riffling');
-      if (soundEnabled) {
-        playRiffleSound();
-      }
-
-      const sheets = Array.from(stack.children) as HTMLElement[];
-      sheets.forEach((s, i) => {
-        s.animate(
-          [
-            { opacity: 0, transform: 'rotateY(0deg) translateX(0)' },
-            { opacity: 0.82, transform: `rotateY(${-28 - i * 4}deg) translateX(${-3 - i}px)`, offset: 0.45 },
-            { opacity: 0, transform: `rotateY(${-82 - i * 5}deg) translateX(${-14 - i * 2}px)` }
-          ],
-          { duration: 210, delay: i * 58, easing: 'cubic-bezier(.4,0,.2,1)' }
-        );
-      });
-
-      await new Promise((r) => setTimeout(r, 610));
-      pageEl.classList.remove('riffling');
-      stack.classList.remove('active');
-      animatePageTurn(targetTerm, 'forward');
-    },
-    [animatePageTurn, soundEnabled]
+    [explanationMode, soundEnabled, bookmarks]
   );
 
   // Select a term (via search, related link, index, etc.)
   const handleSelectTerm = useCallback(
     (termToSelect: Term, options?: { fromSearch?: boolean; addTrail?: boolean }) => {
+      if (isTurningRef.current) return;
+
       // Resolve term object if incomplete
       const resolved =
         termsByWord[termToSelect.word.toLowerCase()] ||
@@ -371,19 +533,15 @@ export const App: React.FC = () => {
       const fromSearch = options?.fromSearch ?? false;
       const addTrail = options?.addTrail ?? true;
 
-      if (fromSearch) {
-        setFromSearchQuestion(searchQuery);
-        setSearchQuery('');
-      } else {
-        setFromSearchQuestion('');
-      }
-
       if (resolved.word.toLowerCase() === currentTerm.word.toLowerCase()) {
+        if (fromSearch) {
+          setFromSearchQuestion(searchQuery);
+          setSearchQuery('');
+        }
+        isProgrammaticHashRef.current = true;
         window.location.hash = `#term=${encodeURIComponent(resolved.word)}`;
         return;
       }
-
-      window.location.hash = `#term=${encodeURIComponent(resolved.word)}`;
 
       if (addTrail) {
         setTrail((prev) => {
@@ -393,14 +551,37 @@ export const App: React.FC = () => {
       }
 
       recordHistory(resolved.word);
-      animatePageTurn(resolved, 'forward');
+      const searchQ = searchQuery;
+      if (fromSearch) {
+        setSearchQuery('');
+      }
+
+      animatePageTurn(resolved, 'forward', () => {
+        if (fromSearch) {
+          setFromSearchQuestion(searchQ);
+        } else {
+          setFromSearchQuestion('');
+        }
+      });
     },
     [currentTerm, searchQuery, recordHistory, animatePageTurn]
+  );
+
+  // Single page flip navigation directly to target term
+  const riffleToTerm = useCallback(
+    (targetTerm: Term) => {
+      handleSelectTerm(targetTerm, { addTrail: true });
+    },
+    [handleSelectTerm]
   );
 
   // Listen to hash changes (browser back/forward)
   useEffect(() => {
     const handleHashChange = () => {
+      if (isProgrammaticHashRef.current) {
+        isProgrammaticHashRef.current = false;
+        return;
+      }
       const target = getHashTerm();
       if (target && target.word.toLowerCase() !== currentTerm.word.toLowerCase()) {
         handleSelectTerm(target, { addTrail: false });
@@ -432,8 +613,11 @@ export const App: React.FC = () => {
     const updated = exists ? bookmarks.filter((w) => w !== word) : [...bookmarks, word];
     setBookmarks(updated);
     saveStorage('aiAlmanacBookmarks', updated);
+    if (soundEnabled) {
+      playPaperTearSound();
+    }
     triggerStamp(exists ? 'BOOKMARK REMOVED' : 'DOG-EARED');
-  }, [bookmarks, currentTerm, triggerStamp]);
+  }, [bookmarks, currentTerm, soundEnabled, triggerStamp]);
 
   // Speech pronunciation
   const handleSpeak = useCallback(() => {
@@ -541,7 +725,13 @@ export const App: React.FC = () => {
             soundEnabled={soundEnabled}
             onToggleSound={handleToggleSound}
             onOpenOverlay={(overlay) => {
-              if (soundEnabled) playPaperSmallSound();
+              if (soundEnabled) {
+                if (overlay === 'clip') {
+                  playPaperTearSound();
+                } else {
+                  playPaperSmallSound();
+                }
+              }
               setActiveOverlay(overlay);
             }}
             onFocusSearch={() => {
@@ -553,9 +743,16 @@ export const App: React.FC = () => {
           />
 
           <div className="paper-block" ref={paperBlockRef} id="paperBlock">
-            <div className="page-stack"></div>
+            <div className="page-stack" aria-hidden="true">
+              <i className="stack-sheet"></i>
+              <i className="stack-sheet"></i>
+              <i className="stack-sheet"></i>
+              <i className="stack-sheet"></i>
+              <i className="stack-sheet"></i>
+            </div>
 
             <Page
+              ref={pageRef}
               currentTerm={currentTerm}
               termIndex={termIndex}
               totalTerms={sortedTerms.length}
@@ -571,14 +768,14 @@ export const App: React.FC = () => {
               onSearchChange={setSearchQuery}
               onClearTrail={() => setTrail([currentTerm.word])}
               onOpenPicker={() => setActiveOverlay('picker')}
-              onOpenClip={() => setActiveOverlay('clip')}
+              onOpenClip={() => {
+                if (soundEnabled) playPaperTearSound();
+                setActiveOverlay('clip');
+              }}
               onOpenTimeline={() => setActiveOverlay('timeline')}
               onCopyLink={handleCopyLink}
               onSpeak={handleSpeak}
             />
-
-            <div className="depth-left"></div>
-            <div className="depth-right"></div>
 
             <Tabs
               currentLetter={currentTerm.word[0].toUpperCase()}
@@ -586,27 +783,13 @@ export const App: React.FC = () => {
               onSelectLetter={handleSelectLetter}
             />
 
-            <div className="under-glow" ref={underGlowRef} id="underGlow"></div>
-            <div className="cast-shadow" ref={castShadowRef} id="castShadow"></div>
-
-            {/* 3D Page Turn System */}
+            {/* Single-leaf soft page turn */}
             <div className="turn-fx" ref={turnFxRef} id="turnFx" aria-hidden="true">
               <div className="turn-leaf" ref={turnLeafRef} id="turnLeaf">
+                <div className="turn-bottom" ref={turnBottomRef} id="turnBottom"></div>
                 <div className="turn-face turn-front" ref={turnFrontRef} id="turnFront"></div>
-                <div className="turn-face turn-back" id="turnBack">
-                  <div className="ghost" ref={turnGhostRef} id="turnGhost"></div>
-                </div>
                 <div className="turn-shade" ref={turnShadeRef} id="turnShade"></div>
-                <div className="turn-edge" ref={turnEdgeRef} id="turnEdge"></div>
               </div>
-              <div className="corner-curl" ref={cornerCurlRef} id="cornerCurl"></div>
-            </div>
-
-            {/* Riffle Sheets */}
-            <div className="riffle-stack" ref={riffleStackRef} id="riffleStack">
-              {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="riffle-sheet" style={{ zIndex: 7 - i }} />
-              ))}
             </div>
           </div>
         </section>
