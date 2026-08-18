@@ -37,7 +37,7 @@ export function drawClipToCanvas(
   ctx.fillStyle = '#6b5e4b';
   ctx.font = '700 16px "Avenir Next", "Helvetica Neue", Arial, sans-serif';
   ctx.letterSpacing = '2px';
-  ctx.fillText('THE AI ALMANAC · CLIPPED ENTRY', 80, 75);
+  ctx.fillText('AI ALMANAC · CLIPPED ENTRY', 80, 75);
 
   // Headword
   ctx.fillStyle = '#282119';

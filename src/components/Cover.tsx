@@ -39,7 +39,7 @@ export const Cover: React.FC<CoverProps> = ({
           <path d="M32 3v5m0 18v5" />
         </svg>
         <h1>
-          The AI<span>Almanac</span>
+          AI<span>Almanac</span>
         </h1>
         <p>An evolving reference book for AI enthusiasts &amp; vibe coders</p>
       </div>

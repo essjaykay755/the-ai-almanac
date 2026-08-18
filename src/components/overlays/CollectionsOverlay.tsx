@@ -46,7 +46,7 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
       <section className="insert" role="dialog" aria-modal="true">
         <div className="insert-head">
           <div>
-            <small>The AI Almanac · reading lists</small>
+            <small>AI Almanac · reading lists</small>
             <h2>Collections</h2>
           </div>
           <button className="close" onClick={onClose} aria-label="Close">

@@ -33,7 +33,7 @@ export const IndexOverlay: React.FC<IndexOverlayProps> = ({
       <section className="insert index-insert" role="dialog" aria-modal="true">
         <div className="insert-head">
           <div>
-            <small>The AI Almanac · complete index</small>
+            <small>AI Almanac · complete index</small>
             <h2>Every filed term</h2>
           </div>
           <button className="close" onClick={onClose} aria-label="Close">

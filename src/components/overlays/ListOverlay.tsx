@@ -22,8 +22,8 @@ export const ListOverlay: React.FC<ListOverlayProps> = ({
   const isBookmarks = kind === 'bookmarks';
   const title = isBookmarks ? 'Dog-eared pages' : 'Reading history';
   const eyebrow = isBookmarks
-    ? 'The AI Almanac · saved leaves'
-    : 'The AI Almanac · recently opened';
+    ? 'AI Almanac · saved leaves'
+    : 'AI Almanac · recently opened';
 
   return (
     <div className="overlay" id="listOverlay" onClick={(e) => e.target === e.currentTarget && onClose()}>

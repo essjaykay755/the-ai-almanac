@@ -64,7 +64,7 @@ export const Page: React.FC<PageProps> = ({
     setIsRevealing(true);
     const timer = setTimeout(() => setIsRevealing(false), 500);
     return () => clearTimeout(timer);
-  }, [currentTerm.word, explanationMode]);
+  }, [currentTerm.word]);
 
   // Update suggestions on search query change
   useEffect(() => {
@@ -154,8 +154,8 @@ export const Page: React.FC<PageProps> = ({
                 ref={searchRef}
                 id="search"
                 autoComplete="off"
-                placeholder="Ask the Almanac or search a term…"
-                aria-label="Search The AI Almanac"
+                placeholder="Ask AI Almanac or search a term…"
+                aria-label="Search AI Almanac"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 onFocus={() => {
@@ -214,14 +214,22 @@ export const Page: React.FC<PageProps> = ({
               id="bookmarkBtn"
               onClick={onToggleBookmark}
               aria-label={`${isBookmarked ? 'Remove bookmark' : 'Bookmark'} ${currentTerm.word}`}
+              title={isBookmarked ? 'Remove bookmark' : 'Bookmark this leaf'}
             >
-              <span className="ribbon"></span>
-              <span className="ribbon-star">{isBookmarked ? '★' : '☆'}</span>
+              <svg className="bookmark-svg" viewBox="0 0 24 34" fill="none">
+                <path
+                  d="M3 0H21V30L12 23L3 30V0Z"
+                  className="bookmark-ribbon-path"
+                />
+              </svg>
+              <span className="bookmark-star">{isBookmarked ? '★' : '☆'}</span>
             </button>
 
             <div className="headword-line">
-              <h2 className="word">{currentTerm.word}</h2>
-              <span className="part">{currentTerm.part}</span>
+              <h2 className="word">
+                {currentTerm.word}
+                <span className="part">{currentTerm.part}</span>
+              </h2>
             </div>
 
             <div className="pronounce-row">
@@ -245,8 +253,6 @@ export const Page: React.FC<PageProps> = ({
                 </button>
               ))}
             </div>
-
-            <div className="rule"></div>
 
             <div className="definition-wrap">
               <span className="sense-num">1.</span>
@@ -360,7 +366,7 @@ export const Page: React.FC<PageProps> = ({
         </div>
 
         <footer className="page-footer">
-          <span className="left">The AI Almanac · Field Edition</span>
+          <span className="left">AI Almanac · Field Edition</span>
           <span className="center" id="pageNumber">
             {pageNumber}
           </span>

@@ -4,7 +4,6 @@ import { terms, sortedTerms, termsByWord, timeline } from './data/terms';
 import { Cover } from './components/Cover';
 import { Page } from './components/Page';
 import { Tabs } from './components/Tabs';
-import { EdgeMarkers } from './components/EdgeMarkers';
 import { Stamp } from './components/Stamp';
 import { MobileBar } from './components/MobileBar';
 import { IndexOverlay } from './components/overlays/IndexOverlay';
@@ -577,8 +576,6 @@ export const App: React.FC = () => {
               onCopyLink={handleCopyLink}
               onSpeak={handleSpeak}
             />
-
-            <EdgeMarkers bookmarks={bookmarks} />
 
             <div className="depth-left"></div>
             <div className="depth-right"></div>
