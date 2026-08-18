@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { flushSync } from 'react-dom';
 import type { Term, ExplanationMode, OverlayType } from './types/almanac';
-import { terms, sortedTerms, termsByWord, timeline, specialModes } from './data/terms';
+import { terms, sortedTerms, termsByWord, timeline, specialModes, crossRefs } from './data/terms';
 import { Cover } from './components/Cover';
 import { Page } from './components/Page';
 import { Tabs } from './components/Tabs';
@@ -20,6 +20,13 @@ import {
   playStampSound
 } from './utils/sound';
 import { getPronunciation } from './utils/pronunciation';
+
+const modeNames: Record<ExplanationMode, string> = {
+  dictionary: 'Standard Dictionary',
+  plain: 'Explain like I’m a founder',
+  technical: 'Vibe coder spec',
+  quote: 'In the wild'
+};
 
 function loadStorage<T>(key: string, fallback: T): T {
   try {
@@ -63,9 +70,12 @@ function createDestinationSnapshot(
   sampleInner: HTMLElement,
   termIndex: number,
   totalTerms: number,
-  isBookmarked: boolean = false
+  isBookmarked: boolean = false,
+  nextTrail: string[] = []
 ): HTMLElement {
   const clone = cleanClone(sampleInner);
+
+  // 1. Headword line
   const wordEl = clone.querySelector('.word');
   if (wordEl) {
     wordEl.textContent = term.word;
@@ -74,31 +84,102 @@ function createDestinationSnapshot(
   if (partEl) {
     partEl.textContent = term.part;
   }
+
+  // 2. Pronunciation
   const pronEl = clone.querySelector('.pronounce-text');
   if (pronEl) {
     pronEl.textContent = getPronunciation(term.word, term.pron);
+  }
+
+  // 3. Definition mode & text
+  const defModeEl = clone.querySelector('.definition-mode');
+  if (defModeEl) {
+    defModeEl.textContent = modeNames[mode] || 'Standard Dictionary';
   }
   const defEl = clone.querySelector('.definition');
   if (defEl) {
     defEl.textContent = getExplanationForTerm(term, mode);
   }
-  const exEl = clone.querySelector('.example');
+
+  // 4. Example
+  const exEl = clone.querySelector('.example') as HTMLElement | null;
   if (exEl) {
-    exEl.textContent = term.example || '';
+    if (term.example) {
+      exEl.textContent = term.example;
+      exEl.style.display = 'block';
+    } else {
+      exEl.style.display = 'none';
+    }
   }
+
+  // 5. Lower grid (Origin & In Practice)
   const lowerGridPs = clone.querySelectorAll('.lower-grid p');
   if (lowerGridPs.length >= 2) {
     lowerGridPs[0].textContent = term.origin || 'A standard term in modern AI practice.';
     lowerGridPs[1].textContent = term.note || 'Use the term precisely in context.';
   }
-  const noteP = clone.querySelector('.margin-note p');
-  if (noteP) {
-    noteP.textContent = term.note || '';
+
+  // 6. Thread & Trail
+  const trailEl = clone.querySelector('.trail');
+  if (trailEl && nextTrail && nextTrail.length > 0) {
+    trailEl.innerHTML = nextTrail
+      .map((w) => `<button type="button" tabindex="-1" aria-hidden="true">${w}</button>`)
+      .join('');
   }
-  const filedUnder = clone.querySelector('.margin-section:nth-last-of-type(1) p');
-  if (filedUnder) {
-    filedUnder.textContent = term.category || 'AI Concepts';
+
+  // 7. Margin sections: See also, Compare, Often confused with, Filed under, Marginalia
+  const marginEl = clone.querySelector('.margin');
+  if (marginEl) {
+    const x = crossRefs[term.word] || { compare: [], confused: [] };
+    const seeRefs = term.related || [];
+    const compareRefs = x.compare && x.compare.length > 0 ? x.compare : seeRefs.slice(0, 2);
+    const confusedRefs = x.confused || [];
+
+    let marginHtml = '';
+    if (seeRefs.length > 0) {
+      marginHtml += `
+        <section class="margin-section">
+          <h3>See also</h3>
+          <div class="xref">
+            ${seeRefs.map((r) => `<button type="button" tabindex="-1" aria-hidden="true">${r}</button>`).join('')}
+          </div>
+        </section>
+      `;
+    }
+    if (compareRefs.length > 0) {
+      marginHtml += `
+        <section class="margin-section">
+          <h3>Compare</h3>
+          <div class="xref">
+            ${compareRefs.map((r) => `<button type="button" tabindex="-1" aria-hidden="true">${r}</button>`).join('')}
+          </div>
+        </section>
+      `;
+    }
+    if (confusedRefs.length > 0) {
+      marginHtml += `
+        <section class="margin-section">
+          <h3>Often confused with</h3>
+          <div class="xref">
+            ${confusedRefs.map((r) => `<button type="button" tabindex="-1" aria-hidden="true">${r}</button>`).join('')}
+          </div>
+        </section>
+      `;
+    }
+    marginHtml += `
+      <section class="margin-section">
+        <h3>Filed under</h3>
+        <p>${term.category || 'AI Concepts'}</p>
+      </section>
+      <aside class="margin-note">
+        <strong>Marginalia</strong>
+        <p>${term.note || ''}</p>
+      </aside>
+    `;
+    marginEl.innerHTML = marginHtml;
   }
+
+  // 8. Folio top, Page number, Depth label
   const pageNumEl = clone.querySelector('#pageNumber');
   if (pageNumEl) {
     pageNumEl.textContent = String(101 + termIndex * 7);
@@ -112,21 +193,15 @@ function createDestinationSnapshot(
     const pct = totalTerms <= 1 ? 50 : Math.round((termIndex / (totalTerms - 1)) * 100);
     depthLabelEl.textContent = `Index position ${pct}%`;
   }
-  const xref = clone.querySelector('.xref');
-  if (xref && term.related) {
-    xref.innerHTML = term.related
-      .map(
-        (r) =>
-          `<button type="button" tabindex="-1" aria-hidden="true"><span>${r}</span></button>`
-      )
-      .join('');
-  }
+
+  // 9. Bookmark button
   const bookmarkBtn = clone.querySelector('.bookmark-btn');
   if (bookmarkBtn) {
     bookmarkBtn.classList.toggle('saved', isBookmarked);
     const star = bookmarkBtn.querySelector('.bookmark-star');
     if (star) star.textContent = isBookmarked ? '★' : '☆';
   }
+
   return clone;
 }
 
@@ -262,7 +337,7 @@ export const App: React.FC = () => {
   const animatePageTurn = useCallback(
     async (
       nextTerm: Term,
-      _direction: 'forward' | 'backward' = 'forward',
+      direction: 'forward' | 'backward' = 'forward',
       onComplete?: () => void
     ) => {
       if (isTurningRef.current) {
@@ -301,11 +376,17 @@ export const App: React.FC = () => {
         return;
       }
 
-      paperBlock.classList.add('turning-book');
-      turnFx.classList.add('active');
+      const paperBlockEl: HTMLElement = paperBlock;
+      const turnFxEl: HTMLElement = turnFx;
+      const turnFrontEl: HTMLElement = turnFront;
+      const turnBottomEl: HTMLElement = turnBottom;
+      const turnShadeEl: HTMLElement = turnShade;
 
-      const w = Math.max(1, turnFx.getBoundingClientRect().width);
-      const h = Math.max(1, turnFx.getBoundingClientRect().height);
+      paperBlockEl.classList.add('turning-book');
+      turnFxEl.classList.add('active');
+
+      const w = Math.max(1, turnFxEl.getBoundingClientRect().width);
+      const h = Math.max(1, turnFxEl.getBoundingClientRect().height);
 
       const nextIndex = sortedTerms.findIndex((t) => t.word.toLowerCase() === nextTerm.word.toLowerCase());
       const safeNextIndex = nextIndex >= 0 ? nextIndex : 0;
@@ -313,23 +394,48 @@ export const App: React.FC = () => {
 
       const pageInner = pageEl.querySelector('.page-inner');
       if (pageInner) {
-        turnFront.innerHTML = '';
-        turnFront.appendChild(cleanClone(pageInner as HTMLElement));
-        turnFront.style.display = 'block';
+        if (direction === 'forward') {
+          // Forward turn:
+          // turnFront = current page (peels away to the left)
+          // turnBottom = destination page (revealed underneath from right to left)
+          turnFrontEl.innerHTML = '';
+          turnFrontEl.appendChild(cleanClone(pageInner as HTMLElement));
+          turnFrontEl.style.display = 'block';
 
-        turnBottom.innerHTML = '';
-        const destSnap = createDestinationSnapshot(
-          nextTerm,
-          explanationMode,
-          pageInner as HTMLElement,
-          safeNextIndex,
-          sortedTerms.length,
-          isSaved
-        );
-        turnBottom.appendChild(destSnap);
-        // Start completely unrevealed (zero area) so destination word never flashes beforehand
-        turnBottom.style.clipPath = 'polygon(0 0, 0 0, 0 0)';
-        turnBottom.style.display = 'block';
+          turnBottomEl.innerHTML = '';
+          const destSnap = createDestinationSnapshot(
+            nextTerm,
+            explanationMode,
+            pageInner as HTMLElement,
+            safeNextIndex,
+            sortedTerms.length,
+            isSaved
+          );
+          turnBottomEl.appendChild(destSnap);
+          turnBottomEl.style.clipPath = 'polygon(0 0, 0 0, 0 0)';
+          turnBottomEl.style.display = 'block';
+        } else {
+          // Backward turn:
+          // turnBottom = current page (stays fixed underneath)
+          // turnFront = destination page (curls in from left spine over onto right page)
+          turnBottomEl.innerHTML = '';
+          turnBottomEl.appendChild(cleanClone(pageInner as HTMLElement));
+          turnBottomEl.style.clipPath = 'none';
+          turnBottomEl.style.display = 'block';
+
+          turnFrontEl.innerHTML = '';
+          const destSnap = createDestinationSnapshot(
+            nextTerm,
+            explanationMode,
+            pageInner as HTMLElement,
+            safeNextIndex,
+            sortedTerms.length,
+            isSaved
+          );
+          turnFrontEl.appendChild(destSnap);
+          turnFrontEl.style.clipPath = 'polygon(0 0, 0 0, 0 0)';
+          turnFrontEl.style.display = 'block';
+        }
       }
 
       const dist = (a: { x: number; y: number } | null, b: { x: number; y: number } | null) =>
@@ -448,19 +554,23 @@ export const App: React.FC = () => {
             return `${q.x.toFixed(2)}px ${q.y.toFixed(2)}px`;
           })
           .join(',');
-        turnFront.style.clipPath = `polygon(${flipPoly})`;
-        turnFront.style.transform = `translate3d(${active.x}px,${active.y}px,0) rotate(${drawAngle}rad)`;
+        turnFrontEl.style.clipPath = `polygon(${flipPoly})`;
+        turnFrontEl.style.transform = `translate3d(${active.x}px,${active.y}px,0) rotate(${drawAngle}rad)`;
 
-        let under: ({ x: number; y: number } | null)[] = [c.topI];
-        if (c.topI) under.push({ x: w, y: 0 });
-        under.push({ x: w, y: h });
-        if (c.sideI && dist(c.sideI, c.topI) >= 10) under.push(c.sideI);
-        under.push(c.bottomI, c.topI);
-        const validUnder = under.filter(Boolean) as { x: number; y: number }[];
-        if (validUnder.length >= 3) {
-          turnBottom.style.clipPath = `polygon(${validUnder.map((pt) => `${pt.x.toFixed(2)}px ${pt.y.toFixed(2)}px`).join(',')})`;
+        if (direction === 'forward') {
+          let under: ({ x: number; y: number } | null)[] = [c.topI];
+          if (c.topI) under.push({ x: w, y: 0 });
+          under.push({ x: w, y: h });
+          if (c.sideI && dist(c.sideI, c.topI) >= 10) under.push(c.sideI);
+          under.push(c.bottomI, c.topI);
+          const validUnder = under.filter(Boolean) as { x: number; y: number }[];
+          if (validUnder.length >= 3) {
+            turnBottomEl.style.clipPath = `polygon(${validUnder.map((pt) => `${pt.x.toFixed(2)}px ${pt.y.toFixed(2)}px`).join(',')})`;
+          } else {
+            turnBottomEl.style.clipPath = 'polygon(0 0, 0 0, 0 0)';
+          }
         } else {
-          turnBottom.style.clipPath = 'polygon(0 0, 0 0, 0 0)';
+          turnBottomEl.style.clipPath = 'none';
         }
 
         const progress = Math.max(0, Math.min(100, Math.abs(((c.pos.x - w) / (2 * w)) * 100)));
@@ -471,13 +581,13 @@ export const App: React.FC = () => {
           const width = Math.max(8, ((3 * w) / 4) * (progress / 100));
           const opacity = Math.max(0, (100 - progress) * 0.004);
           const r = shadowAngle + (3 * Math.PI) / 2;
-          turnShade.style.display = 'block';
-          turnShade.style.width = `${width}px`;
-          turnShade.style.height = `${2 * h}px`;
-          turnShade.style.opacity = String(opacity);
-          turnShade.style.transform = `translate3d(${shadowPos.x}px,${shadowPos.y - 100}px,0) rotate(${r}rad)`;
+          turnShadeEl.style.display = 'block';
+          turnShadeEl.style.width = `${width}px`;
+          turnShadeEl.style.height = `${2 * h}px`;
+          turnShadeEl.style.opacity = String(opacity);
+          turnShadeEl.style.transform = `translate3d(${shadowPos.x}px,${shadowPos.y - 100}px,0) rotate(${r}rad)`;
         }
-        turnFront.style.filter = `drop-shadow(2px 2px ${4 + progress * 0.04}px rgba(43,29,16,${0.09 + progress * 0.0022}))`;
+        turnFrontEl.style.filter = `drop-shadow(2px 2px ${4 + progress * 0.04}px rgba(43,29,16,${0.09 + progress * 0.0022}))`;
         return true;
       }
 
@@ -492,7 +602,10 @@ export const App: React.FC = () => {
         function frame(now: number) {
           const raw = Math.min(1, (now - start) / duration);
           const p = raw < 0.5 ? 2 * raw * raw : 1 - Math.pow(-2 * raw + 2, 2) / 2;
-          const pos = { x: a.x + (b.x - a.x) * p, y: a.y + (b.y - a.y) * p };
+          const pos =
+            direction === 'forward'
+              ? { x: a.x + (b.x - a.x) * p, y: a.y + (b.y - a.y) * p }
+              : { x: b.x + (a.x - b.x) * p, y: b.y + (a.y - b.y) * p };
           const c = calculate(pos);
           if (c && renderFold(c)) last = c;
           else if (last) renderFold(last);
@@ -507,12 +620,12 @@ export const App: React.FC = () => {
       });
       isProgrammaticHashRef.current = true;
       window.location.hash = `#term=${encodeURIComponent(nextTerm.word)}`;
-      turnFx.classList.remove('active');
-      paperBlock.classList.remove('turning-book');
-      turnFront.style.cssText = '';
-      turnShade.style.cssText = '';
-      turnBottom.style.cssText = '';
-      turnBottom.innerHTML = '';
+      turnFxEl.classList.remove('active');
+      paperBlockEl.classList.remove('turning-book');
+      turnFrontEl.style.cssText = '';
+      turnShadeEl.style.cssText = '';
+      turnBottomEl.style.cssText = '';
+      turnBottomEl.innerHTML = '';
       isTurningRef.current = false;
       onComplete?.();
     },
@@ -521,7 +634,10 @@ export const App: React.FC = () => {
 
   // Select a term (via search, related link, index, etc.)
   const handleSelectTerm = useCallback(
-    (termToSelect: Term, options?: { fromSearch?: boolean; addTrail?: boolean }) => {
+    (
+      termToSelect: Term,
+      options?: { fromSearch?: boolean; addTrail?: boolean; direction?: 'forward' | 'backward' }
+    ) => {
       if (isTurningRef.current) return;
 
       // Resolve term object if incomplete
@@ -543,6 +659,11 @@ export const App: React.FC = () => {
         return;
       }
 
+      const currentIndex = sortedTerms.findIndex((t) => t.word.toLowerCase() === currentTerm.word.toLowerCase());
+      const targetIndex = sortedTerms.findIndex((t) => t.word.toLowerCase() === resolved.word.toLowerCase());
+      const direction: 'forward' | 'backward' =
+        options?.direction ?? (targetIndex !== -1 && currentIndex !== -1 && targetIndex < currentIndex ? 'backward' : 'forward');
+
       if (addTrail) {
         setTrail((prev) => {
           if (prev[prev.length - 1]?.toLowerCase() === resolved.word.toLowerCase()) return prev;
@@ -556,7 +677,7 @@ export const App: React.FC = () => {
         setSearchQuery('');
       }
 
-      animatePageTurn(resolved, 'forward', () => {
+      animatePageTurn(resolved, direction, () => {
         if (fromSearch) {
           setFromSearchQuestion(searchQ);
         } else {
@@ -569,11 +690,24 @@ export const App: React.FC = () => {
 
   // Single page flip navigation directly to target term
   const riffleToTerm = useCallback(
-    (targetTerm: Term) => {
-      handleSelectTerm(targetTerm, { addTrail: true });
+    (targetTerm: Term, options?: { direction?: 'forward' | 'backward' }) => {
+      handleSelectTerm(targetTerm, { addTrail: true, direction: options?.direction });
     },
     [handleSelectTerm]
   );
+
+  // Previous and Next term step helpers
+  const handlePrevTerm = useCallback(() => {
+    const currentIndex = sortedTerms.findIndex((t) => t.word.toLowerCase() === currentTerm.word.toLowerCase());
+    const prevIndex = currentIndex > 0 ? currentIndex - 1 : sortedTerms.length - 1;
+    handleSelectTerm(sortedTerms[prevIndex], { addTrail: true, direction: 'backward' });
+  }, [currentTerm, handleSelectTerm]);
+
+  const handleNextTerm = useCallback(() => {
+    const currentIndex = sortedTerms.findIndex((t) => t.word.toLowerCase() === currentTerm.word.toLowerCase());
+    const nextIndex = currentIndex < sortedTerms.length - 1 ? currentIndex + 1 : 0;
+    handleSelectTerm(sortedTerms[nextIndex], { addTrail: true, direction: 'forward' });
+  }, [currentTerm, handleSelectTerm]);
 
   // Listen to hash changes (browser back/forward)
   useEffect(() => {
@@ -591,20 +725,33 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [currentTerm, getHashTerm, handleSelectTerm]);
 
-  // Global keyboard shortcuts (⌘K, Ctrl+K, Escape)
+  // Global keyboard shortcuts (⌘K, Ctrl+K, Escape, ArrowLeft/P, ArrowRight/N)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const isInputActive =
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        (document.activeElement as HTMLElement)?.isContentEditable;
+
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         searchInputRef.current?.focus();
         searchInputRef.current?.select();
       } else if (e.key === 'Escape') {
         setActiveOverlay(null);
+      } else if (!isInputActive && !activeOverlay) {
+        if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'p') {
+          e.preventDefault();
+          handlePrevTerm();
+        } else if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'n') {
+          e.preventDefault();
+          handleNextTerm();
+        }
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [activeOverlay, handlePrevTerm, handleNextTerm]);
 
   // Bookmarks Toggle
   const handleToggleBookmark = useCallback(() => {
@@ -664,14 +811,16 @@ export const App: React.FC = () => {
   // Tab jump by letter
   const handleSelectLetter = useCallback(
     (letter: string) => {
+      const currentLetter = currentTerm.word[0].toUpperCase();
+      const direction: 'forward' | 'backward' = letter < currentLetter ? 'backward' : 'forward';
       const found = sortedTerms.find((t) => t.word[0].toUpperCase() === letter);
       if (found) {
-        riffleToTerm(found);
+        handleSelectTerm(found, { addTrail: true, direction });
       } else {
         triggerStamp(`NO ${letter} ENTRIES YET`);
       }
     },
-    [riffleToTerm, triggerStamp]
+    [currentTerm, handleSelectTerm, triggerStamp]
   );
 
   // Surprise random jump
