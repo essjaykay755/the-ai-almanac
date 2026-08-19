@@ -3,6 +3,50 @@ import type { Term, ClipStyle } from '../../types/almanac';
 import { drawClipToCanvas, downloadCanvasAsPng } from '../../utils/canvasExport';
 import { playPaperTearSound } from '../../utils/sound';
 
+const clipStyleOptions: Array<{
+  id: ClipStyle;
+  name: string;
+  personality: string;
+  mark: string;
+}> = [
+  {
+    id: 'clipping',
+    name: 'Dictionary sheet',
+    personality: 'precise · quiet · archival',
+    mark: 'ARCHIVE / A'
+  },
+  {
+    id: 'library',
+    name: 'Library card',
+    personality: 'ordered · catalogued · useful',
+    mark: 'CATALOG / 01'
+  },
+  {
+    id: 'newspaper',
+    name: 'News desk',
+    personality: 'bold · current · editorial',
+    mark: 'EXTRA / FILED'
+  },
+  {
+    id: 'margin-card',
+    name: 'Margin note',
+    personality: 'warm · curious · personal',
+    mark: 'KEEP / CLOSE'
+  },
+  {
+    id: 'terminal',
+    name: 'Terminal memo',
+    personality: 'technical · direct · builder-minded',
+    mark: 'SHELL / 0x01'
+  },
+  {
+    id: 'field-guide',
+    name: 'Field guide',
+    personality: 'observant · practical · exploratory',
+    mark: 'FIELD / OBSERVE'
+  }
+];
+
 interface ClipOverlayProps {
   isOpen: boolean;
   term: Term;
@@ -24,6 +68,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
 }) => {
   const [clipStyle, setClipStyle] = useState<ClipStyle>('clipping');
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const activeStyle = clipStyleOptions.find((style) => style.id === clipStyle) || clipStyleOptions[0];
 
   if (!isOpen) return null;
 
@@ -88,6 +133,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
           <div>
             <small>The AI Almanac · save or share</small>
             <h2>Save this entry</h2>
+            <p className="clip-intro">Choose a visual voice for the entry. The words stay the same; the treatment changes.</p>
           </div>
           <button className="close" onClick={onClose} aria-label="Close">
             ×
@@ -95,17 +141,28 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
         </div>
 
         <div className="clip-layout">
-          <article className={`clipping ${clipStyle !== 'clipping' ? clipStyle : ''}`} id="clippingPreview">
-            <div className="clip-mast">THE AI ALMANAC · SAVED ENTRY</div>
+          <article className={`clipping clip-style-${clipStyle}`} id="clippingPreview">
+            <div className="clip-topline">
+              <div className="clip-mast">THE AI ALMANAC · SAVED ENTRY</div>
+              <div className="clip-mark" aria-hidden="true">{activeStyle.mark}</div>
+            </div>
             <div className="clip-word" id="clipWord">
               {term.word}
             </div>
             <div className="clip-pron" id="clipPron">
               {term.pron ? `${term.pron} · ${term.part}` : term.part}
             </div>
+            <div className="clip-category">{term.category}</div>
+            <div className="clip-def-label">definition</div>
             <div className="clip-def" id="clipDefinition">
               {term.definition}
             </div>
+            {term.example && (
+              <div className="clip-example" id="clipExample">
+                <span>in use</span>
+                {term.example}
+              </div>
+            )}
             <div className="clip-foot">
               <span id="clipPage">PAGE {pageNumber}</span>
               <span id="clipDate">{formattedDate}</span>
@@ -113,30 +170,23 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
           </article>
 
           <aside className="clip-controls">
-            <button
-              className={`clip-style ${clipStyle === 'clipping' ? 'active' : ''}`}
-              onClick={() => setClipStyle('clipping')}
-            >
-              Dictionary style
-            </button>
-            <button
-              className={`clip-style ${clipStyle === 'library' ? 'active' : ''}`}
-              onClick={() => setClipStyle('library')}
-            >
-              Library card
-            </button>
-            <button
-              className={`clip-style ${clipStyle === 'newspaper' ? 'active' : ''}`}
-              onClick={() => setClipStyle('newspaper')}
-            >
-              Newspaper style
-            </button>
-            <button
-              className={`clip-style ${clipStyle === 'margin-card' ? 'active' : ''}`}
-              onClick={() => setClipStyle('margin-card')}
-            >
-              Note card
-            </button>
+            <div className="clip-controls-label">Pick a personality</div>
+            {clipStyleOptions.map((style, index) => (
+              <button
+                key={style.id}
+                type="button"
+                className={`clip-style clip-style-option-${style.id} ${clipStyle === style.id ? 'active' : ''}`}
+                onClick={() => setClipStyle(style.id)}
+                aria-pressed={clipStyle === style.id}
+              >
+                <span className="clip-style-swatch" aria-hidden="true" />
+                <span className="clip-style-copy">
+                  <span className="clip-style-name">{style.name}</span>
+                  <span className="clip-style-personality">{style.personality}</span>
+                </span>
+                <span className="clip-style-index">{String(index + 1).padStart(2, '0')}</span>
+              </button>
+            ))}
 
             <hr />
 

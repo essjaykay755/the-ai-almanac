@@ -35,6 +35,12 @@ export interface TimelineItem {
   term: string;
 }
 
-export type ClipStyle = 'clipping' | 'library' | 'newspaper' | 'margin-card';
+export type ClipStyle =
+  | 'clipping'
+  | 'library'
+  | 'newspaper'
+  | 'margin-card'
+  | 'terminal'
+  | 'field-guide';
 
 export type OverlayType = 'index' | 'bookmarks' | 'history' | 'timeline' | 'collections' | 'picker' | 'clip' | null;
