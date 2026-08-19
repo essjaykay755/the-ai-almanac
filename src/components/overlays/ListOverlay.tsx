@@ -1,19 +1,20 @@
 import React from 'react';
-import type { Term } from '../../types/almanac';
-import { termsByWord } from '../../data/terms';
+import type { Term, TermSelectionTarget } from '../../types/almanac';
 
 interface ListOverlayProps {
   isOpen: boolean;
   kind: 'bookmarks' | 'history';
   words: string[];
+  termsByWord: Record<string, Term>;
   onClose: () => void;
-  onSelectTerm: (term: Term) => void;
+  onSelectTerm: (term: TermSelectionTarget) => void;
 }
 
 export const ListOverlay: React.FC<ListOverlayProps> = ({
   isOpen,
   kind,
   words,
+  termsByWord,
   onClose,
   onSelectTerm
 }) => {

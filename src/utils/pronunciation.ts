@@ -58,7 +58,7 @@ const KNOWN_PRONUNCIATIONS: Record<string, string> = {
   'guardrail': '/ˈɡɑːrd.reɪl/',
   'guardrails': '/ˈɡɑːrd.reɪlz/',
   'inference': '/ˈɪn.fər.əns/',
-  'loss function': '/lɔːs ˈfʌŋk.ʃən/ ',
+  'loss function': '/lɔːs ˈfʌŋk.ʃən/',
   'neural network': '/ˈnjʊə.rəl ˈnɛt.wɜːrk/',
   'parameter': '/pəˈræm.ɪ.tər/',
   'parameters': '/pəˈræm.ɪ.tərz/',
@@ -448,7 +448,8 @@ export function getPronunciation(word: string, explicitPron?: string): string {
     return explicitPron.startsWith('/') ? explicitPron : `/${explicitPron}/`;
   }
 
-  const clean = word.trim().toLowerCase();
+  const original = word.trim();
+  const clean = original.toLowerCase();
   
   // 1. Direct exact lookup
   if (KNOWN_PRONUNCIATIONS[clean]) {
@@ -456,11 +457,12 @@ export function getPronunciation(word: string, explicitPron?: string): string {
   }
 
   // 2. Multi-word phrase decomposition
-  const words = clean.split(/[\s_-]+/);
+  const words = original.split(/[\s_-]+/);
   if (words.length > 1) {
     const parts = words.map(w => {
-      if (KNOWN_PRONUNCIATIONS[w]) return KNOWN_PRONUNCIATIONS[w].replace(/\//g, '');
-      if (WORD_MAP[w]) return WORD_MAP[w];
+      const token = w.toLowerCase();
+      if (KNOWN_PRONUNCIATIONS[token]) return KNOWN_PRONUNCIATIONS[token].replace(/\//g, '');
+      if (WORD_MAP[token]) return WORD_MAP[token];
       return phoneticallyEstimateWord(w);
     });
     return `/${parts.join(' ')}/`;
@@ -472,7 +474,7 @@ export function getPronunciation(word: string, explicitPron?: string): string {
   }
 
   // 4. Algorithmic fallback
-  return `/${phoneticallyEstimateWord(clean)}/`;
+  return `/${phoneticallyEstimateWord(original)}/`;
 }
 
 /**

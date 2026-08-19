@@ -8150,7 +8150,8 @@ export const terms: Term[] = [
       "object detection"
     ],
     "aliases": [
-      "cv"
+      "cv",
+      "vision"
     ],
     "category": "Vision, Image & Video"
   },
@@ -13845,3 +13846,26 @@ export const sortedTerms: Term[] = [...terms].sort((a, b) => a.word.localeCompar
 export const termsByWord: Record<string, Term> = Object.fromEntries(
   sortedTerms.map((t) => [t.word.toLowerCase(), t])
 );
+
+const aliasTargets = new Map<string, Term | null>();
+for (const term of sortedTerms) {
+  for (const alias of term.aliases) {
+    const key = alias.trim().toLowerCase();
+    if (!key) continue;
+    const existing = aliasTargets.get(key);
+    if (existing && existing !== term) {
+      aliasTargets.set(key, null);
+    } else if (!aliasTargets.has(key)) {
+      aliasTargets.set(key, term);
+    }
+  }
+}
+
+export const termsByAlias: Record<string, Term> = Object.fromEntries(
+  [...aliasTargets.entries()].filter((entry): entry is [string, Term] => Boolean(entry[1]))
+);
+
+export function resolveTerm(word: string): Term | null {
+  const key = word.trim().toLowerCase();
+  return termsByWord[key] || termsByAlias[key] || null;
+}

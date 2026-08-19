@@ -1,17 +1,18 @@
 import React from 'react';
-import type { TimelineItem, Term } from '../../types/almanac';
-import { termsByWord } from '../../data/terms';
+import type { TimelineItem, Term, TermSelectionTarget } from '../../types/almanac';
 
 interface TimelineOverlayProps {
   isOpen: boolean;
   timeline: TimelineItem[];
+  termsByWord: Record<string, Term>;
   onClose: () => void;
-  onSelectTerm: (term: Term) => void;
+  onSelectTerm: (term: TermSelectionTarget) => void;
 }
 
 export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
   isOpen,
   timeline,
+  termsByWord,
   onClose,
   onSelectTerm
 }) => {

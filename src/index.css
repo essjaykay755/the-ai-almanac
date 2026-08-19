@@ -1821,7 +1821,7 @@ button {
   z-index: 8;
   display: none;
   transform-origin: 0 0;
-  will-change: transform, clip-path, filter;
+  will-change: transform, clip-path;
   box-shadow: inset 17px 0 28px rgba(79, 55, 27, 0.1);
 }
 

@@ -1,11 +1,13 @@
 import React from 'react';
-import { termsByWord, sortedTerms } from '../data/terms';
+import type { Term } from '../types/almanac';
 
 interface EdgeMarkersProps {
   bookmarks: string[];
+  termsByWord: Record<string, Term>;
+  sortedTerms: readonly Term[];
 }
 
-export const EdgeMarkers: React.FC<EdgeMarkersProps> = ({ bookmarks }) => {
+export const EdgeMarkers: React.FC<EdgeMarkersProps> = ({ bookmarks, termsByWord, sortedTerms }) => {
   return (
     <div className="markers" id="markers">
       {bookmarks.slice(0, 12).map((word, i) => {

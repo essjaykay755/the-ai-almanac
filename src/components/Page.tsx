@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import type { Term, ExplanationMode, CrossRefInfo } from '../types/almanac';
-import { searchTerms, type SearchMatch } from '../utils/search';
-import { specialModes, crossRefs } from '../data/terms';
+import React, { useDeferredValue, useMemo, useState, useEffect, useRef } from 'react';
+import type { Term, ExplanationMode, CrossRefInfo, SpecialModes, TermSelectionTarget } from '../types/almanac';
+import { searchTerms, type SearchIndex } from '../utils/search';
 import { getPronunciation } from '../utils/pronunciation';
 import { APP_VERSION } from '../version';
 
@@ -11,11 +10,14 @@ interface PageProps {
   totalTerms: number;
   isBookmarked: boolean;
   explanationMode: ExplanationMode;
+  specialModes: SpecialModes;
+  crossRefs: Record<string, CrossRefInfo>;
+  searchIndex: SearchIndex;
   searchQuery: string;
   fromSearchQuestion: string;
   trail: string[];
   searchRef: React.RefObject<HTMLInputElement | null>;
-  onSelectTerm: (term: Term, options?: { fromSearch?: boolean; addTrail?: boolean }) => void;
+  onSelectTerm: (term: TermSelectionTarget, options?: { fromSearch?: boolean; addTrail?: boolean }) => void;
   onPrevTerm?: () => void;
   onNextTerm?: () => void;
   onToggleBookmark: () => void;
@@ -43,6 +45,9 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
     totalTerms,
     isBookmarked,
     explanationMode,
+    specialModes,
+    crossRefs,
+    searchIndex,
     searchQuery,
     fromSearchQuestion,
     trail,
@@ -62,23 +67,15 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
   },
   ref
 ) {
-  const [suggestions, setSuggestions] = useState<SearchMatch[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState(0);
   const searchShellRef = useRef<HTMLDivElement>(null);
 
-  // Update suggestions on search query change
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-    const matches = searchTerms(searchQuery, 7);
-    setSuggestions(matches);
-    setSelectedSuggestion(0);
-    setShowSuggestions(true);
-  }, [searchQuery]);
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+  const suggestions = useMemo(
+    () => searchTerms(deferredSearchQuery, searchIndex, 7),
+    [deferredSearchQuery, searchIndex]
+  );
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -159,7 +156,12 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                 placeholder="Ask AI Almanac or search a term…"
                 aria-label="Search AI Almanac"
                 value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSelectedSuggestion(0);
+                  setShowSuggestions(Boolean(value.trim()));
+                  onSearchChange(value);
+                }}
                 onFocus={() => {
                   if (searchQuery.trim()) setShowSuggestions(true);
                 }}
@@ -168,7 +170,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
               <span className="shortcut">⌘ K</span>
             </label>
 
-            {showSuggestions && (
+            {showSuggestions && searchQuery.trim() && (
               <div className="suggestions" id="suggestions">
                 {suggestions.length === 0 ? (
                   <button className="suggestion" type="button">
@@ -299,7 +301,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                   <button
                     key={`${word}-${idx}`}
                     onClick={() => {
-                      onSelectTerm({ word } as Term, { addTrail: false });
+                      onSelectTerm({ word }, { addTrail: false });
                     }}
                   >
                     {word}
@@ -315,7 +317,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                 <h3>See also</h3>
                 <div className="xref">
                   {refs.see.map((r) => (
-                    <button key={r} onClick={() => onSelectTerm({ word: r } as Term)}>
+                    <button key={r} onClick={() => onSelectTerm({ word: r })}>
                       {r}
                     </button>
                   ))}
@@ -328,7 +330,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                 <h3>Compare</h3>
                 <div className="xref">
                   {refs.compare.map((r) => (
-                    <button key={r} onClick={() => onSelectTerm({ word: r } as Term)}>
+                    <button key={r} onClick={() => onSelectTerm({ word: r })}>
                       {r}
                     </button>
                   ))}
@@ -341,7 +343,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                 <h3>Often confused with</h3>
                 <div className="xref">
                   {refs.confused.map((r) => (
-                    <button key={r} onClick={() => onSelectTerm({ word: r } as Term)}>
+                    <button key={r} onClick={() => onSelectTerm({ word: r })}>
                       {r}
                     </button>
                   ))}

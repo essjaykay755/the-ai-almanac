@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { use, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { flushSync } from 'react-dom';
-import { createRoot } from 'react-dom/client';
-import type { Term, ExplanationMode, OverlayType } from './types/almanac';
-import { sortedTerms, termsByWord, timeline, specialModes, crossRefs } from './data/terms';
+import type { Term, ExplanationMode, OverlayType, SpecialModes, TermSelectionTarget } from './types/almanac';
 import { Cover } from './components/Cover';
 import { AboutPage } from './components/AboutPage';
 import { Page } from './components/Page';
@@ -22,6 +20,10 @@ import {
   playStampSound
 } from './utils/sound';
 import { getPronunciation } from './utils/pronunciation';
+import { createSearchIndex } from './utils/search';
+
+type AlmanacData = typeof import('./data/terms');
+const almanacDataPromise: Promise<AlmanacData> = import('./data/terms');
 
 const modeNames: Record<ExplanationMode, string> = {
   dictionary: 'Dictionary',
@@ -42,14 +44,26 @@ function getBookViewFromHash(): BookView {
   return typeof window !== 'undefined' && window.location.hash === '#about' ? 'about' : 'term';
 }
 
-function loadStorage<T>(key: string, fallback: T): T {
+function loadStorage<T>(key: string, fallback: T, isValid: (value: unknown) => value is T): T {
   try {
     const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : fallback;
+    if (!item) return fallback;
+    const parsed: unknown = JSON.parse(item);
+    return isValid(parsed) ? parsed : fallback;
   } catch {
     return fallback;
   }
 }
+
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === 'string');
+
+const isCollections = (value: unknown): value is Record<string, string[]> =>
+  typeof value === 'object' &&
+  value !== null &&
+  Object.values(value).every((items) => isStringArray(items));
+
+const isBoolean = (value: unknown): value is boolean => typeof value === 'boolean';
 
 function saveStorage<T>(key: string, value: T): void {
   try {
@@ -81,7 +95,7 @@ function cloneWithScroll(node: HTMLElement, scrollTop: number, scrollLeft: numbe
   return clone;
 }
 
-function getExplanationForTerm(term: Term, mode: ExplanationMode): string {
+function getExplanationForTerm(term: Term, mode: ExplanationMode, specialModes: SpecialModes): string {
   const s = specialModes[term.word];
   if (mode === 'dictionary') return term.definition;
   if (s && s[mode]) return s[mode];
@@ -97,6 +111,7 @@ function createDestinationSnapshot(
   term: Term,
   mode: ExplanationMode,
   sampleInner: HTMLElement,
+  data: Pick<AlmanacData, 'specialModes' | 'crossRefs'>,
   termIndex: number,
   totalTerms: number,
   isBookmarked: boolean = false,
@@ -129,7 +144,7 @@ function createDestinationSnapshot(
   }
   const defEl = clone.querySelector('.definition');
   if (defEl) {
-    defEl.textContent = getExplanationForTerm(term, mode);
+    defEl.textContent = getExplanationForTerm(term, mode, data.specialModes);
     defEl.classList.toggle('search-hit', Boolean(fromSearchQuestion));
   }
 
@@ -141,7 +156,7 @@ function createDestinationSnapshot(
   }
 
   // Keep the controlled search input in sync with the target React render.
-  const searchInput = clone.querySelector('#search') as HTMLInputElement | null;
+  const searchInput = clone.querySelector('.search-box input') as HTMLInputElement | null;
   if (searchInput) {
     searchInput.value = searchQueryValue;
     searchInput.setAttribute('value', searchQueryValue);
@@ -166,7 +181,7 @@ function createDestinationSnapshot(
   // 7. Margin sections: See also, Compare, Often confused with, Filed under, Marginalia
   const marginEl = clone.querySelector('.margin');
   if (marginEl) {
-    const x = crossRefs[term.word] || { compare: [], confused: [] };
+    const x = data.crossRefs[term.word] || { compare: [], confused: [] };
     const seeRefs = term.related || [];
     const compareRefs = x.compare && x.compare.length > 0 ? x.compare : seeRefs.slice(0, 2);
     const confusedRefs = x.confused || [];
@@ -255,6 +270,8 @@ function createDestinationSnapshot(
 }
 
 export const App: React.FC = () => {
+  const { sortedTerms, termsByWord, timeline, specialModes, crossRefs, resolveTerm } = use(almanacDataPromise);
+
   // Date calculation
   const today = useMemo(() => new Date(), []);
   const formattedDate = useMemo(() => {
@@ -274,14 +291,14 @@ export const App: React.FC = () => {
     if (!match) return null;
     try {
       const decoded = decodeURIComponent(match[1].replace(/\+/g, ' '));
-      return termsByWord[decoded.toLowerCase()] || null;
+      return resolveTerm(decoded);
     } catch {
       return null;
     }
-  }, []);
+  }, [resolveTerm]);
 
   const [currentTerm, setCurrentTerm] = useState<Term>(() => {
-    return getHashTerm() || termsByWord['vibe coding'] || sortedTerms[0];
+    return getHashTerm() || resolveTerm('vibe coding') || sortedTerms[0];
   });
   const initialBookView = getBookViewFromHash();
   const [bookView, setBookView] = useState<BookView>(initialBookView);
@@ -293,19 +310,19 @@ export const App: React.FC = () => {
 
   // Persistent States
   const [bookmarks, setBookmarks] = useState<string[]>(() =>
-    loadStorage<string[]>('aiAlmanacBookmarks', [])
+    loadStorage<string[]>('aiAlmanacBookmarks', [], isStringArray)
   );
   const [historyTerms, setHistoryTerms] = useState<string[]>(() =>
-    loadStorage<string[]>('aiAlmanacHistory', [currentTerm.word])
+    loadStorage<string[]>('aiAlmanacHistory', [currentTerm.word], isStringArray)
   );
   const [collections, setCollections] = useState<Record<string, string[]>>(() =>
     loadStorage<Record<string, string[]>>('aiAlmanacCollections', {
       'Vibe coder essentials': ['vibe coding', 'diff', 'ship loop', 'taste', 'eval'],
       'Agent rabbit hole': ['agentic', 'tool calling', 'workflow', 'reasoning', 'grounding']
-    })
+    }, isCollections)
   );
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() =>
-    loadStorage<boolean>('aiAlmanacSound', false)
+    loadStorage<boolean>('aiAlmanacSound', false, isBoolean)
   );
 
   // Overlays & Stamp State
@@ -333,15 +350,20 @@ export const App: React.FC = () => {
   const pendingTermRef = useRef<{ term: Term; options?: TermSelectionOptions } | null>(null);
 
   // Compute depth and index
+  const termIndexByWord = useMemo(
+    () => new Map(sortedTerms.map((term, index) => [term.word.toLowerCase(), index])),
+    [sortedTerms]
+  );
   const termIndex = useMemo(() => {
-    const idx = sortedTerms.findIndex((t) => t.word === currentTerm.word);
+    const idx = termIndexByWord.get(currentTerm.word.toLowerCase()) ?? -1;
     return idx >= 0 ? idx : 0;
-  }, [currentTerm]);
+  }, [currentTerm.word, termIndexByWord]);
   const totalPages = sortedTerms.length;
+  const searchIndex = useMemo(() => createSearchIndex(sortedTerms), [sortedTerms]);
 
   const availableLetters = useMemo(() => {
     return new Set(sortedTerms.map((t) => t.word[0].toUpperCase()));
-  }, []);
+  }, [sortedTerms]);
 
   // Update root CSS variable for page-depth and stack heights
   useEffect(() => {
@@ -354,16 +376,18 @@ export const App: React.FC = () => {
     document.documentElement.style.setProperty('--page-depth', `${clamped}%`);
     document.documentElement.style.setProperty('--stack-turned', `${(4 + 7 * p).toFixed(1)}px`);
     document.documentElement.style.setProperty('--stack-remaining', `${(4 + 7 * (1 - p)).toFixed(1)}px`);
-  }, [termIndex]);
+  }, [termIndex, sortedTerms.length]);
 
   // Record history
   const recordHistory = useCallback((word: string) => {
     setHistoryTerms((prev) => {
-      const updated = [word, ...prev.filter((w) => w.toLowerCase() !== word.toLowerCase())].slice(0, 40);
-      saveStorage('aiAlmanacHistory', updated);
-      return updated;
+      return [word, ...prev.filter((w) => w.toLowerCase() !== word.toLowerCase())].slice(0, 40);
     });
   }, []);
+
+  useEffect(() => {
+    saveStorage('aiAlmanacHistory', historyTerms);
+  }, [historyTerms]);
 
   // Trigger stamp animation
   const triggerStamp = useCallback(
@@ -567,7 +591,7 @@ export const App: React.FC = () => {
       const w = Math.max(1, turnFxEl.getBoundingClientRect().width);
       const h = Math.max(1, turnFxEl.getBoundingClientRect().height);
 
-      const nextIndex = sortedTerms.findIndex((t) => t.word.toLowerCase() === nextTerm.word.toLowerCase());
+      const nextIndex = termIndexByWord.get(nextTerm.word.toLowerCase()) ?? -1;
       const safeNextIndex = nextIndex >= 0 ? nextIndex : 0;
       const isSaved = bookmarks.includes(nextTerm.word);
       const targetTrail = options?.nextTrail || trail;
@@ -575,66 +599,22 @@ export const App: React.FC = () => {
       const targetSearchQuery = options?.fromSearch ? '' : searchQuery;
 
       const pageInner = pageEl.querySelector('.page-inner');
-      let destinationRoot: {
-        render: (children: React.ReactNode) => void;
-        unmount: () => void;
-      } | null = null;
-      const unmountDestinationPage = () => {
-        const root = destinationRoot as { unmount: () => void } | null;
-        if (root) {
-          root.unmount();
-        }
-        destinationRoot = null;
-      };
-
       const mountDestinationPage = (container: HTMLElement, sampleInner: HTMLElement) => {
-        try {
-          destinationRoot = createRoot(container);
-          const destinationSearchRef = React.createRef<HTMLInputElement>();
-          flushSync(() => {
-            destinationRoot?.render(
-              <Page
-                currentTerm={nextTerm}
-                termIndex={safeNextIndex}
-                totalTerms={totalPages}
-                isBookmarked={isSaved}
-                explanationMode={explanationMode}
-                searchQuery={targetSearchQuery}
-                fromSearchQuestion={targetSearchQuestion}
-                trail={targetTrail}
-                searchRef={destinationSearchRef}
-                onSelectTerm={() => {}}
-                onPrevTerm={() => {}}
-                onNextTerm={() => {}}
-                onToggleBookmark={() => {}}
-                onChangeMode={() => {}}
-                onSearchChange={() => {}}
-                onClearTrail={() => {}}
-                onOpenPicker={() => {}}
-                onOpenClip={() => {}}
-                onOpenTimeline={() => {}}
-                onCopyLink={() => {}}
-                onSpeak={() => {}}
-              />
-            );
-          });
-        } catch {
-          unmountDestinationPage();
-          const fallback = createDestinationSnapshot(
-            nextTerm,
-            explanationMode,
-            sampleInner,
-            safeNextIndex,
-            totalPages,
-            isSaved,
-            targetTrail,
-            targetSearchQuestion,
-            targetSearchQuery
-          );
-          fallback.scrollTop = 0;
-          fallback.scrollLeft = 0;
-          container.appendChild(fallback);
-        }
+        const destination = createDestinationSnapshot(
+          nextTerm,
+          explanationMode,
+          sampleInner,
+          { specialModes, crossRefs },
+          safeNextIndex,
+          totalPages,
+          isSaved,
+          targetTrail,
+          targetSearchQuestion,
+          targetSearchQuery
+        );
+        destination.scrollTop = 0;
+        destination.scrollLeft = 0;
+        container.appendChild(destination);
       };
 
       if (pageInner) {
@@ -828,7 +808,6 @@ export const App: React.FC = () => {
           turnShadeEl.style.opacity = String(opacity);
           turnShadeEl.style.transform = `translate3d(${shadowPos.x}px,${shadowPos.y - 100}px,0) rotate(${r}rad)`;
         }
-        turnFrontEl.style.filter = `drop-shadow(2px 2px ${4 + progress * 0.04}px rgba(43,29,16,${0.09 + progress * 0.0022}))`;
         return true;
       }
 
@@ -884,7 +863,6 @@ export const App: React.FC = () => {
 
       turnFxEl.classList.remove('active');
       paperBlockEl.classList.remove('turning-book');
-      unmountDestinationPage();
       if (turnBackEl) {
         turnBackEl.style.cssText = '';
         turnBackEl.innerHTML = '';
@@ -897,19 +875,31 @@ export const App: React.FC = () => {
       isTurningRef.current = false;
       onComplete?.();
     },
-    [explanationMode, soundEnabled, bookmarks, trail, searchQuery, recordHistory, setLocationHash, totalPages]
+    [
+      explanationMode,
+      specialModes,
+      crossRefs,
+      soundEnabled,
+      bookmarks,
+      trail,
+      searchQuery,
+      recordHistory,
+      setLocationHash,
+      termIndexByWord,
+      totalPages
+    ]
   );
 
   // Select a term (via search, related link, index, etc.)
   const handleSelectTerm = useCallback(
-    (termToSelect: Term, options?: TermSelectionOptions) => {
+    (termToSelect: TermSelectionTarget, options?: TermSelectionOptions) => {
       if (isTurningRef.current) return;
 
-      // Resolve term object if incomplete
-      const resolved =
-        termsByWord[termToSelect.word.toLowerCase()] ||
-        sortedTerms.find((t) => t.word.toLowerCase() === termToSelect.word.toLowerCase()) ||
-        termToSelect;
+      const resolved = resolveTerm(termToSelect.word);
+      if (!resolved) {
+        triggerStamp('ENTRY NOT FOUND');
+        return;
+      }
 
       const fromSearch = options?.fromSearch ?? false;
       const addTrail = options?.addTrail ?? true;
@@ -935,8 +925,8 @@ export const App: React.FC = () => {
         return;
       }
 
-      const currentIndex = sortedTerms.findIndex((t) => t.word.toLowerCase() === currentTerm.word.toLowerCase());
-      const targetIndex = sortedTerms.findIndex((t) => t.word.toLowerCase() === resolved.word.toLowerCase());
+      const currentIndex = termIndexByWord.get(currentTerm.word.toLowerCase()) ?? -1;
+      const targetIndex = termIndexByWord.get(resolved.word.toLowerCase()) ?? -1;
       const direction: 'forward' | 'backward' =
         options?.direction ?? (targetIndex !== -1 && currentIndex !== -1 && targetIndex < currentIndex ? 'backward' : 'forward');
 
@@ -961,7 +951,17 @@ export const App: React.FC = () => {
         () => {}
       );
     },
-    [animateAboutTurn, currentTerm, searchQuery, trail, animatePageTurn, setLocationHash]
+    [
+      animateAboutTurn,
+      currentTerm,
+      searchQuery,
+      trail,
+      animatePageTurn,
+      resolveTerm,
+      termIndexByWord,
+      setLocationHash,
+      triggerStamp
+    ]
   );
 
   // Single page flip navigation directly to target term
@@ -974,16 +974,16 @@ export const App: React.FC = () => {
 
   // Previous and Next term step helpers
   const handlePrevTerm = useCallback(() => {
-    const currentIndex = sortedTerms.findIndex((t) => t.word.toLowerCase() === currentTerm.word.toLowerCase());
+    const currentIndex = termIndexByWord.get(currentTerm.word.toLowerCase()) ?? 0;
     const prevIndex = currentIndex > 0 ? currentIndex - 1 : sortedTerms.length - 1;
     handleSelectTerm(sortedTerms[prevIndex], { addTrail: true, direction: 'backward' });
-  }, [currentTerm, handleSelectTerm]);
+  }, [currentTerm, handleSelectTerm, sortedTerms, termIndexByWord]);
 
   const handleNextTerm = useCallback(() => {
-    const currentIndex = sortedTerms.findIndex((t) => t.word.toLowerCase() === currentTerm.word.toLowerCase());
+    const currentIndex = termIndexByWord.get(currentTerm.word.toLowerCase()) ?? 0;
     const nextIndex = currentIndex < sortedTerms.length - 1 ? currentIndex + 1 : 0;
     handleSelectTerm(sortedTerms[nextIndex], { addTrail: true, direction: 'forward' });
-  }, [currentTerm, handleSelectTerm]);
+  }, [currentTerm, handleSelectTerm, sortedTerms, termIndexByWord]);
 
   const handleOpenAbout = useCallback(() => {
     setIsMobileMenuOpen(false);
@@ -1149,7 +1149,7 @@ export const App: React.FC = () => {
         triggerStamp(`NO ${letter} ENTRIES YET`);
       }
     },
-    [currentTerm, handleSelectTerm, triggerStamp]
+    [currentTerm, handleSelectTerm, sortedTerms, triggerStamp]
   );
 
   // Surprise random jump
@@ -1157,7 +1157,7 @@ export const App: React.FC = () => {
     const pool = sortedTerms.filter((t) => t.word !== currentTerm.word);
     const randomTerm = pool[Math.floor(Math.random() * pool.length)] || sortedTerms[0];
     riffleToTerm(randomTerm);
-  }, [currentTerm, riffleToTerm]);
+  }, [currentTerm, riffleToTerm, sortedTerms]);
 
   // Copy deep link
   const handleCopyLink = useCallback(async () => {
@@ -1296,6 +1296,9 @@ export const App: React.FC = () => {
                 totalTerms={totalPages}
                 isBookmarked={bookmarks.includes(currentTerm.word)}
                 explanationMode={explanationMode}
+                specialModes={specialModes}
+                crossRefs={crossRefs}
+                searchIndex={searchIndex}
                 searchQuery={searchQuery}
                 fromSearchQuestion={fromSearchQuestion}
                 trail={trail}
@@ -1360,6 +1363,7 @@ export const App: React.FC = () => {
         isOpen={activeOverlay === 'bookmarks' || activeOverlay === 'history'}
         kind={activeOverlay === 'bookmarks' ? 'bookmarks' : 'history'}
         words={activeOverlay === 'bookmarks' ? bookmarks : historyTerms}
+        termsByWord={termsByWord}
         onClose={() => setActiveOverlay(null)}
         onSelectTerm={handleSelectTerm}
       />
@@ -1367,6 +1371,7 @@ export const App: React.FC = () => {
       <TimelineOverlay
         isOpen={activeOverlay === 'timeline'}
         timeline={timeline}
+        termsByWord={termsByWord}
         onClose={() => setActiveOverlay(null)}
         onSelectTerm={handleSelectTerm}
       />
@@ -1374,6 +1379,7 @@ export const App: React.FC = () => {
       <CollectionsOverlay
         isOpen={activeOverlay === 'collections'}
         collections={collections}
+        termsByWord={termsByWord}
         onClose={() => setActiveOverlay(null)}
         onSelectTerm={handleSelectTerm}
         onCreateCollection={handleCreateCollection}

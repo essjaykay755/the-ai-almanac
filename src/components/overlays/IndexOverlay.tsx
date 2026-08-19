@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
-import type { Term } from '../../types/almanac';
+import type { Term, TermSelectionTarget } from '../../types/almanac';
 
 interface IndexOverlayProps {
   isOpen: boolean;
   terms: Term[];
   onClose: () => void;
-  onSelectTerm: (term: Term) => void;
+  onSelectTerm: (term: TermSelectionTarget) => void;
 }
 
 export const IndexOverlay: React.FC<IndexOverlayProps> = ({

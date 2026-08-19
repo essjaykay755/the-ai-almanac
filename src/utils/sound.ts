@@ -2,7 +2,7 @@
 
 let audioCtx: AudioContext | null = null;
 let pageFlipBuffer: AudioBuffer | null = null;
-let buffersLoading = false;
+let bufferLoadPromise: Promise<void> | null = null;
 
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
@@ -34,26 +34,16 @@ async function loadAudioBuffer(url: string): Promise<AudioBuffer | null> {
 }
 
 export function preloadAudio() {
-  if (typeof window === 'undefined' || buffersLoading) return;
-  buffersLoading = true;
-  loadAudioBuffer('/sounds/page-flip.mp3').then((buf) => {
-    pageFlipBuffer = buf;
-  });
-}
+  if (typeof window === 'undefined' || pageFlipBuffer || bufferLoadPromise) return;
+  if (!getAudioContext()) return;
 
-// Auto-preload on first load
-if (typeof window !== 'undefined') {
-  const triggerPreload = () => {
-    preloadAudio();
-    window.removeEventListener('click', triggerPreload);
-    window.removeEventListener('keydown', triggerPreload);
-    window.removeEventListener('touchstart', triggerPreload);
-  };
-  window.addEventListener('click', triggerPreload, { once: true });
-  window.addEventListener('keydown', triggerPreload, { once: true });
-  window.addEventListener('touchstart', triggerPreload, { once: true });
-  // Also try immediate preload
-  preloadAudio();
+  bufferLoadPromise = loadAudioBuffer('/sounds/page-flip.mp3')
+    .then((buf) => {
+      pageFlipBuffer = buf;
+    })
+    .finally(() => {
+      bufferLoadPromise = null;
+    });
 }
 
 function playBuffer(buffer: AudioBuffer, volume = 0.65) {
@@ -112,6 +102,9 @@ function noiseBurst(
 }
 
 export function playPageTurnSound() {
+  // Start loading only from the user-initiated page-turn path. Creating an
+  // AudioContext during module evaluation is blocked by browser autoplay policy.
+  preloadAudio();
   if (pageFlipBuffer && playBuffer(pageFlipBuffer, 0.65)) {
     return;
   }

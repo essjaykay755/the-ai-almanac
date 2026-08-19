@@ -11,6 +11,8 @@ export interface Term {
   category: string;
 }
 
+export type TermSelectionTarget = Pick<Term, 'word'>;
+
 export type ExplanationMode = 'dictionary' | 'plain' | 'technical' | 'vibe';
 
 export interface SpecialModes {

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import type { Term } from '../../types/almanac';
-import { termsByWord } from '../../data/terms';
+import type { Term, TermSelectionTarget } from '../../types/almanac';
 
 interface CollectionsOverlayProps {
   isOpen: boolean;
   collections: Record<string, string[]>;
+  termsByWord: Record<string, Term>;
   onClose: () => void;
-  onSelectTerm: (term: Term) => void;
+  onSelectTerm: (term: TermSelectionTarget) => void;
   onCreateCollection: (name: string) => void;
   onDeleteCollection?: (name: string) => void;
 }
@@ -14,6 +14,7 @@ interface CollectionsOverlayProps {
 export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
   isOpen,
   collections,
+  termsByWord,
   onClose,
   onSelectTerm,
   onCreateCollection
