@@ -3,6 +3,7 @@ import type { Term, ExplanationMode, CrossRefInfo } from '../types/almanac';
 import { searchTerms, type SearchMatch } from '../utils/search';
 import { specialModes, crossRefs } from '../data/terms';
 import { getPronunciation } from '../utils/pronunciation';
+import { APP_VERSION } from '../version';
 
 interface PageProps {
   currentTerm: Term;
@@ -142,7 +143,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
       <div className="page-inner" id="pageInner">
         <header className="topline">
           <div className="edition" id="editionLabel">
-            Field edition · v0.7 · {totalTerms} terms
+            Field edition · v{APP_VERSION} · {totalTerms} terms
           </div>
 
           <div className="search-shell" ref={searchShellRef}>

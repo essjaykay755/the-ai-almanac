@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Ornament } from './Ornament';
+import { APP_VERSION } from '../version';
 
 interface AboutPageProps {
   totalTerms: number;
@@ -13,10 +14,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onBack }) => {
     <article className="about-page" aria-labelledby="about-page-title">
       <div className="about-page-inner redesign-layout">
         <header className="about-page-header">
-          <span className="about-page-kicker">Field Edition</span>
           <div className="about-wordmark" aria-label="AI Almanac">
-            <strong>AI</strong>
-            <span>Almanac</span>
+            <strong className="wordmark-main">AI</strong>
+            <span className="wordmark-suffix">Almanac</span>
           </div>
           <div className="about-page-mark" aria-hidden="true">
             <Ornament className="about-page-ornament" />
@@ -66,7 +66,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onBack }) => {
           </div>
           
           <div className="footer-bottom">
-            <small>v0.7 · {totalTerms} terms</small>
+            <small>v{APP_VERSION} · {totalTerms} terms</small>
             <button type="button" className="about-back" onClick={onBack}>
               Back to the almanac <span aria-hidden="true">→</span>
             </button>
