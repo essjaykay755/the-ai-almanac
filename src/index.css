@@ -3769,6 +3769,9 @@ button {
 }
 
 @media (max-width: 760px) {
+  :root {
+    --mobile-bar-height: 60px;
+  }
   html,
   body,
   #root,
@@ -3804,10 +3807,15 @@ button {
   .about-page {
     min-height: 100vh;
     border-radius: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .about-page-inner {
+    height: auto;
     min-height: 100vh;
     padding: 76px 22px 82px;
+    overflow: visible;
   }
   .about-page-content {
     margin: auto 0;
@@ -3839,7 +3847,7 @@ button {
     left: 0;
     right: 0;
     top: 0;
-    height: 60px;
+    height: var(--mobile-bar-height);
     padding: 0 12px;
     background:
       radial-gradient(ellipse at 50% -20%, rgba(205, 168, 107, 0.16), transparent 70%),
@@ -3969,7 +3977,8 @@ button {
   .page-layout {
     grid-template-columns: minmax(0, 1fr);
     gap: 28px;
-    padding-top: 22px;
+    padding-top: calc(22px + var(--mobile-bar-height));
+    scroll-padding-top: var(--mobile-bar-height);
     width: calc(100% + 22px);
     overflow-x: hidden;
   }

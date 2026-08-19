@@ -1,6 +1,6 @@
 import React, { use, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { flushSync } from 'react-dom';
-import type { Term, ExplanationMode, OverlayType, SpecialModes, TermSelectionTarget } from './types/almanac';
+import type { Term, ExplanationMode, OverlayType, TermSelectionTarget } from './types/almanac';
 import { Cover } from './components/Cover';
 import { AboutPage } from './components/AboutPage';
 import { Page } from './components/Page';
@@ -24,6 +24,7 @@ import {
 } from './utils/sound';
 import { getPronunciation } from './utils/pronunciation';
 import { createSearchIndex } from './utils/search';
+import { getExplanationForTerm } from './utils/explanations';
 import {
   getPublicPath,
   getTermOgImagePath,
@@ -208,18 +209,6 @@ function cloneWithScroll(node: HTMLElement, scrollTop: number, scrollLeft: numbe
     scrollContainer.scrollLeft = scrollLeft;
   }
   return clone;
-}
-
-function getExplanationForTerm(term: Term, mode: ExplanationMode, specialModes: SpecialModes): string {
-  const s = specialModes[term.word];
-  if (mode === 'dictionary') return term.definition;
-  if (s && s[mode]) return s[mode];
-  if (mode === 'plain') return `Put simply: ${term.definition}`;
-  if (mode === 'technical') {
-    const rel = term.related.slice(0, 2).join(' and ');
-    return `${term.definition}${rel ? ` In implementation terms, this usually intersects with ${rel}.` : ''}`;
-  }
-  return `${term.note} ${(term.example || '').replace(/[“”]/g, '')}`;
 }
 
 function createDestinationSnapshot(
@@ -543,9 +532,36 @@ const AlmanacApp: React.FC = () => {
   );
 
   const setLocationHash = useCallback((hash: string) => {
-    if (typeof window === 'undefined' || window.location.hash === hash) return;
+    if (typeof window === 'undefined') return;
+
+    const termMatch = hash.match(/^#term=([^&]+)/);
+    let routePath = getPublicPath(import.meta.env.BASE_URL || '/', '');
+    if (termMatch) {
+      try {
+        const word = decodeURIComponent(termMatch[1].replace(/\+/g, ' '));
+        routePath = getPublicPath(import.meta.env.BASE_URL || '/', getTermRoutePath({ word }));
+      } catch {
+        // Keep the current path if a malformed legacy hash is encountered.
+        routePath = window.location.pathname;
+      }
+    }
+
+    const nextUrl = `${routePath}${hash}`;
+    const currentUrl = `${window.location.pathname}${window.location.hash}`;
+    if (currentUrl === nextUrl) return;
+
     isProgrammaticHashRef.current = true;
+    if (window.location.hash === hash) {
+      window.history.pushState(window.history.state, '', nextUrl);
+      isProgrammaticHashRef.current = false;
+      return;
+    }
+
+    // Assigning the hash preserves the existing back/forward behavior. The
+    // replaceState immediately after it moves that new history entry to the
+    // crawlable term route without reloading the React app.
     window.location.hash = hash;
+    window.history.replaceState(window.history.state, '', nextUrl);
   }, []);
 
   const commitBookView = useCallback((view: BookView) => {

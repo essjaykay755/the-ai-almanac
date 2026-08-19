@@ -2,6 +2,7 @@ import React, { useDeferredValue, useMemo, useState, useEffect, useRef } from 'r
 import type { Term, ExplanationMode, CrossRefInfo, SpecialModes, TermSelectionTarget } from '../types/almanac';
 import { searchTerms, type SearchIndex } from '../utils/search';
 import { getPronunciation } from '../utils/pronunciation';
+import { getExplanationForTerm } from '../utils/explanations';
 import { APP_VERSION } from '../version';
 
 interface PageProps {
@@ -108,18 +109,6 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
     }
   };
 
-  const getExplanation = (term: Term, mode: ExplanationMode): string => {
-    const s = specialModes[term.word] || {};
-    if (mode === 'dictionary') return term.definition;
-    if (s[mode]) return s[mode]!;
-    if (mode === 'plain') return `Put simply: ${term.definition}`;
-    if (mode === 'technical') {
-      const rel = term.related.slice(0, 2).join(' and ');
-      return `${term.definition}${rel ? ` In implementation terms, this usually intersects with ${rel}.` : ''}`;
-    }
-    return `${term.note} ${term.example.replace(/[“”]/g, '')}`;
-  };
-
   const getRefs = (term: Term): CrossRefInfo & { see: string[] } => {
     const x = crossRefs[term.word] || { compare: [], confused: [] };
     return {
@@ -130,7 +119,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
   };
 
   const refs = getRefs(currentTerm);
-  const explanationText = getExplanation(currentTerm, explanationMode);
+  const explanationText = getExplanationForTerm(currentTerm, explanationMode, specialModes);
   // Each glossary entry is one real page in the alphabetical book order.
   const pageNumber = termIndex + 1;
   const pageCounter = `Page ${pageNumber}`;

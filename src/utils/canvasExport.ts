@@ -17,15 +17,27 @@ export async function renderClipPreviewToCanvas(
 
   const width = Math.max(1, Math.ceil(preview.offsetWidth));
   const scale = Math.max(2, Math.min(3, 2400 / width));
-  const rendered = await html2canvas(preview, {
+  const renderOptions = {
     allowTaint: false,
     backgroundColor: null,
     imageTimeout: 15000,
     logging: false,
     removeContainer: true,
     scale,
-    useCORS: true
-  });
+    useCORS: true,
+    foreignObjectRendering: true
+  } as const;
+
+  let rendered: HTMLCanvasElement;
+  try {
+    // Let the browser compositor paint the cloned DOM. This keeps the export
+    // on the same font/layout/CSS path as the preview the user is looking at.
+    rendered = await html2canvas(preview, renderOptions);
+  } catch {
+    // Older browsers may not support SVG foreignObject rendering. Still use
+    // the live DOM as the source rather than recreating the card by hand.
+    rendered = await html2canvas(preview, { ...renderOptions, foreignObjectRendering: false });
+  }
 
   canvas.width = rendered.width;
   canvas.height = rendered.height;

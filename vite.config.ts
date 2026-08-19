@@ -2,7 +2,7 @@ import { defineConfig, loadEnv, type Plugin, type ResolvedConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { terms } from './src/data/terms.ts';
+import { sortedTerms, terms } from './src/data/terms.ts';
 import {
   getOgImageSvg,
   getTermOgImagePath,
@@ -17,6 +17,10 @@ type PageMetadata = {
   imageAlt: string;
   url: string;
 };
+
+const termPageNumbers = new Map(
+  sortedTerms.map((term, index) => [term.word.toLowerCase(), index + 1])
+);
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -147,7 +151,10 @@ function almanacOgPages(siteUrl: string): Plugin {
         response.statusCode = 200;
         response.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
         response.setHeader('Cache-Control', 'public, max-age=3600');
-        response.end(getOgImageSvg(term));
+        response.end(getOgImageSvg(term, {
+          pageNumber: term ? termPageNumbers.get(term.word.toLowerCase()) : 1,
+          totalTerms: sortedTerms.length
+        }));
       });
     },
 
@@ -156,7 +163,10 @@ function almanacOgPages(siteUrl: string): Plugin {
         this.emitFile({
           type: 'asset',
           fileName: getTermOgImagePath(term),
-          source: getOgImageSvg(term)
+          source: getOgImageSvg(term, {
+            pageNumber: termPageNumbers.get(term.word.toLowerCase()),
+            totalTerms: sortedTerms.length
+          })
         });
       }
     },
