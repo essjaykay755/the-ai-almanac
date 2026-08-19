@@ -4,6 +4,34 @@ import type { Term, ClipStyle } from '../types/almanac';
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 675;
 
+function hasVisiblePixels(canvas: HTMLCanvasElement): boolean {
+  if (canvas.width === 0 || canvas.height === 0) return false;
+
+  const context = canvas.getContext('2d', { willReadFrequently: true });
+  if (!context) return false;
+
+  try {
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    const xStep = Math.max(1, Math.floor(canvas.width / 64));
+    const yStep = Math.max(1, Math.floor(canvas.height / 64));
+    const sampleCount = Math.ceil(canvas.width / xStep) * Math.ceil(canvas.height / yStep);
+    let visibleSamples = 0;
+
+    for (let y = 0; y < canvas.height; y += yStep) {
+      for (let x = 0; x < canvas.width; x += xStep) {
+        const alpha = pixels[(y * canvas.width + x) * 4 + 3];
+        if (alpha > 16) visibleSamples += 1;
+      }
+    }
+
+    // A transparent foreignObject failure can still resolve without throwing.
+    // Reject captures that contain only transparent pixels before downloading.
+    return visibleSamples >= Math.max(8, Math.ceil(sampleCount * 0.02));
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Renders the actual preview element into a PNG canvas. Keeping the DOM and
  * export paths together prevents the saved image from drifting away from the
@@ -37,6 +65,16 @@ export async function renderClipPreviewToCanvas(
     // Older browsers may not support SVG foreignObject rendering. Still use
     // the live DOM as the source rather than recreating the card by hand.
     rendered = await html2canvas(preview, { ...renderOptions, foreignObjectRendering: false });
+  }
+
+  if (!hasVisiblePixels(rendered)) {
+    // foreignObject rendering can silently return a transparent canvas in
+    // Chromium. Retry with html2canvas's computed DOM renderer before failing.
+    rendered = await html2canvas(preview, { ...renderOptions, foreignObjectRendering: false });
+  }
+
+  if (!hasVisiblePixels(rendered)) {
+    throw new Error('The saved entry preview rendered without visible pixels.');
   }
 
   canvas.width = rendered.width;
