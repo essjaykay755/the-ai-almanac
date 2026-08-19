@@ -460,7 +460,7 @@ export const App: React.FC = () => {
           window.clearTimeout(timeout);
           resolve();
         };
-        const timeout = window.setTimeout(finish, 900);
+        const timeout = window.setTimeout(finish, 800);
         solidTurn.addEventListener('animationend', finish);
       });
 

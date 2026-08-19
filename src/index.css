@@ -660,26 +660,29 @@ button {
 
 .solid-turn.opening {
   transform-origin: left center;
-  animation: solidTurnOpening 0.72s var(--motion) both;
+  animation: solidTurnOpen 0.65s cubic-bezier(0.22, 0.61, 0.35, 1) both;
 }
 
 .solid-turn.closing {
   transform-origin: left center;
-  animation: solidTurnOpening 0.72s var(--motion) reverse both;
+  animation: solidTurnClose 0.65s cubic-bezier(0.55, 0, 0.68, 0.53) both;
 }
 
-@keyframes solidTurnOpening {
-  0% {
+@keyframes solidTurnOpen {
+  from {
     transform: translateZ(0) rotateY(-86deg);
   }
-  42% {
-    transform: translateZ(0) rotateY(-28deg);
-  }
-  78% {
-    transform: translateZ(0) rotateY(-6deg);
-  }
-  100% {
+  to {
     transform: translateZ(0) rotateY(0deg);
+  }
+}
+
+@keyframes solidTurnClose {
+  from {
+    transform: translateZ(0) rotateY(0deg);
+  }
+  to {
+    transform: translateZ(0) rotateY(-86deg);
   }
 }
 
