@@ -64,6 +64,16 @@ function playBuffer(buffer: AudioBuffer, volume = 0.65) {
   }
 }
 
+function playAudioFile(url: string, volume: number, fallback: () => void) {
+  try {
+    const audio = new Audio(url);
+    audio.volume = volume;
+    audio.play().catch(fallback);
+  } catch {
+    fallback();
+  }
+}
+
 // Fallback synthetic noise burst
 function noiseBurst(
   duration = 0.12,
@@ -122,17 +132,20 @@ export function playPageTurnSound() {
 }
 
 export function playPaperTearSound() {
-  // Disabled per user request — only page turn sound is active
+  playAudioFile('/sounds/paper-tear.mp3', 0.42, () => {
+    noiseBurst(0.16, 1900, 0.025, 'highpass');
+  });
 }
 
 export function playRiffleSound() {
-  // Disabled per user request — only page turn sound is active
+  noiseBurst(0.12, 900, 0.02, 'bandpass');
+  window.setTimeout(() => noiseBurst(0.1, 1500, 0.014, 'bandpass'), 90);
 }
 
 export function playPaperSmallSound() {
-  // Disabled per user request — only page turn sound is active
+  noiseBurst(0.08, 1700, 0.018, 'highpass');
 }
 
 export function playStampSound() {
-  // Disabled per user request — only page turn sound is active
+  noiseBurst(0.06, 520, 0.024, 'lowpass');
 }

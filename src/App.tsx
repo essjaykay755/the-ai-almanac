@@ -13,6 +13,9 @@ import { TimelineOverlay } from './components/overlays/TimelineOverlay';
 import { CollectionsOverlay } from './components/overlays/CollectionsOverlay';
 import { PickerOverlay } from './components/overlays/PickerOverlay';
 import { ClipOverlay } from './components/overlays/ClipOverlay';
+import { NotFoundPage } from './components/NotFoundPage';
+import { TutorialOverlay } from './components/TutorialOverlay';
+import { TUTORIAL_STEPS } from './components/tutorialSteps';
 import {
   playPageTurnSound,
   playPaperTearSound,
@@ -71,6 +74,8 @@ function loadStorage<T>(key: string, fallback: T, isValid: (value: unknown) => v
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');
 
+const isBoolean = (value: unknown): value is boolean => typeof value === 'boolean';
+
 const isCollections = (value: unknown): value is Record<string, string[]> =>
   typeof value === 'object' &&
   value !== null &&
@@ -103,8 +108,6 @@ function normalizeCollectionName(name: string): string {
   return name.trim().replace(/\s+/g, ' ');
 }
 
-const isBoolean = (value: unknown): value is boolean => typeof value === 'boolean';
-
 function saveStorage<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
@@ -121,17 +124,27 @@ function cleanClone(node: HTMLElement): HTMLElement {
   return c;
 }
 
+function getPageScrollContainer(root: HTMLElement | null): HTMLElement | null {
+  if (!root) return null;
+  if (root.matches('.page-layout')) return root;
+  return root.querySelector<HTMLElement>('.page-layout') ||
+    (root.matches('.page-inner') ? root : root.querySelector<HTMLElement>('.page-inner'));
+}
+
 function resetPageScroll(page: HTMLElement | null): void {
-  const inner = page?.querySelector<HTMLElement>('.page-inner');
-  if (!inner) return;
-  inner.scrollTop = 0;
-  inner.scrollLeft = 0;
+  const scrollContainer = getPageScrollContainer(page);
+  if (!scrollContainer) return;
+  scrollContainer.scrollTop = 0;
+  scrollContainer.scrollLeft = 0;
 }
 
 function cloneWithScroll(node: HTMLElement, scrollTop: number, scrollLeft: number): HTMLElement {
   const clone = cleanClone(node);
-  clone.scrollTop = scrollTop;
-  clone.scrollLeft = scrollLeft;
+  const scrollContainer = getPageScrollContainer(clone);
+  if (scrollContainer) {
+    scrollContainer.scrollTop = scrollTop;
+    scrollContainer.scrollLeft = scrollLeft;
+  }
   return clone;
 }
 
@@ -308,7 +321,7 @@ function createDestinationSnapshot(
   return clone;
 }
 
-export const App: React.FC = () => {
+const AlmanacApp: React.FC = () => {
   const { sortedTerms, termsByWord, timeline, specialModes, crossRefs, resolveTerm } = use(almanacDataPromise);
 
   // Date calculation
@@ -363,6 +376,11 @@ export const App: React.FC = () => {
   const [activeOverlay, setActiveOverlay] = useState<OverlayType>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileMenuMounted, setIsMobileMenuMounted] = useState(false);
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  const [tutorialStepIndex, setTutorialStepIndex] = useState(0);
+  const [isCompactViewport, setIsCompactViewport] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 760px)').matches
+  );
   const [stampText, setStampText] = useState<string | null>(null);
   const [isStampVisible, setIsStampVisible] = useState(false);
   const stampTimerRef = useRef<number | null>(null);
@@ -382,6 +400,16 @@ export const App: React.FC = () => {
   const isProgrammaticHashRef = useRef<boolean>(false);
   const bookViewRef = useRef<BookView>(initialBookView);
   const pendingTermRef = useRef<{ term: Term; options?: TermSelectionOptions } | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(max-width: 760px)');
+    const syncViewport = () => setIsCompactViewport(mediaQuery.matches);
+    syncViewport();
+    mediaQuery.addEventListener('change', syncViewport);
+    return () => mediaQuery.removeEventListener('change', syncViewport);
+  }, []);
 
   // Compute depth and index
   const termIndexByWord = useMemo(
@@ -425,13 +453,13 @@ export const App: React.FC = () => {
 
   // Trigger stamp animation
   const triggerStamp = useCallback(
-    (text: string) => {
+    (text: string, withSound = soundEnabled) => {
       if (stampTimerRef.current) {
         window.clearTimeout(stampTimerRef.current);
       }
       setStampText(text);
       setIsStampVisible(true);
-      if (soundEnabled) {
+      if (withSound) {
         playStampSound();
       }
       stampTimerRef.current = window.setTimeout(() => {
@@ -450,6 +478,9 @@ export const App: React.FC = () => {
   const commitBookView = useCallback((view: BookView) => {
     bookViewRef.current = view;
     setBookView(view);
+    if (view === 'about') {
+      setActiveOverlay(null);
+    }
   }, []);
 
   const animateAboutTurn = useCallback(
@@ -645,15 +676,15 @@ export const App: React.FC = () => {
           targetSearchQuestion,
           targetSearchQuery
         );
-        destination.scrollTop = 0;
-        destination.scrollLeft = 0;
+        resetPageScroll(destination);
         container.appendChild(destination);
       };
 
       if (pageInner) {
         const pageInnerEl = pageInner as HTMLElement;
-        const currentScrollTop = pageInnerEl.scrollTop;
-        const currentScrollLeft = pageInnerEl.scrollLeft;
+        const pageScrollContainer = getPageScrollContainer(pageInnerEl);
+        const currentScrollTop = pageScrollContainer?.scrollTop ?? 0;
+        const currentScrollLeft = pageScrollContainer?.scrollLeft ?? 0;
         const cloneCurrentPage = () =>
           cloneWithScroll(pageInnerEl, currentScrollTop, currentScrollLeft);
 
@@ -912,14 +943,13 @@ export const App: React.FC = () => {
       explanationMode,
       specialModes,
       crossRefs,
-      soundEnabled,
       bookmarks,
       trail,
       searchQuery,
       recordHistory,
       setLocationHash,
       termIndexByWord,
-      totalPages
+      soundEnabled
     ]
   );
 
@@ -1092,6 +1122,16 @@ export const App: React.FC = () => {
         document.activeElement?.tagName === 'TEXTAREA' ||
         (document.activeElement as HTMLElement)?.isContentEditable;
 
+      if (isTutorialOpen) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          setIsTutorialOpen(false);
+          setTutorialStepIndex(0);
+          setIsMobileMenuOpen(false);
+        }
+        return;
+      }
+
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         handleFocusSearch();
@@ -1113,10 +1153,12 @@ export const App: React.FC = () => {
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [activeOverlay, handleCloseAbout, handleFocusSearch, handlePrevTerm, handleNextTerm]);
+  }, [activeOverlay, handleCloseAbout, handleFocusSearch, handleNextTerm, handlePrevTerm, isTutorialOpen]);
 
   // Bookmarks Toggle
   const handleToggleBookmark = useCallback(() => {
+    if (bookViewRef.current === 'about') return;
+
     const word = currentTerm.word;
     const exists = bookmarks.includes(word);
     const updated = exists ? bookmarks.filter((w) => w !== word) : [...bookmarks, word];
@@ -1125,7 +1167,7 @@ export const App: React.FC = () => {
     if (soundEnabled) {
       playPaperTearSound();
     }
-    triggerStamp(exists ? 'BOOKMARK REMOVED' : 'DOG-EARED');
+    triggerStamp(exists ? 'BOOKMARK REMOVED' : 'BOOKMARKED');
   }, [bookmarks, currentTerm, soundEnabled, triggerStamp]);
 
   // Speech pronunciation
@@ -1144,6 +1186,8 @@ export const App: React.FC = () => {
   // Collections handler
   const handleCreateCollection = useCallback(
     (name: string): boolean => {
+      if (bookViewRef.current === 'about') return false;
+
       const trimmed = normalizeCollectionName(name);
       if (!trimmed) {
         triggerStamp('COLLECTION NAME REQUIRED');
@@ -1165,6 +1209,8 @@ export const App: React.FC = () => {
 
   const handleAddToCollection = useCallback(
     (name: string) => {
+      if (bookViewRef.current === 'about') return;
+
       const trimmed = normalizeCollectionName(name);
       if (!trimmed) {
         triggerStamp('COLLECTION NAME REQUIRED');
@@ -1192,6 +1238,8 @@ export const App: React.FC = () => {
 
   const handleRenameCollection = useCallback(
     (currentName: string, nextName: string): boolean => {
+      if (bookViewRef.current === 'about') return false;
+
       const trimmed = normalizeCollectionName(nextName);
       if (!hasCollection(collections, currentName)) return false;
       if (!trimmed) {
@@ -1218,6 +1266,8 @@ export const App: React.FC = () => {
 
   const handleDeleteCollection = useCallback(
     (name: string) => {
+      if (bookViewRef.current === 'about') return;
+
       if (!hasCollection(collections, name)) return;
 
       const updated = { ...collections };
@@ -1231,6 +1281,8 @@ export const App: React.FC = () => {
 
   const handleRemoveFromCollection = useCallback(
     (collectionName: string, word: string) => {
+      if (bookViewRef.current === 'about') return;
+
       const existing = collections[collectionName];
       if (!existing) return;
 
@@ -1286,7 +1338,7 @@ export const App: React.FC = () => {
     if (nextState) {
       playPaperSmallSound();
     }
-    triggerStamp(nextState ? 'SOUND ON' : 'SOUND OFF');
+    triggerStamp(nextState ? 'SOUND ON' : 'SOUND OFF', false);
   }, [soundEnabled, triggerStamp]);
 
   const openMobileMenu = useCallback(() => {
@@ -1304,6 +1356,38 @@ export const App: React.FC = () => {
     }
   }, [isMobileMenuOpen]);
 
+  useEffect(() => {
+    if (!isTutorialOpen || !isCompactViewport) return;
+
+    const activeStep = TUTORIAL_STEPS[tutorialStepIndex];
+    if (!activeStep) return;
+
+    if (activeStep.region === 'sidebar') {
+      openMobileMenu();
+    } else {
+      closeMobileMenu();
+    }
+  }, [closeMobileMenu, isCompactViewport, isTutorialOpen, openMobileMenu, tutorialStepIndex]);
+
+  const handleCloseTutorial = useCallback(() => {
+    setIsTutorialOpen(false);
+    setTutorialStepIndex(0);
+    closeMobileMenu();
+  }, [closeMobileMenu]);
+
+  const handlePlayTutorial = useCallback(() => {
+    setActiveOverlay(null);
+    setTutorialStepIndex(0);
+    closeMobileMenu();
+
+    if (bookViewRef.current === 'about') {
+      animateAboutTurn('term', () => setIsTutorialOpen(true));
+      return;
+    }
+
+    setIsTutorialOpen(true);
+  }, [animateAboutTurn, closeMobileMenu]);
+
   const handlePageChangeMode = useCallback((mode: ExplanationMode) => {
     setExplanationMode(mode);
   }, []);
@@ -1313,11 +1397,17 @@ export const App: React.FC = () => {
   }, [currentTerm.word]);
 
   const handlePageOpenPicker = useCallback(() => {
+    if (bookViewRef.current === 'about') return;
+
     setActiveOverlay('picker');
   }, []);
 
   const handlePageOpenClip = useCallback(() => {
-    if (soundEnabled) playPaperTearSound();
+    if (bookViewRef.current === 'about') return;
+
+    if (soundEnabled) {
+      playPaperTearSound();
+    }
     setActiveOverlay('clip');
   }, [soundEnabled]);
 
@@ -1332,6 +1422,7 @@ export const App: React.FC = () => {
       historyCount={historyTerms.length}
       collectionCount={Object.keys(collections).length}
       soundEnabled={soundEnabled}
+      onPlayTutorial={handlePlayTutorial}
       isMobileOpen={isMobileOpen}
       isMobileClosing={isMobileClosing}
       isAboutActive={bookView === 'about'}
@@ -1339,6 +1430,13 @@ export const App: React.FC = () => {
       onMobileAnimationEnd={handleMobileMenuAnimationEnd}
       onToggleSound={handleToggleSound}
       onOpenOverlay={(overlay) => {
+        if (
+          bookViewRef.current === 'about' &&
+          (overlay === 'bookmarks' || overlay === 'collections' || overlay === 'clip')
+        ) {
+          return;
+        }
+
         closeMobileMenu();
         if (soundEnabled) {
           if (overlay === 'clip') {
@@ -1387,7 +1485,11 @@ export const App: React.FC = () => {
         <section className="book">
           {renderCover()}
 
-          <div className={`paper-block ${bookView === 'about' ? 'about-active' : ''}`} ref={paperBlockRef} id="paperBlock">
+          <div
+            className={`paper-block ${bookView === 'about' ? 'about-active' : ''}${activeOverlay ? ' overlay-open' : ''}`}
+            ref={paperBlockRef}
+            id="paperBlock"
+          >
             <div className="page-stack" aria-hidden="true">
               <i className="stack-sheet"></i>
               <i className="stack-sheet"></i>
@@ -1508,11 +1610,27 @@ export const App: React.FC = () => {
         term={currentTerm}
         pageNumber={termIndex + 1}
         formattedDate={formattedDate}
+        soundEnabled={soundEnabled}
         onClose={() => setActiveOverlay(null)}
         onShowStamp={triggerStamp}
       />
+
+      <TutorialOverlay
+        isOpen={isTutorialOpen}
+        steps={TUTORIAL_STEPS}
+        activeStepIndex={tutorialStepIndex}
+        onStepChange={setTutorialStepIndex}
+        onClose={handleCloseTutorial}
+      />
     </>
   );
+};
+
+export const App: React.FC = () => {
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const isKnownPath = pathname === '/' || pathname === '' || pathname === '/index.html';
+
+  return isKnownPath ? <AlmanacApp /> : <NotFoundPage />;
 };
 
 export default App;

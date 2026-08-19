@@ -161,7 +161,7 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
                 ) : (
                   <>
                     <div>
-                      <small>Collection · {currentItems.length} leaves</small>
+                      <small>Collection · {currentItems.length} entries</small>
                       <h3>{currentCollectionName}</h3>
                     </div>
                     {pendingDeleteCollection === currentCollectionName ? (
@@ -196,7 +196,7 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
             {currentCollectionName && (
               <div className="list" id="collectionItems">
                 {currentItems.length === 0 ? (
-                  <div className="empty-state">This collection has no leaves yet.</div>
+                  <div className="empty-state">This collection has no entries yet.</div>
                 ) : (
                   currentItems.map((word, index) => {
                     const t = termsByWord[word.toLowerCase()];

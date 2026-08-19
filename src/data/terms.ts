@@ -13730,20 +13730,27 @@ export const terms: Term[] = [
   {
     "word": "YOLO",
     "part": "noun",
-    "pron": "",
-    "definition": "You Only Look Once; a family of single-stage object-detection models designed for fast detection in images and video.",
-    "example": "“The team used YOLO while designing, building, or evaluating the AI system.”",
-    "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "This term is useful when comparing model methods, system behavior, or the evidence behind an AI result.",
+    "pron": "/ˈyō-lō/",
+    "definition": "An opt-in high-autonomy mode in an agentic coding interface that lets a coding agent carry out a delegated task without pausing for per-step user approval, including reading and editing files, running commands, invoking tools, and iterating on results.",
+    "example": "“I handed the issue to the coding agent in YOLO mode, then reviewed the diff and test results when it finished.”",
+    "origin": "Developer slang from “You Only Live Once,” repurposed by agentic coding tools for auto-approval and full-autonomy execution settings.",
+    "note": "YOLO changes the approval policy, not the agent’s judgment or correctness; depending on the tool, it may still stop for missing credentials, safety restrictions, or unresolved ambiguity. Use a trusted or isolated workspace and review the diff, commands, tests, and generated artifacts afterward; in computer vision, YOLO can also mean “You Only Look Once.”",
     "related": [
-      "object detection",
-      "bounding box",
-      "computer vision"
+      "agentic",
+      "coding agent",
+      "tool calling",
+      "approval gate",
+      "sandbox"
     ],
     "aliases": [
-      "you only look once"
+      "yolo mode",
+      "you only live once",
+      "auto approve",
+      "full auto",
+      "no approval mode",
+      "unattended coding"
     ],
-    "category": "Vision, Image & Video"
+    "category": "AI Product, Coding & Culture"
   }
 ];
 
@@ -13767,6 +13774,11 @@ export const specialModes: SpecialModes = {
     plain: 'The AI does several steps and takes actions instead of only answering once.',
     technical: 'A goal-directed system pattern in which a model selects intermediate actions, invokes tools, observes results, and continues across a multi-step loop.',
     vibe: 'It stops being a chatbot and starts touching things.'
+  },
+  'YOLO': {
+    plain: 'You give the coding agent a task, and it keeps working—editing files, running commands, and checking its work—without stopping to ask about every action.',
+    technical: 'An execution and approval policy that automatically permits an agent’s tool calls and coding actions after the initial task handoff, removing interactive confirmation gates while leaving the agent’s capabilities, workspace boundaries, and correctness unchanged.',
+    vibe: 'Hand it the ticket, leave it the keyboard, and come back to inspect the diff—preferably in a disposable workspace.'
   },
   'context window': {
     plain: 'How much information the model can keep in front of it at one time.',
@@ -13795,6 +13807,7 @@ export const crossRefs: Record<string, CrossRefInfo> = {
   'RAG': { compare: ['retrieval', 'grounding'], confused: ['vector database'] },
   'hallucination': { compare: ['grounding'], confused: ['confidence'] },
   'agentic': { compare: ['workflow', 'tool calling'], confused: ['reasoning'] },
+  'YOLO': { compare: ['agentic', 'coding agent'], confused: ['vibe coding', 'human in the loop'] },
   'chain of thought': { compare: ['reasoning'], confused: ['trace'] },
   'embedding': { compare: ['vector database'], confused: ['token'] },
   'eval': { compare: ['benchmark'], confused: ['verification'] },

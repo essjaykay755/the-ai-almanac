@@ -33,7 +33,7 @@ export const PickerOverlay: React.FC<PickerOverlayProps> = ({
       <section className="insert" style={{ width: 'min(520px, 100%)' }} role="dialog" aria-modal="true">
         <div className="insert-head">
           <div>
-            <small>File this leaf</small>
+            <small>Add this entry</small>
             <h2>Add to collection</h2>
           </div>
           <button className="close" onClick={onClose} aria-label="Close">
@@ -47,7 +47,7 @@ export const PickerOverlay: React.FC<PickerOverlayProps> = ({
               key={name}
               onClick={() => onAddToCollection(name)}
             >
-              {name} <small>· {(collections[name] || []).length} leaves</small>
+              {name} <small>· {(collections[name] || []).length} entries</small>
             </button>
           ))}
         </div>

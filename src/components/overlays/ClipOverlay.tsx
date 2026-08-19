@@ -8,6 +8,7 @@ interface ClipOverlayProps {
   term: Term;
   pageNumber: number;
   formattedDate: string;
+  soundEnabled: boolean;
   onClose: () => void;
   onShowStamp: (text: string) => void;
 }
@@ -17,6 +18,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
   term,
   pageNumber,
   formattedDate,
+  soundEnabled,
   onClose,
   onShowStamp
 }) => {
@@ -35,17 +37,19 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
 
   const handleDownloadPng = () => {
     if (!canvasRef.current) return;
-    playPaperTearSound();
+    if (soundEnabled) {
+      playPaperTearSound();
+    }
     drawClipToCanvas(canvasRef.current, term, clipStyle, pageNumber, formattedDate);
     const filename = `the-ai-almanac-${term.word.toLowerCase().replace(/\s+/g, '-')}.png`;
     downloadCanvasAsPng(canvasRef.current, filename);
-    onShowStamp('CLIPPING EXPORTED');
+    onShowStamp('ENTRY SAVED');
   };
 
   const handleCopyText = async () => {
     try {
       await navigator.clipboard.writeText(getClipText());
-      onShowStamp('CLIPPING COPIED');
+      onShowStamp('TEXT COPIED');
     } catch {
       onShowStamp('COPY UNAVAILABLE');
     }
@@ -82,8 +86,8 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
       <section className="insert clip-insert" role="dialog" aria-modal="true">
         <div className="insert-head">
           <div>
-            <small>The AI Almanac · clipping desk</small>
-            <h2>Clip this entry</h2>
+            <small>The AI Almanac · save or share</small>
+            <h2>Save this entry</h2>
           </div>
           <button className="close" onClick={onClose} aria-label="Close">
             ×
@@ -92,7 +96,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
 
         <div className="clip-layout">
           <article className={`clipping ${clipStyle !== 'clipping' ? clipStyle : ''}`} id="clippingPreview">
-            <div className="clip-mast">THE AI ALMANAC · CLIPPED ENTRY</div>
+            <div className="clip-mast">THE AI ALMANAC · SAVED ENTRY</div>
             <div className="clip-word" id="clipWord">
               {term.word}
             </div>
@@ -113,7 +117,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
               className={`clip-style ${clipStyle === 'clipping' ? 'active' : ''}`}
               onClick={() => setClipStyle('clipping')}
             >
-              Dictionary clipping
+              Dictionary style
             </button>
             <button
               className={`clip-style ${clipStyle === 'library' ? 'active' : ''}`}
@@ -125,13 +129,13 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
               className={`clip-style ${clipStyle === 'newspaper' ? 'active' : ''}`}
               onClick={() => setClipStyle('newspaper')}
             >
-              Newspaper column
+              Newspaper style
             </button>
             <button
               className={`clip-style ${clipStyle === 'margin-card' ? 'active' : ''}`}
               onClick={() => setClipStyle('margin-card')}
             >
-              Margin note
+              Note card
             </button>
 
             <hr />

@@ -11,6 +11,7 @@ interface CoverProps {
   soundEnabled: boolean;
   onToggleSound: () => void;
   onOpenOverlay: (overlay: OverlayType) => void;
+  onPlayTutorial: () => void;
   onFocusSearch: () => void;
   onOpenAbout: () => void;
   onSurprise: () => void;
@@ -29,6 +30,7 @@ export const Cover: React.FC<CoverProps> = ({
   soundEnabled,
   onToggleSound,
   onOpenOverlay,
+  onPlayTutorial,
   onFocusSearch,
   onOpenAbout,
   onSurprise,
@@ -41,6 +43,7 @@ export const Cover: React.FC<CoverProps> = ({
   const mobileClass = isMobileOpen
     ? ` mobile-sidebar${isMobileClosing ? ' mobile-sidebar-closing' : ''}`
     : '';
+  const entryActionsDisabled = isAboutActive;
 
   return (
     <aside
@@ -79,7 +82,7 @@ export const Cover: React.FC<CoverProps> = ({
         <Ornament className="brand-mark" />
       </div>
 
-      <nav className="cover-nav">
+      <nav className="cover-nav" id="coverNav" aria-label="Almanac navigation">
         <button className="nav-btn" onClick={onFocusSearch} id="navSearch">
           <svg viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="7" />
@@ -87,6 +90,14 @@ export const Cover: React.FC<CoverProps> = ({
           </svg>
           <span>Ask / Search</span>
           <small>⌘K</small>
+        </button>
+
+        <button className="nav-btn nav-tutorial" onClick={onPlayTutorial} id="navTutorial">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m9 7 8 5-8 5z" />
+          </svg>
+          <span>Play Tutorial</span>
+          <small>guide</small>
         </button>
 
         <button className="nav-btn" onClick={() => onOpenOverlay('index')} id="navIndex">
@@ -97,11 +108,18 @@ export const Cover: React.FC<CoverProps> = ({
           <small id="termCount">{totalTerms}</small>
         </button>
 
-        <button className="nav-btn" onClick={() => onOpenOverlay('bookmarks')} id="navBookmarks">
+        <button
+          className="nav-btn"
+          onClick={() => onOpenOverlay('bookmarks')}
+          id="navBookmarks"
+          disabled={entryActionsDisabled}
+          aria-disabled={entryActionsDisabled}
+          title={entryActionsDisabled ? 'Available on an entry page' : 'Open bookmarks'}
+        >
           <svg viewBox="0 0 24 24">
             <path d="M6 3h12v18l-6-4-6 4z" />
           </svg>
-          <span>Dog-eared pages</span>
+          <span>Bookmarks</span>
           <small id="bookmarkCount">{bookmarkCount}</small>
         </button>
 
@@ -119,11 +137,18 @@ export const Cover: React.FC<CoverProps> = ({
             <path d="M4 6h16M4 12h16M4 18h16" />
             <path d="M8 4v4m5 2v4m4 2v4" />
           </svg>
-          <span>Chronology</span>
-          <small>fold-out</small>
+          <span>Timeline</span>
+          <small>view</small>
         </button>
 
-        <button className="nav-btn" onClick={() => onOpenOverlay('collections')} id="navCollections">
+        <button
+          className="nav-btn"
+          onClick={() => onOpenOverlay('collections')}
+          id="navCollections"
+          disabled={entryActionsDisabled}
+          aria-disabled={entryActionsDisabled}
+          title={entryActionsDisabled ? 'Available on an entry page' : 'Open collections'}
+        >
           <svg viewBox="0 0 24 24">
             <path d="M4 5h7v14H4zM13 5h7v14h-7z" />
             <path d="M6 8h3m6 0h3" />
@@ -137,14 +162,21 @@ export const Cover: React.FC<CoverProps> = ({
             <path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
           </svg>
           <span>Surprise me</span>
-          <small>riffle</small>
+          <small>random</small>
         </button>
 
-        <button className="nav-btn" onClick={() => onOpenOverlay('clip')} id="navClip">
+        <button
+          className="nav-btn"
+          onClick={() => onOpenOverlay('clip')}
+          id="navClip"
+          disabled={entryActionsDisabled}
+          aria-disabled={entryActionsDisabled}
+          title={entryActionsDisabled ? 'Available on an entry page' : 'Save this entry'}
+        >
           <svg viewBox="0 0 24 24">
             <path d="M8 3v18M16 3v18M3 8h18M3 16h18" />
           </svg>
-          <span>Clip this entry</span>
+          <span>Save this entry</span>
           <small>share</small>
         </button>
 
@@ -169,7 +201,14 @@ export const Cover: React.FC<CoverProps> = ({
         <small className="cover-version">v{APP_VERSION}</small>
         <div className="sound-row">
           <span>Paper &amp; ink sounds</span>
-          <button className="sound-toggle" onClick={onToggleSound} id="soundToggle">
+          <button
+            type="button"
+            className="sound-toggle"
+            onClick={onToggleSound}
+            id="soundToggle"
+            aria-pressed={soundEnabled}
+            aria-label={`Paper and ink sounds ${soundEnabled ? 'on' : 'off'}`}
+          >
             {soundEnabled ? 'On' : 'Off'}
           </button>
         </div>

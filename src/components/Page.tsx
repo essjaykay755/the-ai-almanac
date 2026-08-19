@@ -176,7 +176,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                   <button className="suggestion" type="button">
                     <span className="letter">?</span>
                     <span>
-                      <strong>No exact leaf</strong>
+                      <strong>No exact match</strong>
                       <br />
                       <small>Describe the idea instead</small>
                     </span>
@@ -218,7 +218,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
               id="bookmarkBtn"
               onClick={onToggleBookmark}
               aria-label={`${isBookmarked ? 'Remove bookmark' : 'Bookmark'} ${currentTerm.word}`}
-              title={isBookmarked ? 'Remove bookmark' : 'Bookmark this leaf'}
+              title={isBookmarked ? 'Remove bookmark' : 'Bookmark this entry'}
             >
               <svg className="bookmark-svg" viewBox="0 0 24 34" fill="none">
                 <path
@@ -244,7 +244,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
               </button>
             </div>
 
-            <div className="mode-switch">
+            <div className="mode-switch" id="modeSwitch">
               {(Object.keys(modeNames) as ExplanationMode[]).map((m) => (
                 <button
                   key={m}
@@ -256,7 +256,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
               ))}
             </div>
 
-            <div className="definition-wrap">
+            <div className="definition-wrap" id="definitionContent">
               <span className="sense-num">1.</span>
               <div className="definition-mode">{modeNames[explanationMode]}</div>
               <p className={`definition ${fromSearchQuestion ? 'search-hit' : ''}`}>{explanationText}</p>
@@ -274,26 +274,26 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
               </section>
             </div>
 
-            <div className="entry-actions">
+            <div className="entry-actions" id="entryActions">
               <button className="text-action" onClick={onOpenPicker} id="addCollection">
-                + collection
+                + add to collection
               </button>
               <button className="text-action" onClick={onOpenClip} id="clipEntry">
-                clip entry
+                save entry
               </button>
               <button className="text-action" onClick={onCopyLink} id="copyDeepLink">
                 copy link
               </button>
               <button className="text-action" onClick={onOpenTimeline} id="openChronology">
-                chronology
+                timeline
               </button>
             </div>
 
-            <div className="thread">
+            <div className="thread" id="thread">
               <div className="thread-head">
-                <span className="thread-title">Follow the thread</span>
+                <span className="thread-title">Recent terms</span>
                 <button className="thread-clear" onClick={onClearTrail} id="clearThread">
-                  Clear trail
+                  Clear list
                 </button>
               </div>
               <div className="trail" id="trail">
@@ -367,7 +367,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
           </aside>
         </div>
 
-        <footer className="page-footer">
+        <footer className="page-footer" id="pageNavigation">
           <button
             type="button"
             className="footer-nav footer-prev left"

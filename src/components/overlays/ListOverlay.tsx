@@ -21,9 +21,9 @@ export const ListOverlay: React.FC<ListOverlayProps> = ({
   if (!isOpen) return null;
 
   const isBookmarks = kind === 'bookmarks';
-  const title = isBookmarks ? 'Dog-eared pages' : 'Reading history';
+  const title = isBookmarks ? 'Bookmarks' : 'Reading history';
   const eyebrow = isBookmarks
-    ? 'The AI Almanac · saved leaves'
+    ? 'The AI Almanac · saved entries'
     : 'The AI Almanac · recently opened';
 
   return (
@@ -41,7 +41,7 @@ export const ListOverlay: React.FC<ListOverlayProps> = ({
 
         <div className="list" id="listContent">
           {words.length === 0 ? (
-            <div className="empty-state">No pages filed here yet.</div>
+            <div className="empty-state">No bookmarks yet.</div>
           ) : (
             words.map((word) => {
               const t = termsByWord[word.toLowerCase()];

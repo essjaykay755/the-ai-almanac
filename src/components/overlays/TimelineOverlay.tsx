@@ -23,8 +23,8 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
       <section className="insert timeline-insert" role="dialog" aria-modal="true">
         <div className="timeline-head">
           <div>
-            <small>The AI Almanac · fold-out chronology</small>
-            <h2>How the vocabulary accumulated</h2>
+            <small>The AI Almanac · timeline</small>
+            <h2>How the terms developed</h2>
           </div>
           <button className="close" onClick={onClose} aria-label="Close">
             ×
@@ -48,7 +48,7 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
                     }
                   }}
                 >
-                  Open related entry →
+                  Open this term →
                 </button>
               </article>
             ))}

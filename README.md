@@ -7,10 +7,10 @@ The AI Almanac is an evolving reference book for AI enthusiasts and vibe coders.
 - Search the glossary with ranked suggestions, aliases, and natural-language prompts.
 - Read entries in Dictionary, Plain English, Technical, or Vibe Coder modes.
 - Navigate with the A–Z index, previous/next controls, keyboard shortcuts, deep links, and related terms.
-- Browse the complete index, About cover page, chronology, reading history, bookmarks, and collections.
-- Bookmark entries and organize them into editable reading lists persisted in the browser; create, rename, delete, and remove leaves from collections.
-- Clip an entry as a PNG, copy its text or deep link, or share it through the browser share sheet.
-- Hear pronunciation with browser speech synthesis and optionally enable page-turn paper sounds.
+- Browse the complete index, About cover page, timeline, reading history, bookmarks, and collections.
+- Bookmark entries and organize them into editable reading lists persisted in the browser; create, rename, delete, and remove entries from collections.
+- Save an entry as a PNG, copy its text or deep link, or share it through the browser share sheet.
+- Hear pronunciation with browser speech synthesis and tactile paper sound effects throughout the book.
 - Use the responsive book layout on desktop, tablet, and mobile screens.
 
 ## Getting started
@@ -51,15 +51,15 @@ Open the local URL printed by Vite, usually `http://localhost:5173`.
 src/
 ├── App.tsx                 # Application state, navigation, persistence, and overlays
 ├── components/             # Cover, About page, glossary page, mobile controls, tabs, and overlays
-├── data/terms.ts           # Glossary entries, special explanations, and chronology
+├── data/terms.ts           # Glossary entries, special explanations, and timeline
 ├── types/almanac.ts        # Shared domain types
 ├── utils/search.ts         # Search and query matching
 ├── utils/pronunciation.ts  # Pronunciation lookup and fallbacks
 ├── utils/sound.ts          # Page-turn and paper audio helpers
-└── utils/canvasExport.ts   # PNG clipping export
+└── utils/canvasExport.ts   # PNG entry export
 ```
 
-The app is client-side only. Bookmarks, history, collections, and sound preferences are stored in `localStorage`; the current entry and About view are shareable through the URL hash.
+The app is client-side only. Bookmarks, history, and collections are stored in `localStorage`; the current entry and About view are shareable through the URL hash.
 
 ## Stack
 
