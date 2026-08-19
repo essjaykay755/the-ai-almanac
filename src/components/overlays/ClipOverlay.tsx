@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import type { Term, ClipStyle } from '../../types/almanac';
-import { drawClipToCanvas, downloadCanvasAsPng, renderClipPreviewToCanvas } from '../../utils/canvasExport';
+import { downloadCanvasAsPng, renderClipPreviewToCanvas } from '../../utils/canvasExport';
 import { playPaperTearSound } from '../../utils/sound';
 import { getPublicPath, getTermRoutePath } from '../../utils/ogImage';
 
@@ -89,33 +89,13 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
       playPaperTearSound();
     }
     const filename = `the-ai-almanac-${term.word.toLowerCase().replace(/\s+/g, '-')}.png`;
-    const createCompatibilityCanvas = () => {
-      const fallbackCanvas = document.createElement('canvas');
-      drawClipToCanvas(fallbackCanvas, term, clipStyle, pageNumber, formattedDate);
-      return fallbackCanvas;
-    };
-
-    let exportCanvas = canvasRef.current;
     try {
       await renderClipPreviewToCanvas(canvasRef.current, previewRef.current);
-    } catch {
-      // Some browsers do not render SVG foreignObject content into an image.
-      // Keep the save action usable there with the deterministic renderer.
-      exportCanvas = createCompatibilityCanvas();
-    }
-
-    try {
-      downloadCanvasAsPng(exportCanvas, filename);
+      downloadCanvasAsPng(canvasRef.current, filename);
       onShowStamp('ENTRY SAVED');
     } catch {
-      // A foreignObject canvas can render but still be blocked by canvas
-      // security rules when read back. Retry with a fresh compatibility canvas.
-      try {
-        downloadCanvasAsPng(createCompatibilityCanvas(), filename);
-        onShowStamp('ENTRY SAVED');
-      } catch {
-        onShowStamp('ENTRY SAVE FAILED');
-      }
+      // Never download a different visual treatment as a silent fallback.
+      onShowStamp('ENTRY SAVE FAILED');
     }
   };
 

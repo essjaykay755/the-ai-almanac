@@ -1,60 +1,8 @@
+import html2canvas from 'html2canvas';
 import type { Term, ClipStyle } from '../types/almanac';
 
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 675;
-
-function collectDocumentStyles(): string {
-  return Array.from(document.styleSheets)
-    .map((styleSheet) => {
-      try {
-        return Array.from(styleSheet.cssRules)
-          .map((rule) => rule.cssText)
-          .join('\n');
-      } catch {
-        return '';
-      }
-    })
-    .filter(Boolean)
-    .join('\n');
-}
-
-function copyComputedStyles(source: HTMLElement, target: HTMLElement): void {
-  const sourceElements = [source, ...Array.from(source.querySelectorAll<HTMLElement>('*'))];
-  const targetElements = [target, ...Array.from(target.querySelectorAll<HTMLElement>('*'))];
-
-  sourceElements.forEach((sourceElement, index) => {
-    const targetElement = targetElements[index];
-    if (!targetElement) return;
-
-    const computed = window.getComputedStyle(sourceElement);
-    for (let propertyIndex = 0; propertyIndex < computed.length; propertyIndex += 1) {
-      const property = computed.item(propertyIndex);
-      targetElement.style.setProperty(
-        property,
-        computed.getPropertyValue(property),
-        computed.getPropertyPriority(property)
-      );
-    }
-  });
-}
-
-function loadSvgImage(svg: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const image = new Image();
-    image.decoding = 'async';
-    image.onload = () => {
-      URL.revokeObjectURL(url);
-      resolve(image);
-    };
-    image.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error('The saved entry preview could not be rendered.'));
-    };
-    image.src = url;
-  });
-}
 
 /**
  * Renders the actual preview element into a PNG canvas. Keeping the DOM and
@@ -68,41 +16,25 @@ export async function renderClipPreviewToCanvas(
   await document.fonts?.ready;
 
   const width = Math.max(1, Math.ceil(preview.offsetWidth));
-  const height = Math.max(1, Math.ceil(preview.offsetHeight));
   const scale = Math.max(2, Math.min(3, 2400 / width));
-  const clone = preview.cloneNode(true) as HTMLElement;
+  const rendered = await html2canvas(preview, {
+    allowTaint: false,
+    backgroundColor: null,
+    imageTimeout: 15000,
+    logging: false,
+    removeContainer: true,
+    scale,
+    useCORS: true
+  });
 
-  clone.removeAttribute('id');
-  copyComputedStyles(preview, clone);
-  clone.style.width = `${width}px`;
-  clone.style.height = `${height}px`;
-  clone.style.minHeight = `${height}px`;
-  // The preview may be slightly rotated for materiality. Export the complete
-  // card at its natural dimensions so the transform cannot crop its corners.
-  clone.style.transform = 'none';
-  clone.style.transformOrigin = 'top left';
-  clone.style.margin = '0';
-
-  const styles = collectDocumentStyles();
-  const serialized = new XMLSerializer().serializeToString(clone);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-  <foreignObject x="0" y="0" width="${width}" height="${height}">
-    <div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden;">
-      <style>${styles}</style>
-      ${serialized}
-    </div>
-  </foreignObject>
-</svg>`;
-
-  const image = await loadSvgImage(svg);
-  canvas.width = Math.round(width * scale);
-  canvas.height = Math.round(height * scale);
+  canvas.width = rendered.width;
+  canvas.height = rendered.height;
   const ctx = canvas.getContext('2d');
   if (!ctx) return canvas;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.imageSmoothingEnabled = true;
-  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(rendered, 0, 0);
   return canvas;
 }
 
