@@ -988,7 +988,11 @@ export const App: React.FC = () => {
   const handleOpenAbout = useCallback(() => {
     setIsMobileMenuOpen(false);
     pendingTermRef.current = null;
-    animateAboutTurn('about');
+    if (bookViewRef.current === 'about') {
+      animateAboutTurn('term');
+    } else {
+      animateAboutTurn('about');
+    }
   }, [animateAboutTurn]);
 
   const handleCloseAbout = useCallback(() => {
