@@ -27,7 +27,13 @@ export const MobileBar: React.FC<MobileBarProps> = ({
         </svg>
       </button>
       <div className="mobile-title">
-        <span>AI <em>Almanac</em></span>
+        <span className="mobile-wordmark">
+          <span className="mobile-main-lockup">
+            <small>The</small>
+            <strong>AI</strong>
+          </span>
+          <em>Almanac</em>
+        </span>
         <Ornament className="mobile-brand-mark" />
       </div>
       <button onClick={onFocusSearch} id="mobileSearch" aria-label="Search" title="Search terms">

@@ -14,8 +14,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onBack }) => {
     <article className="about-page" aria-labelledby="about-page-title">
       <div className="about-page-inner redesign-layout">
         <header className="about-page-header">
-          <div className="about-wordmark" aria-label="AI Almanac">
-            <strong className="wordmark-main">AI</strong>
+          <div className="about-wordmark" aria-label="The AI Almanac">
+            <span className="wordmark-main-lockup">
+              <span className="wordmark-pretitle">The</span>
+              <strong className="wordmark-main">AI</strong>
+            </span>
             <span className="wordmark-suffix">Almanac</span>
           </div>
           <div className="about-page-mark" aria-hidden="true">

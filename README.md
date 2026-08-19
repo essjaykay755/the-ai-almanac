@@ -1,6 +1,6 @@
-# AI Almanac
+# The AI Almanac
 
-AI Almanac is an evolving reference book for AI enthusiasts and vibe coders. It presents a searchable living dictionary of artificial intelligence concepts, architectures, and practices inside a tactile, book-inspired interface.
+The AI Almanac is an evolving reference book for AI enthusiasts and vibe coders. It presents a searchable living dictionary of artificial intelligence concepts, architectures, and practices inside a tactile, book-inspired interface.
 
 ## Features
 

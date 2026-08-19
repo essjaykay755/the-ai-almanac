@@ -1,5 +1,5 @@
 /**
- * Authentic dictionary phonetic transcription dictionary and rule engine for AI Almanac.
+ * Authentic dictionary phonetic transcription dictionary and rule engine for The AI Almanac.
  * Provides IPA / dictionary pronunciation guides for all AI & computing terms.
  */
 

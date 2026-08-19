@@ -236,7 +236,7 @@ function createDestinationSnapshot(
 
       const noteHeading = marginNote.querySelector('strong');
       if (noteHeading) {
-        noteHeading.textContent = isSearchResult ? 'The Almanac suggests' : 'Marginalia';
+        noteHeading.textContent = isSearchResult ? 'The AI Almanac suggests' : 'Marginalia';
       }
 
       const noteText = marginNote.querySelector('p');

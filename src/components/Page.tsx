@@ -153,8 +153,8 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                 ref={searchRef}
                 id="search"
                 autoComplete="off"
-                placeholder="Ask AI Almanac or search a term…"
-                aria-label="Search AI Almanac"
+                placeholder="Ask The AI Almanac or search a term…"
+                aria-label="Search The AI Almanac"
                 value={searchQuery}
                 onChange={(e) => {
                   const value = e.target.value;

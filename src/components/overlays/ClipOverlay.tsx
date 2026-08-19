@@ -30,14 +30,14 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
   };
 
   const getClipText = () => {
-    return `${term.word}${term.pron ? ` ${term.pron}` : ''} · ${term.part}\n\n${term.definition}\n\nAI Almanac — ${deepLink()}`;
+    return `${term.word}${term.pron ? ` ${term.pron}` : ''} · ${term.part}\n\n${term.definition}\n\nThe AI Almanac — ${deepLink()}`;
   };
 
   const handleDownloadPng = () => {
     if (!canvasRef.current) return;
     playPaperTearSound();
     drawClipToCanvas(canvasRef.current, term, clipStyle, pageNumber, formattedDate);
-    const filename = `ai-almanac-${term.word.toLowerCase().replace(/\s+/g, '-')}.png`;
+    const filename = `the-ai-almanac-${term.word.toLowerCase().replace(/\s+/g, '-')}.png`;
     downloadCanvasAsPng(canvasRef.current, filename);
     onShowStamp('CLIPPING EXPORTED');
   };
@@ -64,7 +64,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${term.word} — AI Almanac`,
+          title: `${term.word} — The AI Almanac`,
           text: term.definition,
           url: deepLink()
         });
@@ -82,7 +82,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
       <section className="insert clip-insert" role="dialog" aria-modal="true">
         <div className="insert-head">
           <div>
-            <small>AI Almanac · clipping desk</small>
+            <small>The AI Almanac · clipping desk</small>
             <h2>Clip this entry</h2>
           </div>
           <button className="close" onClick={onClose} aria-label="Close">
@@ -92,7 +92,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
 
         <div className="clip-layout">
           <article className={`clipping ${clipStyle !== 'clipping' ? clipStyle : ''}`} id="clippingPreview">
-            <div className="clip-mast">AI ALMANAC · CLIPPED ENTRY</div>
+            <div className="clip-mast">THE AI ALMANAC · CLIPPED ENTRY</div>
             <div className="clip-word" id="clipWord">
               {term.word}
             </div>

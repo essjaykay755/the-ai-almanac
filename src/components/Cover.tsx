@@ -68,7 +68,11 @@ export const Cover: React.FC<CoverProps> = ({
       )}
       <div className="brand">
         <h1>
-          AI<span>Almanac</span>
+          <span className="brand-main-lockup">
+            <small className="brand-pretitle">The</small>
+            <span className="brand-main">AI</span>
+          </span>
+          <span className="brand-suffix">Almanac</span>
         </h1>
         <p>An evolving reference book for AI enthusiasts &amp; vibe coders</p>
         <Ornament className="brand-mark" />
