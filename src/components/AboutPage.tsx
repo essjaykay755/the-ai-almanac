@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Ornament } from './Ornament';
 import { APP_VERSION } from '../version';
+import essjaykayLogoUrl from '../assets/essjaykay-logo.svg';
 
 interface AboutPageProps {
   totalTerms: number;
@@ -64,7 +65,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onBack }) => {
               </div>
             </div>
             <div className="about-website">
-              <a href="https://essjaykay.dev" target="_blank" rel="noreferrer">EssJayKay.dev</a>
+              <a href="https://essjaykay.dev" target="_blank" rel="noreferrer">
+                <img className="about-website-logo" src={essjaykayLogoUrl} alt="EssJayKay.dev" />
+              </a>
             </div>
           </div>
           

@@ -40,6 +40,19 @@ type TermSelectionOptions = {
   direction?: 'forward' | 'backward';
 };
 
+type Collections = Record<string, string[]>;
+
+const legacyDefaultCollections: Collections = {
+  'Vibe coder essentials': ['vibe coding', 'diff', 'ship loop', 'taste', 'eval'],
+  'Agent rabbit hole': ['agentic', 'tool calling', 'workflow', 'reasoning', 'grounding']
+};
+
+const defaultCollections: Collections = {
+  ...legacyDefaultCollections,
+  'Build & ship': ['prompt-to-product', 'tool calling', 'workflow', 'observability', 'diff'],
+  'Evaluation & safety': ['eval', 'benchmark', 'guardrail', 'safety eval', 'grounding']
+};
+
 function getBookViewFromHash(): BookView {
   return typeof window !== 'undefined' && window.location.hash === '#about' ? 'about' : 'term';
 }
@@ -62,6 +75,33 @@ const isCollections = (value: unknown): value is Record<string, string[]> =>
   typeof value === 'object' &&
   value !== null &&
   Object.values(value).every((items) => isStringArray(items));
+
+function collectionsMatch(left: Collections, right: Collections): boolean {
+  const leftNames = Object.keys(left);
+  const rightNames = Object.keys(right);
+  if (leftNames.length !== rightNames.length || leftNames.some((name) => !right[name])) return false;
+  return leftNames.every((name) => {
+    const leftItems = left[name];
+    const rightItems = right[name];
+    return leftItems.length === rightItems.length && leftItems.every((item, index) => item === rightItems[index]);
+  });
+}
+
+function loadCollections(): Collections {
+  const stored = loadStorage<Collections>('aiAlmanacCollections', defaultCollections, isCollections);
+
+  // Upgrade an untouched install from the original two seeded collections to the new four.
+  // Any renamed, deleted, or otherwise edited collection set is left exactly as the user saved it.
+  return collectionsMatch(stored, legacyDefaultCollections) ? defaultCollections : stored;
+}
+
+function hasCollection(collections: Collections, name: string): boolean {
+  return Object.prototype.hasOwnProperty.call(collections, name);
+}
+
+function normalizeCollectionName(name: string): string {
+  return name.trim().replace(/\s+/g, ' ');
+}
 
 const isBoolean = (value: unknown): value is boolean => typeof value === 'boolean';
 
@@ -298,7 +338,7 @@ export const App: React.FC = () => {
   }, [resolveTerm]);
 
   const [currentTerm, setCurrentTerm] = useState<Term>(() => {
-    return getHashTerm() || resolveTerm('vibe coding') || sortedTerms[0];
+    return getHashTerm() || resolveTerm('artificial intelligence') || sortedTerms[0];
   });
   const initialBookView = getBookViewFromHash();
   const [bookView, setBookView] = useState<BookView>(initialBookView);
@@ -315,12 +355,7 @@ export const App: React.FC = () => {
   const [historyTerms, setHistoryTerms] = useState<string[]>(() =>
     loadStorage<string[]>('aiAlmanacHistory', [currentTerm.word], isStringArray)
   );
-  const [collections, setCollections] = useState<Record<string, string[]>>(() =>
-    loadStorage<Record<string, string[]>>('aiAlmanacCollections', {
-      'Vibe coder essentials': ['vibe coding', 'diff', 'ship loop', 'taste', 'eval'],
-      'Agent rabbit hole': ['agentic', 'tool calling', 'workflow', 'reasoning', 'grounding']
-    }, isCollections)
-  );
+  const [collections, setCollections] = useState<Collections>(loadCollections);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() =>
     loadStorage<boolean>('aiAlmanacSound', false, isBoolean)
   );
@@ -1110,31 +1145,106 @@ export const App: React.FC = () => {
 
   // Collections handler
   const handleCreateCollection = useCallback(
-    (name: string) => {
-      if (!collections[name]) {
-        const updated = { ...collections, [name]: [] };
-        setCollections(updated);
-        saveStorage('aiAlmanacCollections', updated);
-        triggerStamp(`COLLECTION “${name}” CREATED`);
+    (name: string): boolean => {
+      const trimmed = normalizeCollectionName(name);
+      if (!trimmed) {
+        triggerStamp('COLLECTION NAME REQUIRED');
+        return false;
       }
+      if (hasCollection(collections, trimmed)) {
+        triggerStamp('COLLECTION ALREADY EXISTS');
+        return false;
+      }
+
+      const updated = { ...collections, [trimmed]: [] };
+      setCollections(updated);
+      saveStorage('aiAlmanacCollections', updated);
+      triggerStamp(`COLLECTION “${trimmed}” CREATED`);
+      return true;
     },
     [collections, triggerStamp]
   );
 
   const handleAddToCollection = useCallback(
     (name: string) => {
-      const existing = collections[name] || [];
-      if (!existing.includes(currentTerm.word)) {
-        const updated = { ...collections, [name]: [...existing, currentTerm.word] };
+      const trimmed = normalizeCollectionName(name);
+      if (!trimmed) {
+        triggerStamp('COLLECTION NAME REQUIRED');
+        return;
+      }
+
+      const existing = collections[trimmed];
+      if (existing && !existing.includes(currentTerm.word)) {
+        const updated = { ...collections, [trimmed]: [...existing, currentTerm.word] };
         setCollections(updated);
         saveStorage('aiAlmanacCollections', updated);
-        triggerStamp(`FILED IN ${name.toUpperCase()}`);
+        triggerStamp(`FILED IN ${trimmed.toUpperCase()}`);
+      } else if (existing) {
+        triggerStamp(`ALREADY IN ${trimmed.toUpperCase()}`);
       } else {
-        triggerStamp(`ALREADY IN ${name.toUpperCase()}`);
+        const updated = { ...collections, [trimmed]: [currentTerm.word] };
+        setCollections(updated);
+        saveStorage('aiAlmanacCollections', updated);
+        triggerStamp(`COLLECTION “${trimmed}” CREATED & FILED`);
       }
       setActiveOverlay(null);
     },
     [collections, currentTerm, triggerStamp]
+  );
+
+  const handleRenameCollection = useCallback(
+    (currentName: string, nextName: string): boolean => {
+      const trimmed = normalizeCollectionName(nextName);
+      if (!hasCollection(collections, currentName)) return false;
+      if (!trimmed) {
+        triggerStamp('COLLECTION NAME REQUIRED');
+        return false;
+      }
+      if (trimmed !== currentName && hasCollection(collections, trimmed)) {
+        triggerStamp('COLLECTION ALREADY EXISTS');
+        return false;
+      }
+      if (trimmed === currentName) return true;
+
+      const updated: Collections = {};
+      Object.entries(collections).forEach(([name, words]) => {
+        updated[name === currentName ? trimmed : name] = words;
+      });
+      setCollections(updated);
+      saveStorage('aiAlmanacCollections', updated);
+      triggerStamp(`COLLECTION RENAMED TO “${trimmed}”`);
+      return true;
+    },
+    [collections, triggerStamp]
+  );
+
+  const handleDeleteCollection = useCallback(
+    (name: string) => {
+      if (!hasCollection(collections, name)) return;
+
+      const updated = { ...collections };
+      delete updated[name];
+      setCollections(updated);
+      saveStorage('aiAlmanacCollections', updated);
+      triggerStamp(`COLLECTION “${name}” DELETED`);
+    },
+    [collections, triggerStamp]
+  );
+
+  const handleRemoveFromCollection = useCallback(
+    (collectionName: string, word: string) => {
+      const existing = collections[collectionName];
+      if (!existing) return;
+
+      const updated = {
+        ...collections,
+        [collectionName]: existing.filter((item) => item !== word)
+      };
+      setCollections(updated);
+      saveStorage('aiAlmanacCollections', updated);
+      triggerStamp(`REMOVED FROM ${collectionName.toUpperCase()}`);
+    },
+    [collections, triggerStamp]
   );
 
   // Tab jump by letter
@@ -1383,12 +1493,14 @@ export const App: React.FC = () => {
         onClose={() => setActiveOverlay(null)}
         onSelectTerm={handleSelectTerm}
         onCreateCollection={handleCreateCollection}
+        onRenameCollection={handleRenameCollection}
+        onDeleteCollection={handleDeleteCollection}
+        onRemoveFromCollection={handleRemoveFromCollection}
       />
 
       <PickerOverlay
         isOpen={activeOverlay === 'picker'}
         collections={collections}
-        currentWord={currentTerm.word}
         onClose={() => setActiveOverlay(null)}
         onAddToCollection={handleAddToCollection}
       />

@@ -8,7 +8,7 @@ The AI Almanac is an evolving reference book for AI enthusiasts and vibe coders.
 - Read entries in Dictionary, Plain English, Technical, or Vibe Coder modes.
 - Navigate with the A–Z index, previous/next controls, keyboard shortcuts, deep links, and related terms.
 - Browse the complete index, About cover page, chronology, reading history, bookmarks, and collections.
-- Bookmark entries and organize them into reading lists persisted in the browser.
+- Bookmark entries and organize them into editable reading lists persisted in the browser; create, rename, delete, and remove leaves from collections.
 - Clip an entry as a PNG, copy its text or deep link, or share it through the browser share sheet.
 - Hear pronunciation with browser speech synthesis and optionally enable page-turn paper sounds.
 - Use the responsive book layout on desktop, tablet, and mobile screens.

@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 interface PickerOverlayProps {
   isOpen: boolean;
   collections: Record<string, string[]>;
-  currentWord: string;
   onClose: () => void;
   onAddToCollection: (collectionName: string) => void;
 }

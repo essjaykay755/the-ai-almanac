@@ -1,5 +1,6 @@
 import React from 'react';
 import type { OverlayType } from '../types/almanac';
+import { APP_VERSION } from '../version';
 import { Ornament } from './Ornament';
 
 interface CoverProps {
@@ -170,6 +171,8 @@ export const Cover: React.FC<CoverProps> = ({
           {soundEnabled ? 'On' : 'Off'}
         </button>
       </div>
+
+      <small className="cover-version">v{APP_VERSION}</small>
     </aside>
   );
 };

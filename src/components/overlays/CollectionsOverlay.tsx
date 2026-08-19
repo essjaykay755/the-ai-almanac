@@ -7,8 +7,10 @@ interface CollectionsOverlayProps {
   termsByWord: Record<string, Term>;
   onClose: () => void;
   onSelectTerm: (term: TermSelectionTarget) => void;
-  onCreateCollection: (name: string) => void;
-  onDeleteCollection?: (name: string) => void;
+  onCreateCollection: (name: string) => boolean;
+  onRenameCollection: (currentName: string, nextName: string) => boolean;
+  onDeleteCollection: (name: string) => void;
+  onRemoveFromCollection: (collectionName: string, word: string) => void;
 }
 
 export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
@@ -17,29 +19,84 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
   termsByWord,
   onClose,
   onSelectTerm,
-  onCreateCollection
+  onCreateCollection,
+  onRenameCollection,
+  onDeleteCollection,
+  onRemoveFromCollection
 }) => {
   const collectionNames = Object.keys(collections);
   const [selectedCollection, setSelectedCollection] = useState<string>(
     collectionNames[0] || 'Vibe coder essentials'
   );
   const [newCollectionName, setNewCollectionName] = useState('');
+  const [editingCollection, setEditingCollection] = useState<string | null>(null);
+  const [editedCollectionName, setEditedCollectionName] = useState('');
+  const [pendingDeleteCollection, setPendingDeleteCollection] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const currentCollectionName = collections[selectedCollection]
+  const currentCollectionName = Object.prototype.hasOwnProperty.call(collections, selectedCollection)
     ? selectedCollection
     : collectionNames[0] || '';
   const currentItems = collections[currentCollectionName] || [];
 
+  const handleSelectCollection = (name: string) => {
+    setSelectedCollection(name);
+    setEditingCollection(null);
+    setPendingDeleteCollection(null);
+  };
+
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = newCollectionName.trim();
-    if (trimmed && !collections[trimmed]) {
-      onCreateCollection(trimmed);
+    if (trimmed && onCreateCollection(trimmed)) {
       setSelectedCollection(trimmed);
       setNewCollectionName('');
+      setPendingDeleteCollection(null);
     }
+  };
+
+  const beginRename = () => {
+    if (!currentCollectionName) return;
+    setEditingCollection(currentCollectionName);
+    setEditedCollectionName(currentCollectionName);
+    setPendingDeleteCollection(null);
+  };
+
+  const cancelRename = () => {
+    setEditingCollection(null);
+    setEditedCollectionName('');
+  };
+
+  const handleRename = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentCollectionName) return;
+
+    const trimmed = editedCollectionName.trim();
+    if (trimmed && onRenameCollection(currentCollectionName, trimmed)) {
+      setSelectedCollection(trimmed);
+      cancelRename();
+    }
+  };
+
+  const handleDelete = () => {
+    if (!currentCollectionName) return;
+
+    setPendingDeleteCollection(currentCollectionName);
+  };
+
+  const cancelDelete = () => {
+    setPendingDeleteCollection(null);
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDeleteCollection) return;
+
+    const nextCollection = collectionNames.find((name) => name !== pendingDeleteCollection) || '';
+    onDeleteCollection(pendingDeleteCollection);
+    setSelectedCollection(nextCollection);
+    setPendingDeleteCollection(null);
+    cancelRename();
   };
 
   return (
@@ -61,7 +118,7 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
               <button
                 key={name}
                 className={`collection-tab ${name === currentCollectionName ? 'active' : ''}`}
-                onClick={() => setSelectedCollection(name)}
+                onClick={() => handleSelectCollection(name)}
               >
                 {name} <small>({(collections[name] || []).length})</small>
               </button>
@@ -82,36 +139,110 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
           </aside>
 
           <section>
-            <div className="list" id="collectionItems">
-              {currentItems.length === 0 ? (
-                <div className="empty-state">This collection has no leaves yet.</div>
-              ) : (
-                currentItems.map((word) => {
-                  const t = termsByWord[word.toLowerCase()];
-                  if (!t) return null;
-                  return (
-                    <button
-                      key={t.word}
-                      className="list-row"
-                      onClick={() => {
-                        onSelectTerm(t);
-                        onClose();
-                      }}
-                    >
-                      <span className="list-letter">{t.word[0].toUpperCase()}</span>
-                      <span>
-                        <strong>{t.word}</strong>
-                        <span>{t.part}</span>
-                      </span>
-                      <span>open →</span>
+            {currentCollectionName ? (
+              <div className="collection-detail-head">
+                {editingCollection === currentCollectionName ? (
+                  <form onSubmit={handleRename} className="collection-rename-form">
+                    <input
+                      id="editCollectionName"
+                      aria-label="Collection name"
+                      maxLength={36}
+                      value={editedCollectionName}
+                      onChange={(e) => setEditedCollectionName(e.target.value)}
+                      autoFocus
+                    />
+                    <button type="submit" className="mini-btn">
+                      Save
                     </button>
-                  );
-                })
-              )}
-            </div>
+                    <button type="button" className="mini-btn" onClick={cancelRename}>
+                      Cancel
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    <div>
+                      <small>Collection · {currentItems.length} leaves</small>
+                      <h3>{currentCollectionName}</h3>
+                    </div>
+                    {pendingDeleteCollection === currentCollectionName ? (
+                      <div className="collection-delete-confirm" role="alert">
+                        <span>Delete this collection?</span>
+                        <button type="button" className="mini-btn" onClick={cancelDelete}>
+                          Cancel
+                        </button>
+                        <button type="button" className="mini-btn collection-confirm-delete" onClick={confirmDelete}>
+                          Delete
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="collection-actions">
+                        <button type="button" className="mini-btn" onClick={beginRename}>
+                          Rename
+                        </button>
+                        <button type="button" className="mini-btn collection-delete" onClick={handleDelete}>
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="empty-state collection-empty-state">
+                No collections yet. Create one from the field on the left.
+              </div>
+            )}
+
+            {currentCollectionName && (
+              <div className="list" id="collectionItems">
+                {currentItems.length === 0 ? (
+                  <div className="empty-state">This collection has no leaves yet.</div>
+                ) : (
+                  currentItems.map((word, index) => {
+                    const t = termsByWord[word.toLowerCase()];
+                    const displayWord = t?.word || word;
+                    return (
+                      <div key={`${word}-${index}`} className="list-row collection-list-row">
+                        <span className="list-letter">{displayWord[0]?.toUpperCase()}</span>
+                        {t ? (
+                          <button
+                            type="button"
+                            className="collection-item-open"
+                            onClick={() => {
+                              onSelectTerm(t);
+                              onClose();
+                            }}
+                          >
+                            <span className="collection-item-copy">
+                              <strong>{t.word}</strong>
+                              <span>{t.part}</span>
+                            </span>
+                            <span className="collection-item-open-label">open →</span>
+                          </button>
+                        ) : (
+                          <span className="collection-item-copy collection-item-missing">
+                            <strong>{word}</strong>
+                            <span>Entry unavailable</span>
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          className="collection-remove"
+                          aria-label={`Remove ${displayWord} from ${currentCollectionName}`}
+                          onClick={() => onRemoveFromCollection(currentCollectionName, word)}
+                        >
+                          remove
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
           </section>
         </div>
       </section>
+
     </div>
   );
 };
