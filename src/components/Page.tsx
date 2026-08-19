@@ -133,7 +133,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
   const explanationText = getExplanation(currentTerm, explanationMode);
   // Each glossary entry is one real page in the alphabetical book order.
   const pageNumber = termIndex + 1;
-  const pageCounter = `Page ${pageNumber} of ${totalTerms}`;
+  const pageCounter = `Page ${pageNumber}`;
 
   return (
     <article className="page" id="page" ref={ref}>

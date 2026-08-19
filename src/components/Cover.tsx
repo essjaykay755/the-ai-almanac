@@ -165,14 +165,15 @@ export const Cover: React.FC<CoverProps> = ({
 
       <Ornament className="cover-divider-mark" />
 
-      <div className="sound-row">
-        <span>Paper &amp; ink sounds</span>
-        <button className="sound-toggle" onClick={onToggleSound} id="soundToggle">
-          {soundEnabled ? 'On' : 'Off'}
-        </button>
+      <div className="cover-sound-panel">
+        <small className="cover-version">v{APP_VERSION}</small>
+        <div className="sound-row">
+          <span>Paper &amp; ink sounds</span>
+          <button className="sound-toggle" onClick={onToggleSound} id="soundToggle">
+            {soundEnabled ? 'On' : 'Off'}
+          </button>
+        </div>
       </div>
-
-      <small className="cover-version">v{APP_VERSION}</small>
     </aside>
   );
 };

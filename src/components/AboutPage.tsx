@@ -1,15 +1,67 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Ornament } from './Ornament';
 import { APP_VERSION } from '../version';
 import essjaykayLogoUrl from '../assets/essjaykay-logo.svg';
 
 interface AboutPageProps {
   totalTerms: number;
-  onBack: () => void;
 }
 
-export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onBack }) => {
+export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms }) => {
   const [showVideo, setShowVideo] = useState(false);
+  const [touchPreviewOpen, setTouchPreviewOpen] = useState(false);
+  const authorCreditRef = useRef<HTMLDivElement>(null);
+  const firstTouchTap = useRef(false);
+
+  useEffect(() => {
+    const handleTouchOutside = (event: PointerEvent) => {
+      if (
+        event.pointerType !== 'touch' ||
+        !window.matchMedia('(max-width: 760px)').matches ||
+        !authorCreditRef.current ||
+        authorCreditRef.current.contains(event.target as Node)
+      ) {
+        return;
+      }
+
+      firstTouchTap.current = false;
+      setTouchPreviewOpen(false);
+    };
+
+    document.addEventListener('pointerdown', handleTouchOutside);
+    return () => document.removeEventListener('pointerdown', handleTouchOutside);
+  }, []);
+
+  const handleAuthorPointerDown = (event: React.PointerEvent<HTMLAnchorElement>) => {
+    const isMobileTouch =
+      event.pointerType === 'touch' &&
+      window.matchMedia('(max-width: 760px)').matches;
+
+    if (!isMobileTouch) {
+      firstTouchTap.current = false;
+      return;
+    }
+
+    if (!touchPreviewOpen) {
+      firstTouchTap.current = true;
+      event.preventDefault();
+      setTouchPreviewOpen(true);
+    } else {
+      firstTouchTap.current = false;
+    }
+  };
+
+  const handleAuthorClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (firstTouchTap.current) {
+      event.preventDefault();
+      firstTouchTap.current = false;
+      return;
+    }
+
+    if (touchPreviewOpen) {
+      setTouchPreviewOpen(false);
+    }
+  };
 
   return (
     <article className="about-page" aria-labelledby="about-page-title">
@@ -44,15 +96,24 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onBack }) => {
               </svg>
               <span> by </span>
               <div 
+                ref={authorCreditRef}
                 className="author-credit"
                 onMouseEnter={() => setShowVideo(true)}
                 onMouseLeave={() => setShowVideo(false)}
               >
-                <a href="https://x.com/essjaykay755" target="_blank" rel="noreferrer">
+                <a
+                  href="https://x.com/essjaykay755"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-expanded={showVideo || touchPreviewOpen}
+                  aria-controls="author-video-popup"
+                  onPointerDown={handleAuthorPointerDown}
+                  onClick={handleAuthorClick}
+                >
                   Subhojit Karmakar
                 </a>
-                {showVideo && (
-                  <div className="author-video-popup">
+                {(showVideo || touchPreviewOpen) && (
+                  <div id="author-video-popup" className="author-video-popup">
                     <video 
                       src="/author-video.mp4" 
                       autoPlay 
@@ -64,18 +125,16 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onBack }) => {
                 )}
               </div>
             </div>
+          </div>
+          
+          <div className="footer-bottom">
+            <small className="about-terms">{totalTerms} terms</small>
             <div className="about-website">
               <a href="https://essjaykay.dev" target="_blank" rel="noreferrer">
                 <img className="about-website-logo" src={essjaykayLogoUrl} alt="EssJayKay.dev" />
               </a>
             </div>
-          </div>
-          
-          <div className="footer-bottom">
-            <small>v{APP_VERSION} · {totalTerms} terms</small>
-            <button type="button" className="about-back" onClick={onBack}>
-              Back to the almanac <span aria-hidden="true">→</span>
-            </button>
+            <small className="about-version">v{APP_VERSION}</small>
           </div>
         </footer>
       </div>

@@ -153,7 +153,6 @@ function createDestinationSnapshot(
   sampleInner: HTMLElement,
   data: Pick<AlmanacData, 'specialModes' | 'crossRefs'>,
   termIndex: number,
-  totalTerms: number,
   isBookmarked: boolean = false,
   nextTrail: string[] = [],
   fromSearchQuestion: string = '',
@@ -291,11 +290,11 @@ function createDestinationSnapshot(
   // 8. Folio top, page counter
   const pageNumEl = clone.querySelector('#pageNumber') || clone.querySelector('.page-footer .center');
   if (pageNumEl) {
-    pageNumEl.textContent = `Page ${termIndex + 1} of ${totalTerms}`;
+    pageNumEl.textContent = `Page ${termIndex + 1}`;
   }
   const folioTopEl = clone.querySelector('.folio-top');
   if (folioTopEl) {
-    folioTopEl.textContent = `Page ${termIndex + 1} of ${totalTerms}`;
+    folioTopEl.textContent = `Page ${termIndex + 1}`;
   }
 
   // 9. Bookmark button
@@ -641,7 +640,6 @@ export const App: React.FC = () => {
           sampleInner,
           { specialModes, crossRefs },
           safeNextIndex,
-          totalPages,
           isSaved,
           targetTrail,
           targetSearchQuestion,
@@ -1430,7 +1428,7 @@ export const App: React.FC = () => {
 
             {bookView === 'about' && (
               <div className="about-page-layer">
-                <AboutPage totalTerms={totalPages} onBack={handleCloseAbout} />
+                <AboutPage totalTerms={totalPages} />
               </div>
             )}
 
@@ -1453,7 +1451,7 @@ export const App: React.FC = () => {
             </div>
 
             <div className="solid-turn" ref={solidTurnRef} aria-hidden="true">
-              <AboutPage totalTerms={totalPages} onBack={handleCloseAbout} />
+              <AboutPage totalTerms={totalPages} />
             </div>
           </div>
         </section>
