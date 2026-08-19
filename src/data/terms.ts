@@ -1,4 +1,4 @@
-import type { Term, SpecialModes, CrossRefInfo, TimelineItem } from '../types/almanac';
+import type { Term, SpecialModes, CrossRefInfo, TimelineItem } from '../types/almanac.js';
 
 export const terms: Term[] = [
   {

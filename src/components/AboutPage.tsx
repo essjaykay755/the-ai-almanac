@@ -11,7 +11,22 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms }) => {
   const [showVideo, setShowVideo] = useState(false);
   const [touchPreviewOpen, setTouchPreviewOpen] = useState(false);
   const authorCreditRef = useRef<HTMLDivElement>(null);
+  const authorVideoRef = useRef<HTMLVideoElement>(null);
   const firstTouchTap = useRef(false);
+  const videoVisible = showVideo || touchPreviewOpen;
+
+  useEffect(() => {
+    const video = authorVideoRef.current;
+    if (!video) return;
+
+    if (videoVisible) {
+      void video.play().catch(() => {
+        // The video is muted, but keep the preview usable if autoplay is blocked.
+      });
+    } else {
+      video.pause();
+    }
+  }, [videoVisible]);
 
   useEffect(() => {
     const handleTouchOutside = (event: PointerEvent) => {
@@ -112,17 +127,20 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms }) => {
                 >
                   Subhojit Karmakar
                 </a>
-                {(showVideo || touchPreviewOpen) && (
-                  <div id="author-video-popup" className="author-video-popup">
-                    <video 
-                      src="/author-video.mp4" 
-                      autoPlay 
-                      muted 
-                      loop 
-                      playsInline
-                    />
-                  </div>
-                )}
+                <div
+                  id="author-video-popup"
+                  className={`author-video-popup${videoVisible ? ' is-visible' : ''}`}
+                  aria-hidden={!videoVisible}
+                >
+                  <video
+                    ref={authorVideoRef}
+                    src="/author-video.mp4"
+                    preload="auto"
+                    muted
+                    loop
+                    playsInline
+                  />
+                </div>
               </div>
             </div>
           </div>

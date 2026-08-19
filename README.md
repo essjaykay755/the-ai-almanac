@@ -13,6 +13,10 @@ The AI Almanac is an evolving reference book for AI enthusiasts and vibe coders.
 - Hear pronunciation with browser speech synthesis and tactile paper sound effects throughout the book.
 - Use the responsive book layout on desktop, tablet, and mobile screens.
 
+## Social previews
+
+The production build generates a term-specific Open Graph SVG and crawlable `/term/<slug>/` HTML page for every glossary entry. New copy/share links use those routes, so social crawlers can read the matching title, description, and image without executing the React app. Set `VITE_SITE_URL` in the deployment environment (for example, `https://example.com`) when absolute Open Graph and canonical URLs are required.
+
 ## Getting started
 
 ### Prerequisites

@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import type { Term, ClipStyle } from '../../types/almanac';
-import { drawClipToCanvas, downloadCanvasAsPng } from '../../utils/canvasExport';
+import { drawClipToCanvas, downloadCanvasAsPng, renderClipPreviewToCanvas } from '../../utils/canvasExport';
 import { playPaperTearSound } from '../../utils/sound';
+import { getPublicPath, getTermRoutePath } from '../../utils/ogImage';
 
 const clipStyleOptions: Array<{
   id: ClipStyle;
@@ -68,27 +69,54 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
 }) => {
   const [clipStyle, setClipStyle] = useState<ClipStyle>('clipping');
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const previewRef = useRef<HTMLElement>(null);
   const activeStyle = clipStyleOptions.find((style) => style.id === clipStyle) || clipStyleOptions[0];
 
   if (!isOpen) return null;
 
   const deepLink = () => {
-    return `${window.location.href.split('#')[0]}#term=${encodeURIComponent(term.word)}`;
+    const routePath = getPublicPath(import.meta.env.BASE_URL || '/', getTermRoutePath(term));
+    return new URL(routePath, window.location.origin).toString();
   };
 
   const getClipText = () => {
     return `${term.word}${term.pron ? ` ${term.pron}` : ''} · ${term.part}\n\n${term.definition}\n\nThe AI Almanac — ${deepLink()}`;
   };
 
-  const handleDownloadPng = () => {
-    if (!canvasRef.current) return;
+  const handleDownloadPng = async () => {
+    if (!canvasRef.current || !previewRef.current) return;
     if (soundEnabled) {
       playPaperTearSound();
     }
-    drawClipToCanvas(canvasRef.current, term, clipStyle, pageNumber, formattedDate);
     const filename = `the-ai-almanac-${term.word.toLowerCase().replace(/\s+/g, '-')}.png`;
-    downloadCanvasAsPng(canvasRef.current, filename);
-    onShowStamp('ENTRY SAVED');
+    const createCompatibilityCanvas = () => {
+      const fallbackCanvas = document.createElement('canvas');
+      drawClipToCanvas(fallbackCanvas, term, clipStyle, pageNumber, formattedDate);
+      return fallbackCanvas;
+    };
+
+    let exportCanvas = canvasRef.current;
+    try {
+      await renderClipPreviewToCanvas(canvasRef.current, previewRef.current);
+    } catch {
+      // Some browsers do not render SVG foreignObject content into an image.
+      // Keep the save action usable there with the deterministic renderer.
+      exportCanvas = createCompatibilityCanvas();
+    }
+
+    try {
+      downloadCanvasAsPng(exportCanvas, filename);
+      onShowStamp('ENTRY SAVED');
+    } catch {
+      // A foreignObject canvas can render but still be blocked by canvas
+      // security rules when read back. Retry with a fresh compatibility canvas.
+      try {
+        downloadCanvasAsPng(createCompatibilityCanvas(), filename);
+        onShowStamp('ENTRY SAVED');
+      } catch {
+        onShowStamp('ENTRY SAVE FAILED');
+      }
+    }
   };
 
   const handleCopyText = async () => {
@@ -141,7 +169,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
         </div>
 
         <div className="clip-layout">
-          <article className={`clipping clip-style-${clipStyle}`} id="clippingPreview">
+          <article ref={previewRef} className={`clipping clip-style-${clipStyle}`} id="clippingPreview">
             <div className="clip-topline">
               <div className="clip-mast">THE AI ALMANAC · SAVED ENTRY</div>
               <div className="clip-mark" aria-hidden="true">{activeStyle.mark}</div>

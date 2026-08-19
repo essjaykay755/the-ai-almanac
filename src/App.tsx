@@ -24,6 +24,12 @@ import {
 } from './utils/sound';
 import { getPronunciation } from './utils/pronunciation';
 import { createSearchIndex } from './utils/search';
+import {
+  getPublicPath,
+  getTermOgImagePath,
+  getTermRoutePath,
+  slugifyTerm
+} from './utils/ogImage';
 
 type AlmanacData = typeof import('./data/terms');
 const almanacDataPromise: Promise<AlmanacData> = import('./data/terms');
@@ -45,6 +51,10 @@ type TermSelectionOptions = {
 
 type Collections = Record<string, string[]>;
 
+const DEFAULT_PAGE_TITLE = 'The AI Almanac — Expanded Living Dictionary v0.7';
+const DEFAULT_PAGE_DESCRIPTION =
+  'An evolving reference book for AI enthusiasts & vibe coders. Living dictionary of artificial intelligence concepts, architectures, and practices.';
+
 const legacyDefaultCollections: Collections = {
   'Vibe coder essentials': ['vibe coding', 'diff', 'ship loop', 'taste', 'eval'],
   'Agent rabbit hole': ['agentic', 'tool calling', 'workflow', 'reasoning', 'grounding']
@@ -58,6 +68,58 @@ const defaultCollections: Collections = {
 
 function getBookViewFromHash(): BookView {
   return typeof window !== 'undefined' && window.location.hash === '#about' ? 'about' : 'term';
+}
+
+function getAbsoluteSiteUrl(relativePath: string): string {
+  if (typeof window === 'undefined') return relativePath;
+  return new URL(getPublicPath(import.meta.env.BASE_URL || '/', relativePath), window.location.origin).toString();
+}
+
+function updateMetaTag(attribute: 'name' | 'property', key: string, content: string): void {
+  let meta = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${key}"]`);
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.setAttribute(attribute, key);
+    document.head.appendChild(meta);
+  }
+  meta.content = content;
+}
+
+function updateCanonicalUrl(href: string): void {
+  let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement('link');
+    canonical.rel = 'canonical';
+    document.head.appendChild(canonical);
+  }
+  canonical.href = href;
+}
+
+function updateDocumentMetadata(term: Term | null, bookView: BookView): void {
+  const isTermView = bookView === 'term' && Boolean(term);
+  const title = isTermView && term ? `${term.word} — The AI Almanac` : DEFAULT_PAGE_TITLE;
+  const description = isTermView && term ? term.definition : DEFAULT_PAGE_DESCRIPTION;
+  const imagePath = isTermView && term ? getTermOgImagePath(term) : 'og-image.svg';
+  const pagePath = isTermView && term ? getTermRoutePath(term) : '';
+  const pageUrl = getAbsoluteSiteUrl(pagePath);
+  const imageUrl = getAbsoluteSiteUrl(imagePath);
+  const imageAlt = isTermView && term
+    ? `${term.word} definition card from The AI Almanac`
+    : 'The AI Almanac — an evolving field guide to artificial intelligence.';
+
+  document.title = title;
+  updateMetaTag('name', 'description', description);
+  updateMetaTag('property', 'og:type', isTermView ? 'article' : 'website');
+  updateMetaTag('property', 'og:title', title);
+  updateMetaTag('property', 'og:description', description);
+  updateMetaTag('property', 'og:url', pageUrl);
+  updateMetaTag('property', 'og:image', imageUrl);
+  updateMetaTag('property', 'og:image:alt', imageAlt);
+  updateMetaTag('name', 'twitter:title', title);
+  updateMetaTag('name', 'twitter:description', description);
+  updateMetaTag('name', 'twitter:image', imageUrl);
+  updateMetaTag('name', 'twitter:image:alt', imageAlt);
+  updateCanonicalUrl(pageUrl);
 }
 
 function loadStorage<T>(key: string, fallback: T, isValid: (value: unknown) => value is T): T {
@@ -336,18 +398,25 @@ const AlmanacApp: React.FC = () => {
       .toUpperCase();
   }, [today]);
 
-  // Read initial term from hash
+  // Read the initial term from a crawlable route or the legacy hash link.
   const getHashTerm = useCallback((): Term | null => {
     if (typeof window === 'undefined') return null;
-    const match = window.location.hash.match(/(?:^#|&)term=([^&]+)/);
-    if (!match) return null;
+    const pathMatch = window.location.pathname.match(/\/term\/([^/]+)\/?$/);
+    const hashMatch = window.location.hash.match(/(?:^#|&)term=([^&]+)/);
+    const requestedValue = pathMatch?.[1] || hashMatch?.[1];
+    if (!requestedValue) return null;
+
     try {
-      const decoded = decodeURIComponent(match[1].replace(/\+/g, ' '));
+      const decoded = decodeURIComponent(requestedValue.replace(/\+/g, ' '));
+      if (pathMatch) {
+        return sortedTerms.find((term) => slugifyTerm(term.word) === decoded) ||
+          resolveTerm(decoded.replace(/-/g, ' '));
+      }
       return resolveTerm(decoded);
     } catch {
       return null;
     }
-  }, [resolveTerm]);
+  }, [resolveTerm, sortedTerms]);
 
   const [currentTerm, setCurrentTerm] = useState<Term>(() => {
     return getHashTerm() || resolveTerm('artificial intelligence') || sortedTerms[0];
@@ -400,6 +469,10 @@ const AlmanacApp: React.FC = () => {
   const isProgrammaticHashRef = useRef<boolean>(false);
   const bookViewRef = useRef<BookView>(initialBookView);
   const pendingTermRef = useRef<{ term: Term; options?: TermSelectionOptions } | null>(null);
+
+  useEffect(() => {
+    updateDocumentMetadata(bookView === 'term' ? currentTerm : null, bookView);
+  }, [bookView, currentTerm]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -1321,7 +1394,7 @@ const AlmanacApp: React.FC = () => {
 
   // Copy deep link
   const handleCopyLink = useCallback(async () => {
-    const url = `${window.location.href.split('#')[0]}#term=${encodeURIComponent(currentTerm.word)}`;
+    const url = getAbsoluteSiteUrl(getTermRoutePath(currentTerm));
     try {
       await navigator.clipboard.writeText(url);
       triggerStamp('LINK COPIED');
@@ -1628,7 +1701,8 @@ const AlmanacApp: React.FC = () => {
 
 export const App: React.FC = () => {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
-  const isKnownPath = pathname === '/' || pathname === '' || pathname === '/index.html';
+  const isTermPath = /\/term\/[^/]+\/?$/.test(pathname);
+  const isKnownPath = pathname === '/' || pathname === '' || pathname === '/index.html' || isTermPath;
 
   return isKnownPath ? <AlmanacApp /> : <NotFoundPage />;
 };
