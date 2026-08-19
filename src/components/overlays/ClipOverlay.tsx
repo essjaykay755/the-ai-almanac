@@ -150,6 +150,8 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
 
         <div className="clip-layout">
           <article ref={previewRef} className={`clipping clip-style-${clipStyle}`} id="clippingPreview">
+            <span className="clip-texture" aria-hidden="true" />
+            <span className="clip-frame" aria-hidden="true" />
             <div className="clip-topline">
               <div className="clip-mast">THE AI ALMANAC · SAVED ENTRY</div>
               <div className="clip-mark" aria-hidden="true">{activeStyle.mark}</div>
