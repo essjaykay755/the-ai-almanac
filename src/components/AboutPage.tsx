@@ -5,9 +5,10 @@ import essjaykayLogoUrl from '../assets/essjaykay-logo.svg';
 
 interface AboutPageProps {
   totalTerms: number;
+  onClose?: () => void;
 }
 
-export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms }) => {
+export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => {
   const [showVideo, setShowVideo] = useState(false);
   const [touchPreviewOpen, setTouchPreviewOpen] = useState(false);
   const authorCreditRef = useRef<HTMLDivElement>(null);
@@ -81,6 +82,17 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms }) => {
   return (
     <article className="about-page" aria-labelledby="about-page-title">
       <div className="about-page-inner redesign-layout">
+        {onClose && (
+          <button
+            type="button"
+            className="about-page-close"
+            onClick={onClose}
+            aria-label="Close About page and return to the book"
+            title="Return to the book"
+          >
+            ×
+          </button>
+        )}
         <header className="about-page-header">
           <div className="about-wordmark" aria-label="The AI Almanac">
             <span className="wordmark-main-lockup">

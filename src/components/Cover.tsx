@@ -18,10 +18,8 @@ interface CoverProps {
   isMobileOpen?: boolean;
   isMobileClosing?: boolean;
   onCloseMobile?: () => void;
-  onCloseCover?: () => void;
   onMobileAnimationEnd?: () => void;
   isAboutActive?: boolean;
-  isClosed?: boolean;
 }
 
 export const Cover: React.FC<CoverProps> = ({
@@ -38,23 +36,19 @@ export const Cover: React.FC<CoverProps> = ({
   onSurprise,
   isMobileOpen = false,
   onCloseMobile,
-  onCloseCover,
   isMobileClosing = false,
   onMobileAnimationEnd,
-  isAboutActive = false,
-  isClosed = false
+  isAboutActive = false
 }) => {
   const mobileClass = isMobileOpen
     ? ` mobile-sidebar${isMobileClosing ? ' mobile-sidebar-closing' : ''}`
     : '';
-  const closedClass = isClosed ? ' cover-panel-hidden' : '';
   const entryActionsDisabled = isAboutActive;
 
   return (
     <aside
-      className={`cover${mobileClass}${closedClass}`}
+      className={`cover${mobileClass}`}
       id={isMobileOpen ? 'mobileSidebar' : undefined}
-      aria-hidden={isClosed ? true : undefined}
       onAnimationEnd={(event) => {
         if (
           event.target === event.currentTarget &&
@@ -72,20 +66,6 @@ export const Cover: React.FC<CoverProps> = ({
           onClick={onCloseMobile}
           aria-label="Close navigation menu"
           title="Close navigation menu"
-        >
-          ×
-        </button>
-      )}
-      {!isMobileOpen && onCloseCover && (
-        <button
-          type="button"
-          className="cover-close"
-          onClick={(event) => {
-            event.currentTarget.blur();
-            onCloseCover();
-          }}
-          aria-label="Close cover and enter reading mode"
-          title="Close cover and enter reading mode"
         >
           ×
         </button>
