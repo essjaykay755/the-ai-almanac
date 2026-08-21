@@ -3,14 +3,16 @@ import { Ornament } from './Ornament';
 
 interface MobileBarProps {
   isMenuOpen: boolean;
+  isSearchOpen: boolean;
   onOpenMenu: () => void;
-  onFocusSearch: () => void;
+  onToggleSearch: () => void;
 }
 
 export const MobileBar: React.FC<MobileBarProps> = ({
   isMenuOpen,
+  isSearchOpen,
   onOpenMenu,
-  onFocusSearch
+  onToggleSearch
 }) => {
   return (
     <div className="mobile-bar">
@@ -36,7 +38,14 @@ export const MobileBar: React.FC<MobileBarProps> = ({
         </span>
         <Ornament className="mobile-brand-mark" />
       </div>
-      <button onClick={onFocusSearch} id="mobileSearch" aria-label="Search" title="Search terms">
+      <button
+        onClick={onToggleSearch}
+        id="mobileSearch"
+        aria-label={isSearchOpen ? 'Close search' : 'Open search'}
+        aria-expanded={isSearchOpen}
+        aria-controls="search"
+        title={isSearchOpen ? 'Close search' : 'Search terms'}
+      >
         <svg viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="7" />
           <path d="m20 20-4-4" />

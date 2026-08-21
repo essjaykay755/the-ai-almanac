@@ -15,6 +15,7 @@ interface PageProps {
   crossRefs: Record<string, CrossRefInfo>;
   searchIndex: SearchIndex;
   searchQuery: string;
+  isMobileSearchOpen: boolean;
   fromSearchQuestion: string;
   trail: string[];
   searchRef: React.RefObject<HTMLInputElement | null>;
@@ -50,6 +51,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
     crossRefs,
     searchIndex,
     searchQuery,
+    isMobileSearchOpen,
     fromSearchQuestion,
     trail,
     searchRef,
@@ -127,7 +129,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
   return (
     <article className="page" id="page" ref={ref}>
       <div className="page-inner" id="pageInner">
-        <header className="topline">
+        <header className={`topline${isMobileSearchOpen ? ' mobile-search-open' : ''}`}>
           <div className="edition" id="editionLabel">
             Field edition · v{APP_VERSION} · {totalTerms} terms
           </div>

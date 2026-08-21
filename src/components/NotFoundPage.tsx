@@ -80,11 +80,12 @@ export const NotFoundPage: React.FC = () => {
     <>
       <MobileBar
         isMenuOpen={isMobileMenuOpen}
+        isSearchOpen={false}
         onOpenMenu={() => {
           if (isMobileMenuOpen) closeMobileMenu();
           else openMobileMenu();
         }}
-        onFocusSearch={goToCover}
+        onToggleSearch={goToCover}
       />
 
       {isMobileMenuMounted && (
@@ -229,4 +230,3 @@ export const NotFoundPage: React.FC = () => {
     </>
   );
 };
-

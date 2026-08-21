@@ -432,8 +432,10 @@ const AlmanacApp: React.FC = () => {
 
   // Overlays & Stamp State
   const [activeOverlay, setActiveOverlay] = useState<OverlayType>(null);
+  const [isCoverOpen, setIsCoverOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileMenuMounted, setIsMobileMenuMounted] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const [tutorialStepIndex, setTutorialStepIndex] = useState(0);
   const [isCompactViewport, setIsCompactViewport] = useState(() =>
@@ -1155,6 +1157,9 @@ const AlmanacApp: React.FC = () => {
 
   const handleFocusSearch = useCallback(() => {
     setIsMobileMenuOpen(false);
+    if (isCompactViewport) {
+      setIsMobileSearchOpen(true);
+    }
     if (bookViewRef.current === 'about') {
       animateAboutTurn('term', () => {
         window.requestAnimationFrame(() => {
@@ -1164,9 +1169,32 @@ const AlmanacApp: React.FC = () => {
       });
       return;
     }
+    if (isCompactViewport) {
+      window.requestAnimationFrame(() => {
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+      });
+      return;
+    }
     searchInputRef.current?.focus();
     searchInputRef.current?.select();
-  }, [animateAboutTurn]);
+  }, [animateAboutTurn, isCompactViewport]);
+
+  const handleToggleMobileSearch = useCallback(() => {
+    setIsMobileMenuOpen(false);
+    if (!isCompactViewport) {
+      handleFocusSearch();
+      return;
+    }
+
+    if (isMobileSearchOpen) {
+      setIsMobileSearchOpen(false);
+      searchInputRef.current?.blur();
+      return;
+    }
+
+    handleFocusSearch();
+  }, [handleFocusSearch, isCompactViewport, isMobileSearchOpen]);
 
   // Listen to hash changes (browser back/forward)
   useEffect(() => {
@@ -1430,6 +1458,14 @@ const AlmanacApp: React.FC = () => {
     triggerStamp(nextState ? 'SOUND ON' : 'SOUND OFF', false);
   }, [soundEnabled, triggerStamp]);
 
+  const handleCloseCover = useCallback(() => {
+    setIsCoverOpen(false);
+  }, []);
+
+  const handleOpenCover = useCallback(() => {
+    setIsCoverOpen(true);
+  }, []);
+
   const openMobileMenu = useCallback(() => {
     setIsMobileMenuMounted(true);
     setIsMobileMenuOpen(true);
@@ -1514,8 +1550,10 @@ const AlmanacApp: React.FC = () => {
       onPlayTutorial={handlePlayTutorial}
       isMobileOpen={isMobileOpen}
       isMobileClosing={isMobileClosing}
+      isClosed={!isMobileOpen && !isCoverOpen}
       isAboutActive={bookView === 'about'}
       onCloseMobile={closeMobileMenu}
+      onCloseCover={!isMobileOpen ? handleCloseCover : undefined}
       onMobileAnimationEnd={handleMobileMenuAnimationEnd}
       onToggleSound={handleToggleSound}
       onOpenOverlay={(overlay) => {
@@ -1549,6 +1587,7 @@ const AlmanacApp: React.FC = () => {
     <>
       <MobileBar
         isMenuOpen={isMobileMenuOpen}
+        isSearchOpen={isMobileSearchOpen}
         onOpenMenu={() => {
           if (isMobileMenuOpen) {
             closeMobileMenu();
@@ -1556,7 +1595,7 @@ const AlmanacApp: React.FC = () => {
             openMobileMenu();
           }
         }}
-        onFocusSearch={handleFocusSearch}
+        onToggleSearch={handleToggleMobileSearch}
       />
 
       {isMobileMenuMounted && (
@@ -1571,8 +1610,24 @@ const AlmanacApp: React.FC = () => {
       {isMobileMenuMounted && renderCover(true, !isMobileMenuOpen)}
 
       <main className="stage">
-        <section className="book">
+        <section className={`book${isCoverOpen ? '' : ' cover-closed'}`}>
           {renderCover()}
+
+          {!isCoverOpen && (
+            <button
+              type="button"
+              className="cover-reopen"
+              onClick={handleOpenCover}
+              aria-label="Open cover"
+              title="Open cover"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 5h6c1.7 0 3 1.3 3 3v11c0-1.7-1.3-3-3-3H4z" />
+                <path d="M20 5h-6c-1.7 0-3 1.3-3 3v11c0-1.7 1.3-3 3-3h6z" />
+              </svg>
+              <span>Open cover</span>
+            </button>
+          )}
 
           <div
             className={`paper-block ${bookView === 'about' ? 'about-active' : ''}${activeOverlay ? ' overlay-open' : ''}`}
@@ -1599,6 +1654,7 @@ const AlmanacApp: React.FC = () => {
                 crossRefs={crossRefs}
                 searchIndex={searchIndex}
                 searchQuery={searchQuery}
+                isMobileSearchOpen={isMobileSearchOpen}
                 fromSearchQuestion={fromSearchQuestion}
                 trail={trail}
                 searchRef={searchInputRef}
