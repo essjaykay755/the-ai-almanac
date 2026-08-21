@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { Term, TermSelectionTarget } from '../../types/almanac';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 
 interface CollectionsOverlayProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
   const [editingCollection, setEditingCollection] = useState<string | null>(null);
   const [editedCollectionName, setEditedCollectionName] = useState('');
   const [pendingDeleteCollection, setPendingDeleteCollection] = useState<string | null>(null);
+  const dialogRef = useDialogFocus(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -101,13 +103,20 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
 
   return (
     <div className="overlay" id="collectionsOverlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <section className="insert" role="dialog" aria-modal="true">
+      <section
+        ref={dialogRef}
+        className="insert"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="collectionsTitle"
+        tabIndex={-1}
+      >
         <div className="insert-head">
           <div>
             <small>The AI Almanac · reading lists</small>
-            <h2>Collections</h2>
+            <h2 id="collectionsTitle">Collections</h2>
           </div>
-          <button className="close" onClick={onClose} aria-label="Close">
+          <button className="close" type="button" onClick={onClose} aria-label="Close collections">
             ×
           </button>
         </div>
@@ -117,7 +126,9 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
             {collectionNames.map((name) => (
               <button
                 key={name}
+                type="button"
                 className={`collection-tab ${name === currentCollectionName ? 'active' : ''}`}
+                aria-pressed={name === currentCollectionName}
                 onClick={() => handleSelectCollection(name)}
               >
                 {name} <small>({(collections[name] || []).length})</small>

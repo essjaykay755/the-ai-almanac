@@ -1233,6 +1233,66 @@ button {
   background: rgba(111, 76, 38, 0.07);
 }
 
+.suggestion:focus-visible,
+.suggestion-example:focus-visible,
+.suggestion-clear:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: -2px;
+}
+
+.suggestion-empty {
+  padding: 13px 12px 10px;
+}
+
+.suggestion-empty p {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 10px;
+  font-family: var(--ui);
+  font-size: 10px;
+  line-height: 1.4;
+  color: #62543f;
+}
+
+.suggestion-empty p strong {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.suggestion-examples {
+  display: grid;
+  gap: 4px;
+}
+
+.suggestion-example,
+.suggestion-clear {
+  border: 0;
+  background: transparent;
+  padding: 6px 0;
+  cursor: pointer;
+  font-family: var(--ui);
+  font-size: 10px;
+  line-height: 1.3;
+  text-align: left;
+  color: #705c42;
+}
+
+.suggestion-example:hover,
+.suggestion-clear:hover {
+  color: var(--red);
+}
+
+.suggestion-clear {
+  margin-top: 6px;
+  border-top: 1px solid rgba(78, 58, 32, 0.12);
+  padding-top: 9px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .suggestion .letter {
   font-size: 22px;
   color: var(--red);
@@ -1455,7 +1515,7 @@ button {
   padding: 8px 4px 10px;
   cursor: pointer;
   font-family: var(--ui);
-  font-size: 9.5px;
+  font-size: 10.5px;
   font-weight: 500;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -1586,18 +1646,26 @@ button {
 .text-action {
   border: 0;
   background: none;
-  padding: 3px 0;
+  padding: 6px 0;
   cursor: pointer;
   font-family: var(--ui);
-  font-size: 9px;
+  font-size: 10.5px;
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: #7d6f5a;
+  min-height: 32px;
   transition: color 0.15s;
 }
 
 .text-action:hover {
   color: var(--red);
+}
+
+.text-action:focus-visible,
+.thread-clear:focus-visible,
+.mode-btn:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 4px;
 }
 
 .thread {
@@ -1924,6 +1992,11 @@ button {
   opacity: 0.38;
 }
 
+.tab:disabled {
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Single-leaf page turn — soft-page geometry adapted from StPageFlip's fold model */
 .turn-fx {
   position: absolute;
@@ -2224,7 +2297,7 @@ button {
   flex: 0 0 auto;
   width: 28px;
   height: 28px;
-  padding: 0;
+  padding: 5px 0;
   border: 0;
   background: transparent;
   color: #75664f;
@@ -2427,6 +2500,9 @@ button {
 }
 
 .close {
+  min-width: 38px;
+  min-height: 38px;
+  padding: 4px;
   border: 0;
   background: none;
   cursor: pointer;
@@ -2688,7 +2764,7 @@ button {
   padding: 0;
   cursor: pointer;
   font-family: var(--ui);
-  font-size: 8.5px;
+  font-size: 9.5px;
   text-transform: uppercase;
   letter-spacing: 0.09em;
   color: var(--red);
@@ -3648,6 +3724,100 @@ button {
   color: #85765f;
 }
 
+.index-tools {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 0.42fr);
+  gap: 6px;
+  margin: 16px 0 10px;
+}
+
+.index-filter-field {
+  display: grid;
+  gap: 6px;
+}
+
+.index-search-label {
+  font-family: var(--ui);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #705f49;
+}
+
+.index-search {
+  width: 100%;
+  border: 1px solid rgba(86, 69, 45, 0.24);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--ink);
+  padding: 10px 12px;
+  font: 16px var(--serif);
+}
+
+.index-search:focus {
+  outline: 2px solid rgba(127, 44, 36, 0.42);
+  outline-offset: 2px;
+}
+
+.index-category-filter {
+  appearance: auto;
+}
+
+.index-jump {
+  position: sticky;
+  top: -1px;
+  z-index: 4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 10px -4px 0;
+  padding: 8px 4px;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+}
+
+.index-jump button {
+  min-width: 29px;
+  min-height: 29px;
+  border: 1px solid rgba(86, 69, 45, 0.2);
+  border-radius: 2px;
+  background: transparent;
+  color: #604e38;
+  cursor: pointer;
+  font-family: var(--ui);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.index-jump button:hover:not(:disabled),
+.index-jump button:focus-visible:not(:disabled) {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.index-jump button:disabled {
+  cursor: not-allowed;
+  opacity: 0.32;
+}
+
+.index-empty {
+  padding: 38px 0;
+  color: #6f604c;
+  font-style: italic;
+  text-align: center;
+}
+
+.index-empty button {
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  font: inherit;
+}
+
 .full-index {
   position: relative;
   display: grid;
@@ -3661,6 +3831,9 @@ button {
   gap: 18px;
   border-top: 1px solid var(--rule);
   padding-top: 14px;
+  scroll-margin-top: 70px;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 280px;
 }
 
 .index-letter {
@@ -3694,6 +3867,98 @@ button {
 .index-term:hover {
   color: var(--red);
   background: rgba(100, 68, 34, 0.03);
+}
+
+/* Side-by-side comparison opened from a term's existing Compare references. */
+.compare-insert {
+  width: min(1120px, 100%);
+}
+
+.compare-intro {
+  position: relative;
+  margin: 16px 0 20px;
+  max-width: 62ch;
+  color: #675a47;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.compare-layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.compare-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 20px 21px 18px;
+  border: 1px solid rgba(86, 62, 33, 0.24);
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.compare-card > small {
+  color: #806e55;
+}
+
+.compare-card h3 {
+  margin: 6px 0 3px;
+  font-family: var(--serif);
+  font-size: clamp(26px, 3vw, 39px);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.compare-part {
+  margin: 0 0 18px;
+  color: #806e55;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.compare-section {
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.compare-section h4 {
+  margin: 0 0 6px;
+  color: #745e3c;
+  font-family: var(--ui);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.compare-section p {
+  margin: 0;
+  color: #493f32;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.compare-open {
+  align-self: flex-start;
+  margin-top: 22px;
+  border: 1px solid rgba(127, 44, 36, 0.45);
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  padding: 9px 11px;
+  font-family: var(--ui);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.compare-open:hover,
+.compare-open:focus-visible {
+  background: var(--red);
+  color: var(--paper);
 }
 
 @media (max-width: 1080px) and (min-width: 761px) {
@@ -4142,7 +4407,8 @@ button {
   }
   .mode-btn {
     white-space: nowrap;
-    font-size: 8.5px;
+    font-size: 9.5px;
+    min-height: 34px;
     padding: 5px 1px 7px;
   }
   .definition-wrap {
@@ -4205,6 +4471,10 @@ button {
   }
   .suggestions {
     right: -12px;
+  }
+
+  .suggestion-empty {
+    padding: 12px 10px 9px;
   }
   .markers {
     display: none;
@@ -4464,6 +4734,28 @@ button {
   .index-term {
     font-size: 13px;
   }
+
+  .index-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .index-jump {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .index-jump button {
+    flex: 0 0 29px;
+  }
+
+  .compare-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-intro {
+    font-size: 15px;
+  }
 }
 
 @media (max-width: 280px) {
@@ -4577,7 +4869,7 @@ button {
   }
   .mode-btn {
     margin-right: 10px;
-    font-size: 7.7px;
+    font-size: 8.7px;
   }
   .page-footer {
     left: 18px;

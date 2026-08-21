@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 
 interface PickerOverlayProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export const PickerOverlay: React.FC<PickerOverlayProps> = ({
   onAddToCollection
 }) => {
   const [newColName, setNewColName] = useState('');
+  const dialogRef = useDialogFocus(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -30,13 +32,21 @@ export const PickerOverlay: React.FC<PickerOverlayProps> = ({
 
   return (
     <div className="overlay" id="pickerOverlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <section className="insert" style={{ width: 'min(520px, 100%)' }} role="dialog" aria-modal="true">
+      <section
+        ref={dialogRef}
+        className="insert"
+        style={{ width: 'min(520px, 100%)' }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pickerTitle"
+        tabIndex={-1}
+      >
         <div className="insert-head">
           <div>
             <small>Add this entry</small>
-            <h2>Add to collection</h2>
+            <h2 id="pickerTitle">Add to collection</h2>
           </div>
-          <button className="close" onClick={onClose} aria-label="Close">
+          <button className="close" type="button" onClick={onClose} aria-label="Close collection picker">
             ×
           </button>
         </div>
@@ -45,6 +55,7 @@ export const PickerOverlay: React.FC<PickerOverlayProps> = ({
           {collectionNames.map((name) => (
             <button
               key={name}
+              type="button"
               onClick={() => onAddToCollection(name)}
             >
               {name} <small>· {(collections[name] || []).length} entries</small>

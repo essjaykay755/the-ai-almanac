@@ -20,6 +20,7 @@ interface PageProps {
   trail: string[];
   searchRef: React.RefObject<HTMLInputElement | null>;
   onSelectTerm: (term: TermSelectionTarget, options?: { fromSearch?: boolean; addTrail?: boolean }) => void;
+  onCompareTerm: (term: TermSelectionTarget) => void;
   onPrevTerm?: () => void;
   onNextTerm?: () => void;
   onToggleBookmark: () => void;
@@ -56,6 +57,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
     trail,
     searchRef,
     onSelectTerm,
+    onCompareTerm,
     onPrevTerm,
     onNextTerm,
     onToggleBookmark,
@@ -111,6 +113,13 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
     }
   };
 
+  const handleSearchExample = (example: string) => {
+    onSearchChange(example);
+    setSelectedSuggestion(0);
+    setShowSuggestions(true);
+    window.requestAnimationFrame(() => searchRef.current?.focus());
+  };
+
   const getRefs = (term: Term): CrossRefInfo & { see: string[] } => {
     const x = crossRefs[term.word] || { compare: [], confused: [] };
     return {
@@ -146,6 +155,11 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                 autoComplete="off"
                 placeholder="Ask The AI Almanac or search a term…"
                 aria-label="Search The AI Almanac"
+                role="combobox"
+                aria-expanded={Boolean(showSuggestions && searchQuery.trim())}
+                aria-controls="suggestions"
+                aria-autocomplete="list"
+                aria-activedescendant={suggestions[selectedSuggestion] ? `suggestion-${selectedSuggestion}` : undefined}
                 value={searchQuery}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -162,22 +176,47 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
             </label>
 
             {showSuggestions && searchQuery.trim() && (
-              <div className="suggestions" id="suggestions">
+              <div
+                className="suggestions"
+                id="suggestions"
+                role={suggestions.length > 0 ? 'listbox' : undefined}
+                aria-label={suggestions.length > 0 ? 'Search suggestions' : undefined}
+              >
                 {suggestions.length === 0 ? (
-                  <button className="suggestion" type="button">
-                    <span className="letter">?</span>
-                    <span>
+                  <div className="suggestion-empty">
+                    <p role="status">
                       <strong>No exact match</strong>
-                      <br />
-                      <small>Describe the idea instead</small>
-                    </span>
-                  </button>
+                      <span>Try the idea behind your question:</span>
+                    </p>
+                    <div className="suggestion-examples">
+                      {[
+                        'What makes AI invent answers?',
+                        'How much can a model remember?',
+                        'What is RAG?'
+                      ].map((example) => (
+                        <button
+                          key={example}
+                          className="suggestion-example"
+                          type="button"
+                          onClick={() => handleSearchExample(example)}
+                        >
+                          {example}
+                        </button>
+                      ))}
+                    </div>
+                    <button className="suggestion-clear" type="button" onClick={() => onSearchChange('')}>
+                      Clear search
+                    </button>
+                  </div>
                 ) : (
                   suggestions.map((item, idx) => (
                     <button
                       key={item.term.word}
+                      id={`suggestion-${idx}`}
                       type="button"
                       className={`suggestion ${idx === selectedSuggestion ? 'active' : ''}`}
+                      role="option"
+                      aria-selected={idx === selectedSuggestion}
                       onClick={() => {
                         onSelectTerm(item.term, { fromSearch: true });
                         setShowSuggestions(false);
@@ -235,10 +274,15 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
               </button>
             </div>
 
-            <div className="mode-switch" id="modeSwitch">
+            <div className="mode-switch" id="modeSwitch" role="tablist" aria-label="Explanation mode">
               {(Object.keys(modeNames) as ExplanationMode[]).map((m) => (
                 <button
                   key={m}
+                  type="button"
+                  id={`mode-tab-${m}`}
+                  role="tab"
+                  aria-selected={explanationMode === m}
+                  aria-controls="definitionContent"
                   className={`mode-btn ${explanationMode === m ? 'active' : ''}`}
                   onClick={() => onChangeMode(m)}
                 >
@@ -247,7 +291,13 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
               ))}
             </div>
 
-            <div className="definition-wrap" id="definitionContent">
+            <div
+              className="definition-wrap"
+              id="definitionContent"
+              role="tabpanel"
+              aria-labelledby={`mode-tab-${explanationMode}`}
+              tabIndex={0}
+            >
               <span className="sense-num">1.</span>
               <div className="definition-mode">{modeNames[explanationMode]}</div>
               <p className={`definition ${fromSearchQuestion ? 'search-hit' : ''}`}>{explanationText}</p>
@@ -321,7 +371,12 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                 <h3>Compare</h3>
                 <div className="xref">
                   {refs.compare.map((r) => (
-                    <button key={r} onClick={() => onSelectTerm({ word: r })}>
+                    <button
+                      key={r}
+                      type="button"
+                      aria-label={`Compare ${currentTerm.word} with ${r}`}
+                      onClick={() => onCompareTerm({ word: r })}
+                    >
                       {r}
                     </button>
                   ))}

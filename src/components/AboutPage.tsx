@@ -147,7 +147,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
                   <video
                     ref={authorVideoRef}
                     src="/author-video.mp4"
-                    preload="auto"
+                    preload="none"
                     muted
                     loop
                     playsInline

@@ -3,6 +3,7 @@ import type { Term, ClipStyle } from '../../types/almanac';
 import { downloadCanvasAsPng, renderClipPreviewToCanvas } from '../../utils/canvasExport';
 import { playPaperTearSound } from '../../utils/sound';
 import { getPublicPath, getTermRoutePath } from '../../utils/ogImage';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 
 const clipStyleOptions: Array<{
   id: ClipStyle;
@@ -70,6 +71,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
   const [clipStyle, setClipStyle] = useState<ClipStyle>('clipping');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewRef = useRef<HTMLElement>(null);
+  const dialogRef = useDialogFocus(isOpen, onClose);
   const activeStyle = clipStyleOptions.find((style) => style.id === clipStyle) || clipStyleOptions[0];
 
   if (!isOpen) return null;
@@ -136,14 +138,21 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
 
   return (
     <div className="overlay" id="clipOverlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <section className="insert clip-insert" role="dialog" aria-modal="true">
+      <section
+        ref={dialogRef}
+        className="insert clip-insert"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="clipTitle"
+        tabIndex={-1}
+      >
         <div className="insert-head">
           <div>
             <small>The AI Almanac · save or share</small>
-            <h2>Save this entry</h2>
+            <h2 id="clipTitle">Save this entry</h2>
             <p className="clip-intro">Choose a visual voice for the entry. The words stay the same; the treatment changes.</p>
           </div>
-          <button className="close" onClick={onClose} aria-label="Close">
+          <button className="close" type="button" onClick={onClose} aria-label="Close save entry dialog">
             ×
           </button>
         </div>
@@ -200,16 +209,16 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
 
             <hr />
 
-            <button className="action" onClick={handleDownloadPng} id="downloadClip">
+            <button type="button" className="action" onClick={handleDownloadPng} id="downloadClip">
               Download PNG
             </button>
-            <button className="action" onClick={handleCopyText} id="copyClip">
+            <button type="button" className="action" onClick={handleCopyText} id="copyClip">
               Copy text
             </button>
-            <button className="action" onClick={handleCopyLink} id="copyLink">
+            <button type="button" className="action" onClick={handleCopyLink} id="copyLink">
               Copy link
             </button>
-            <button className="action" onClick={handleShare} id="shareClip">
+            <button type="button" className="action" onClick={handleShare} id="shareClip">
               Share
             </button>
           </aside>

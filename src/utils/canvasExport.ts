@@ -1,4 +1,3 @@
-import html2canvas from 'html2canvas';
 import type { Term, ClipStyle } from '../types/almanac';
 
 const CANVAS_WIDTH = 1200;
@@ -41,6 +40,10 @@ export async function renderClipPreviewToCanvas(
   canvas: HTMLCanvasElement,
   preview: HTMLElement
 ): Promise<HTMLCanvasElement> {
+  // Keep the export-only renderer out of the initial page chunk. The save
+  // dialog is already an explicit user action, so this import can be deferred
+  // until the user actually requests a PNG.
+  const { default: html2canvas } = await import('html2canvas');
   await document.fonts?.ready;
 
   const width = Math.max(1, Math.ceil(preview.offsetWidth));

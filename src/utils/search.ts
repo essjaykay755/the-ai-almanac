@@ -1,4 +1,4 @@
-import type { Term } from '../types/almanac';
+import type { Term } from '../types/almanac.ts';
 
 export interface SearchMatch {
   term: Term;

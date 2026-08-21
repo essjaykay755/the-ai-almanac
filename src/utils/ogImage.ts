@@ -1,5 +1,5 @@
-import type { Term } from '../types/almanac.js';
-import { APP_VERSION } from '../version.js';
+import type { Term } from '../types/almanac.ts';
+import { APP_VERSION } from '../version.ts';
 
 export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;

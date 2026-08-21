@@ -13,6 +13,7 @@ import { TimelineOverlay } from './components/overlays/TimelineOverlay';
 import { CollectionsOverlay } from './components/overlays/CollectionsOverlay';
 import { PickerOverlay } from './components/overlays/PickerOverlay';
 import { ClipOverlay } from './components/overlays/ClipOverlay';
+import { CompareOverlay } from './components/overlays/CompareOverlay';
 import { NotFoundPage } from './components/NotFoundPage';
 import { TutorialOverlay } from './components/TutorialOverlay';
 import { TUTORIAL_STEPS } from './components/tutorialSteps';
@@ -432,6 +433,7 @@ const AlmanacApp: React.FC = () => {
 
   // Overlays & Stamp State
   const [activeOverlay, setActiveOverlay] = useState<OverlayType>(null);
+  const [compareTerms, setCompareTerms] = useState<[Term, Term] | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileMenuMounted, setIsMobileMenuMounted] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
@@ -568,8 +570,11 @@ const AlmanacApp: React.FC = () => {
   const commitBookView = useCallback((view: BookView) => {
     bookViewRef.current = view;
     setBookView(view);
+    setSearchQuery('');
+    setFromSearchQuestion('');
     if (view === 'about') {
       setActiveOverlay(null);
+      setCompareTerms(null);
     }
   }, []);
 
@@ -682,6 +687,7 @@ const AlmanacApp: React.FC = () => {
             setSearchQuery('');
           } else {
             setFromSearchQuestion('');
+            setSearchQuery('');
           }
         });
         resetPageScroll(pageRef.current);
@@ -716,6 +722,7 @@ const AlmanacApp: React.FC = () => {
             setSearchQuery('');
           } else {
             setFromSearchQuestion('');
+            setSearchQuery('');
           }
         });
         resetPageScroll(pageRef.current);
@@ -751,7 +758,7 @@ const AlmanacApp: React.FC = () => {
       const isSaved = bookmarks.includes(nextTerm.word);
       const targetTrail = options?.nextTrail || trail;
       const targetSearchQuestion = options?.fromSearch ? options.searchQ || '' : '';
-      const targetSearchQuery = options?.fromSearch ? '' : searchQuery;
+      const targetSearchQuery = '';
 
       const pageInner = pageEl.querySelector('.page-inner');
       const mountDestinationPage = (container: HTMLElement, sampleInner: HTMLElement) => {
@@ -999,6 +1006,7 @@ const AlmanacApp: React.FC = () => {
           setSearchQuery('');
         } else {
           setFromSearchQuestion('');
+          setSearchQuery('');
         }
       });
       resetPageScroll(pageEl);
@@ -1035,7 +1043,6 @@ const AlmanacApp: React.FC = () => {
       crossRefs,
       bookmarks,
       trail,
-      searchQuery,
       recordHistory,
       setLocationHash,
       termIndexByWord,
@@ -1057,6 +1064,14 @@ const AlmanacApp: React.FC = () => {
       const fromSearch = options?.fromSearch ?? false;
       const addTrail = options?.addTrail ?? true;
 
+      // Search is a navigation aid, not a second piece of page state. Any
+      // direct navigation (index, history, related term, A–Z, or next/prev)
+      // should leave the next entry with a fresh search field.
+      if (!fromSearch) {
+        setSearchQuery('');
+        setFromSearchQuestion('');
+      }
+
       if (bookViewRef.current === 'about') {
         pendingTermRef.current = { term: resolved, options };
         animateAboutTurn('term', () => {
@@ -1072,6 +1087,8 @@ const AlmanacApp: React.FC = () => {
       if (resolved.word.toLowerCase() === currentTerm.word.toLowerCase()) {
         if (fromSearch) {
           setFromSearchQuestion(searchQuery);
+          setSearchQuery('');
+        } else {
           setSearchQuery('');
         }
         setLocationHash(`#term=${encodeURIComponent(resolved.word)}`);
@@ -1116,6 +1133,34 @@ const AlmanacApp: React.FC = () => {
       triggerStamp
     ]
   );
+
+  const handleOpenComparison = useCallback(
+    (termToCompare: TermSelectionTarget) => {
+      if (bookViewRef.current === 'about') return;
+
+      const resolved = resolveTerm(termToCompare.word);
+      if (!resolved) {
+        triggerStamp('ENTRY NOT FOUND');
+        return;
+      }
+
+      if (resolved.word.toLowerCase() === currentTerm.word.toLowerCase()) {
+        triggerStamp('CHOOSE A SECOND TERM');
+        return;
+      }
+
+      setSearchQuery('');
+      setFromSearchQuestion('');
+      setCompareTerms([currentTerm, resolved]);
+      setActiveOverlay('compare');
+    },
+    [currentTerm, resolveTerm, triggerStamp]
+  );
+
+  const handleCloseComparison = useCallback(() => {
+    setCompareTerms(null);
+    setActiveOverlay(null);
+  }, []);
 
   // Single page flip navigation directly to target term
   const riffleToTerm = useCallback(
@@ -1472,6 +1517,14 @@ const AlmanacApp: React.FC = () => {
     }
   }, [isMobileMenuOpen]);
 
+  // Resizing or switching emulation modes can interrupt a CSS animation before
+  // animationend fires. Keep the closing sidebar from remaining mounted forever.
+  useEffect(() => {
+    if (!isMobileMenuMounted || isMobileMenuOpen) return;
+    const fallback = window.setTimeout(() => setIsMobileMenuMounted(false), 260);
+    return () => window.clearTimeout(fallback);
+  }, [isMobileMenuMounted, isMobileMenuOpen]);
+
   useEffect(() => {
     if (!isTutorialOpen || !isCompactViewport) return;
 
@@ -1632,6 +1685,7 @@ const AlmanacApp: React.FC = () => {
                 trail={trail}
                 searchRef={searchInputRef}
                 onSelectTerm={handleSelectTerm}
+                onCompareTerm={handleOpenComparison}
                 onPrevTerm={handlePrevTerm}
                 onNextTerm={handleNextTerm}
                 onToggleBookmark={handleToggleBookmark}
@@ -1732,6 +1786,19 @@ const AlmanacApp: React.FC = () => {
         onClose={() => setActiveOverlay(null)}
         onShowStamp={triggerStamp}
       />
+
+      {compareTerms && (
+        <CompareOverlay
+          isOpen={activeOverlay === 'compare'}
+          leftTerm={compareTerms[0]}
+          rightTerm={compareTerms[1]}
+          onClose={handleCloseComparison}
+          onOpenTerm={(term) => {
+            handleCloseComparison();
+            handleSelectTerm(term);
+          }}
+        />
+      )}
 
       <TutorialOverlay
         isOpen={isTutorialOpen}

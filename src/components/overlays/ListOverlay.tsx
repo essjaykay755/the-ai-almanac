@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Term, TermSelectionTarget } from '../../types/almanac';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 
 interface ListOverlayProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const ListOverlay: React.FC<ListOverlayProps> = ({
   onClose,
   onSelectTerm
 }) => {
+  const dialogRef = useDialogFocus(isOpen, onClose);
   if (!isOpen) return null;
 
   const isBookmarks = kind === 'bookmarks';
@@ -28,13 +30,20 @@ export const ListOverlay: React.FC<ListOverlayProps> = ({
 
   return (
     <div className="overlay" id="listOverlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <section className="insert" role="dialog" aria-modal="true">
+      <section
+        ref={dialogRef}
+        className="insert"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="listTitle"
+        tabIndex={-1}
+      >
         <div className="insert-head">
           <div>
             <small id="listEyebrow">{eyebrow}</small>
             <h2 id="listTitle">{title}</h2>
           </div>
-          <button className="close" onClick={onClose} aria-label="Close">
+          <button className="close" type="button" onClick={onClose} aria-label={`Close ${title}`}>
             ×
           </button>
         </div>
@@ -50,6 +59,7 @@ export const ListOverlay: React.FC<ListOverlayProps> = ({
                 <button
                   key={t.word}
                   className="list-row"
+                  type="button"
                   onClick={() => {
                     onSelectTerm(t);
                     onClose();

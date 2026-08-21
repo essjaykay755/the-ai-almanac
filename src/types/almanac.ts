@@ -43,4 +43,4 @@ export type ClipStyle =
   | 'terminal'
   | 'field-guide';
 
-export type OverlayType = 'index' | 'bookmarks' | 'history' | 'timeline' | 'collections' | 'picker' | 'clip' | null;
+export type OverlayType = 'index' | 'bookmarks' | 'history' | 'timeline' | 'collections' | 'picker' | 'clip' | 'compare' | null;

@@ -21,9 +21,14 @@ export const Tabs: React.FC<TabsProps> = ({
         return (
           <button
             key={letter}
+            type="button"
             className={`tab ${!isAvailable ? 'empty' : ''} ${isActive ? 'active' : ''}`}
             data-letter={letter}
             aria-label={`Browse ${letter}`}
+            aria-current={isActive ? 'page' : undefined}
+            aria-disabled={!isAvailable}
+            disabled={!isAvailable}
+            title={isAvailable ? `Browse ${letter}` : `No entries filed under ${letter}`}
             onClick={() => onSelectLetter(letter)}
           >
             {letter}

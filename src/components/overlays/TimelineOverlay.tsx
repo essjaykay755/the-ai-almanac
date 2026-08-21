@@ -1,5 +1,6 @@
 import React from 'react';
 import type { TimelineItem, Term, TermSelectionTarget } from '../../types/almanac';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 
 interface TimelineOverlayProps {
   isOpen: boolean;
@@ -16,17 +17,25 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
   onClose,
   onSelectTerm
 }) => {
+  const dialogRef = useDialogFocus(isOpen, onClose);
   if (!isOpen) return null;
 
   return (
     <div className="overlay" id="timelineOverlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <section className="insert timeline-insert" role="dialog" aria-modal="true">
+      <section
+        ref={dialogRef}
+        className="insert timeline-insert"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="timelineTitle"
+        tabIndex={-1}
+      >
         <div className="timeline-head">
           <div>
             <small>The AI Almanac · timeline</small>
-            <h2>How the terms developed</h2>
+            <h2 id="timelineTitle">How the terms developed</h2>
           </div>
-          <button className="close" onClick={onClose} aria-label="Close">
+          <button className="close" type="button" onClick={onClose} aria-label="Close timeline">
             ×
           </button>
         </div>
@@ -40,6 +49,7 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
                 <strong>{item.title}</strong>
                 <p>{item.body}</p>
                 <button
+                  type="button"
                   onClick={() => {
                     const t = termsByWord[item.term.toLowerCase()];
                     if (t) {
