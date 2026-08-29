@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import './coverTransition.css'
 import './loading.css'
+import './pageTurnStability'
 import App from './App.tsx'
 import { getPublicPath, getTermRoutePath } from './utils/ogImage'
 
