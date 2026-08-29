@@ -5,7 +5,7 @@ import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Suspense fallback={null}>
+    <Suspense fallback={<div className="app-loading" role="status" aria-live="polite">Opening The AI Almanac…</div>}>
       <App />
     </Suspense>
   </StrictMode>,
