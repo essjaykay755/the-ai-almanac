@@ -2,6 +2,7 @@ import { StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './coverTransition.css'
+import './loading.css'
 import App from './App.tsx'
 import { getPublicPath, getTermRoutePath } from './utils/ogImage'
 
@@ -65,9 +66,18 @@ window.addEventListener('popstate', () => {
   }
 })
 
+const appLoader = (
+  <div className="app-loading" role="status" aria-live="polite" aria-label="Loading The AI Almanac">
+    <div className="app-loading-mark" aria-hidden="true">
+      <div className="app-loading-title">The AI Almanac</div>
+      <div className="app-loading-rule" />
+    </div>
+  </div>
+)
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Suspense fallback={<div className="app-loading" role="status" aria-live="polite">Opening The AI Almanac…</div>}>
+    <Suspense fallback={appLoader}>
       <App />
     </Suspense>
   </StrictMode>,
