@@ -19,6 +19,13 @@
   pointer-events: none;
 }
 
+/* Internal page turns used to nudge the top stack sheet down by 1px while
+   .turning-book was active, then snap it back up at the handoff. Keep that
+   physical stack geometry fixed so the completed page does not appear to jump. */
+.paper-block.turning-book .stack-sheet:nth-child(5) {
+  transform: translate(3px, 4px) rotate(0.025deg);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .paper-block .page-stack,
   .paper-block .tabs {
