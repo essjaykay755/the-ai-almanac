@@ -7,7 +7,6 @@ const RAW_DIR = path.join(ROOT, 'raw');
 await fs.mkdir(RAW_DIR, { recursive: true });
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const startedAt = Date.now();
 const markers = {};
 
 const browser = await chromium.launch({
@@ -37,6 +36,7 @@ await context.addInitScript(() => {
   localStorage.removeItem('aiAlmanacCollections');
 });
 
+const recordingStartedAt = Date.now();
 const page = await context.newPage();
 const recordedVideo = page.video();
 
@@ -102,7 +102,7 @@ await sleep(350);
 const captureStart = Date.now();
 markers.captureStart = 0;
 
-// 0.0–1.6s — establish the actual tactile book UI.
+// Establish the actual tactile book UI.
 await page.evaluate(() => {
   const book = document.querySelector('.book');
   if (!book) return;
@@ -121,7 +121,7 @@ await page.evaluate(() => {
 });
 await sleep(1550);
 
-// 1.6–4.8s — use the real search component and real semantic suggestion engine.
+// Use the real search component and real semantic suggestion engine.
 mark('searchFocus', captureStart);
 await page.locator('#navSearch').click();
 await sleep(220);
@@ -142,7 +142,7 @@ await hallucinationSuggestion.click();
 await page.locator('.word').filter({ hasText: /^hallucination$/ }).waitFor({ state: 'visible' });
 await sleep(1250); // includes the app's real ~940ms page-turn animation.
 
-// 4.8–10.7s — settle on the entry and show the real explanation modes.
+// Settle on the entry and show the real explanation modes.
 await animateBook(1.045, 1.075, '72% 48%', 400);
 mark('dictionary', captureStart);
 await sleep(650);
@@ -166,7 +166,7 @@ mark('bookmark', captureStart);
 await page.locator('#bookmarkBtn').click();
 await sleep(750);
 
-// 10.7–13.2s — briefly show a real secondary product surface.
+// Briefly show a real secondary product surface.
 await resetBook(450);
 mark('indexOpen', captureStart);
 await page.locator('#navIndex').click();
@@ -176,7 +176,7 @@ await page.locator('#indexOverlay .close').click();
 await page.locator('#indexOverlay').waitFor({ state: 'detached' }).catch(() => {});
 await sleep(320);
 
-// 13.2–16.4s — use the app's real solid-cover page transition into About.
+// Use the app's real solid-cover page transition into About.
 mark('aboutTurn', captureStart);
 await page.locator('#navAbout').click();
 await page.locator('.about-page').waitFor({ state: 'visible' });
@@ -208,8 +208,8 @@ await fs.copyFile(sourceVideoPath, rawOutput);
 await browser.close();
 
 const metadata = {
-  videoStartedAtEpochMs: startedAt,
-  captureStartOffsetMs: captureStart - startedAt,
+  videoStartedAtEpochMs: recordingStartedAt,
+  captureStartOffsetMs: captureStart - recordingStartedAt,
   captureDurationMs: captureEnd - captureStart,
   markers,
   source: 'The AI Almanac v1.1.2 React/Vite application',
