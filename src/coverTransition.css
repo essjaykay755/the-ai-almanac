@@ -1,0 +1,22 @@
+/* Keep the book's physical page furniture out of the About/cover turn.
+   App.tsx switches back to the term view at the start of the closing turn so
+   the destination page can already exist underneath the animated sheet. The
+   page stack and A–Z tabs should not appear until that rigid turn has landed. */
+.paper-block .page-stack,
+.paper-block .tabs {
+  transition: opacity 130ms ease-out;
+}
+
+.paper-block.cover-turning .page-stack,
+.paper-block.cover-turning .tabs {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paper-block .page-stack,
+  .paper-block .tabs {
+    transition: none;
+  }
+}
