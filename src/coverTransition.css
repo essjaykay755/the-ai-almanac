@@ -26,6 +26,18 @@
   transform: translate(3px, 4px) rotate(0.025deg);
 }
 
+/* The actual scrolling surface is .page-layout. Keep the browser from choosing
+   a new scroll anchor while React swaps the destination content at the end of
+   a page turn; even a 1-2px anchor correction moves every entry component. */
+.page-layout {
+  overflow-anchor: none;
+}
+
+.paper-block.turning-book .page-layout {
+  scroll-behavior: auto;
+  overflow-anchor: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .paper-block .page-stack,
   .paper-block .tabs {
