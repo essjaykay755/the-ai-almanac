@@ -3,9 +3,12 @@ import { Cover } from './Cover';
 import { MobileBar } from './MobileBar';
 import { Tabs } from './Tabs';
 import catalogPhotoUrl from '../assets/404-catalog-photo.webp';
+import { getPublicPath } from '../utils/ogImage';
 
 const TOTAL_TERMS = 791;
 const AVAILABLE_LETTERS = new Set('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''));
+const coverPath = getPublicPath(import.meta.env.BASE_URL || '/', '');
+const aboutPath = `${coverPath}#about`;
 
 function readStoredCount(key: string, fallback: number): number {
   try {
@@ -21,11 +24,11 @@ function readStoredCount(key: string, fallback: number): number {
 }
 
 const goToCover = () => {
-  window.location.assign('/');
+  window.location.assign(coverPath);
 };
 
 const goToAbout = () => {
-  window.location.assign('/#about');
+  window.location.assign(aboutPath);
 };
 
 export const NotFoundPage: React.FC = () => {
@@ -162,10 +165,10 @@ export const NotFoundPage: React.FC = () => {
                     </div>
 
                     <div className="entry-actions not-found-actions">
-                      <a className="text-action not-found-home-action" href="/">
+                      <a className="text-action not-found-home-action" href={coverPath}>
                         ← return to cover
                       </a>
-                      <a className="text-action" href="/#about">
+                      <a className="text-action" href={aboutPath}>
                         read about the guide
                       </a>
                     </div>
@@ -208,11 +211,11 @@ export const NotFoundPage: React.FC = () => {
                 </div>
 
                 <footer className="page-footer not-found-page-footer">
-                  <a className="footer-nav footer-prev left" href="/">
+                  <a className="footer-nav footer-prev left" href={coverPath}>
                     <span className="nav-arrow">←</span> Cover
                   </a>
                   <span className="center">Page 404</span>
-                  <a className="footer-nav footer-next right" href="/#about">
+                  <a className="footer-nav footer-next right" href={aboutPath}>
                     About <span className="nav-arrow">→</span>
                   </a>
                 </footer>
