@@ -109,7 +109,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
   return (
     <article className="about-page" aria-labelledby="about-page-title">
       <div className="about-page-inner redesign-layout">
-        {onClose && (
+        {onClose ? (
           <button
             type="button"
             className="about-page-close"
@@ -120,6 +120,14 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
           >
             ×
           </button>
+        ) : (
+          <span
+            className="about-page-close"
+            style={{ border: 0, background: 'transparent', pointerEvents: 'none' }}
+            aria-hidden="true"
+          >
+            ×
+          </span>
         )}
         <header className="about-page-header">
           <div className="about-wordmark" aria-label="The AI Almanac">
