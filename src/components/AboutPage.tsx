@@ -13,10 +13,26 @@ const authorVideoUrl = `${import.meta.env.BASE_URL || '/'}author-video.mp4`;
 export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => {
   const [showVideo, setShowVideo] = useState(false);
   const [touchPreviewOpen, setTouchPreviewOpen] = useState(false);
+  const [videoRequested, setVideoRequested] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const authorCreditRef = useRef<HTMLDivElement>(null);
   const authorVideoRef = useRef<HTMLVideoElement>(null);
   const firstTouchTap = useRef(false);
-  const videoVisible = showVideo || touchPreviewOpen;
+  const wantsVideoPreview = showVideo || touchPreviewOpen;
+  const videoVisible = wantsVideoPreview && videoReady;
+
+  useEffect(() => {
+    const video = authorVideoRef.current;
+    if (!video || !videoRequested) return;
+
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      setVideoReady(true);
+    } else {
+      // Start buffering in the hidden popup and reveal it only after the first
+      // usable frame has decoded. This avoids a black preview on slow networks.
+      video.load();
+    }
+  }, [videoRequested]);
 
   useEffect(() => {
     const video = authorVideoRef.current;
@@ -24,13 +40,15 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
 
     if (videoVisible) {
       void video.play().catch(() => {
-        // The video is muted, but keep the preview usable if autoplay is blocked.
+        // Keep the decoded first frame visible if autoplay is blocked.
       });
     } else {
       video.pause();
-      video.currentTime = 0;
+      if (!wantsVideoPreview) {
+        video.currentTime = 0;
+      }
     }
-  }, [videoVisible]);
+  }, [videoVisible, wantsVideoPreview]);
 
   useEffect(() => {
     const handleTouchOutside = (event: PointerEvent) => {
@@ -51,6 +69,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
     return () => document.removeEventListener('pointerdown', handleTouchOutside);
   }, []);
 
+  const handleAuthorMouseEnter = () => {
+    setVideoRequested(true);
+    setShowVideo(true);
+  };
+
   const handleAuthorPointerDown = (event: React.PointerEvent<HTMLAnchorElement>) => {
     const isMobileTouch =
       event.pointerType === 'touch' &&
@@ -64,6 +87,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
     if (!touchPreviewOpen) {
       firstTouchTap.current = true;
       event.preventDefault();
+      setVideoRequested(true);
       setTouchPreviewOpen(true);
     } else {
       firstTouchTap.current = false;
@@ -89,6 +113,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
           <button
             type="button"
             className="about-page-close"
+            style={{ border: 0, background: 'transparent' }}
             onClick={onClose}
             aria-label="Close About page and return to the book"
             title="Return to the book"
@@ -127,14 +152,14 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
               <div
                 ref={authorCreditRef}
                 className="author-credit"
-                onMouseEnter={() => setShowVideo(true)}
+                onMouseEnter={handleAuthorMouseEnter}
                 onMouseLeave={() => setShowVideo(false)}
               >
                 <a
                   href="https://x.com/essjaykay755"
                   target="_blank"
                   rel="noreferrer"
-                  aria-expanded={showVideo || touchPreviewOpen}
+                  aria-expanded={videoVisible}
                   aria-controls="author-video-popup"
                   onPointerDown={handleAuthorPointerDown}
                   onClick={handleAuthorClick}
@@ -148,8 +173,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
                 >
                   <video
                     ref={authorVideoRef}
-                    src={videoVisible ? authorVideoUrl : undefined}
+                    src={videoRequested ? authorVideoUrl : undefined}
                     preload="none"
+                    onLoadedData={() => setVideoReady(true)}
+                    onCanPlay={() => setVideoReady(true)}
+                    onError={() => setVideoReady(false)}
                     muted
                     loop
                     playsInline
