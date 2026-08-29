@@ -4,6 +4,11 @@ let audioCtx: AudioContext | null = null;
 let pageFlipBuffer: AudioBuffer | null = null;
 let bufferLoadPromise: Promise<void> | null = null;
 
+function assetUrl(path: string): string {
+  const base = import.meta.env.BASE_URL || '/';
+  return `${base}${path.replace(/^\/+/, '')}`;
+}
+
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   if (!audioCtx) {
@@ -37,7 +42,7 @@ export function preloadAudio() {
   if (typeof window === 'undefined' || pageFlipBuffer || bufferLoadPromise) return;
   if (!getAudioContext()) return;
 
-  bufferLoadPromise = loadAudioBuffer('/sounds/page-flip.mp3')
+  bufferLoadPromise = loadAudioBuffer(assetUrl('sounds/page-flip.mp3'))
     .then((buf) => {
       pageFlipBuffer = buf;
     })
@@ -74,7 +79,6 @@ function playAudioFile(url: string, volume: number, fallback: () => void) {
   }
 }
 
-// Fallback synthetic noise burst
 function noiseBurst(
   duration = 0.12,
   filterFreq = 1600,
@@ -112,14 +116,12 @@ function noiseBurst(
 }
 
 export function playPageTurnSound() {
-  // Start loading only from the user-initiated page-turn path. Creating an
-  // AudioContext during module evaluation is blocked by browser autoplay policy.
   preloadAudio();
   if (pageFlipBuffer && playBuffer(pageFlipBuffer, 0.65)) {
     return;
   }
   try {
-    const audio = new Audio('/sounds/page-flip.mp3');
+    const audio = new Audio(assetUrl('sounds/page-flip.mp3'));
     audio.volume = 0.65;
     audio.play().catch(() => {
       noiseBurst(0.28, 750, 0.045, 'bandpass');
@@ -132,7 +134,7 @@ export function playPageTurnSound() {
 }
 
 export function playPaperTearSound() {
-  playAudioFile('/sounds/paper-tear.mp3', 0.42, () => {
+  playAudioFile(assetUrl('sounds/paper-tear.mp3'), 0.42, () => {
     noiseBurst(0.16, 1900, 0.025, 'highpass');
   });
 }
