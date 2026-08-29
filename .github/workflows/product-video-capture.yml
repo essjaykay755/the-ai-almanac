@@ -1,0 +1,129 @@
+name: Capture real UI product video
+
+on:
+  push:
+    branches:
+      - video-capture/real-ui-product-film
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout capture branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install app dependencies
+        run: npm ci
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Build the real application
+        run: npm run build
+
+      - name: Start production preview
+        shell: bash
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/almanac-preview.log 2>&1 &
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+              echo "Vite preview is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/almanac-preview.log
+          exit 1
+
+      - name: Record actual React components and interactions
+        run: node scripts/capture-product-video.mjs
+
+      - name: Ensure FFmpeg is available
+        shell: bash
+        run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+
+      - name: Assemble master using only app recording and app sounds
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p video-output/final video-output/qc
+
+          START=$(node -e "const t=require('./video-output/capture-timeline.json'); process.stdout.write((t.captureStartOffsetMs/1000).toFixed(3))")
+          DUR=$(node -e "const t=require('./video-output/capture-timeline.json'); process.stdout.write((t.captureDurationMs/1000).toFixed(3))")
+          OUTFADE=$(node -e "const t=require('./video-output/capture-timeline.json'); process.stdout.write(Math.max(0, t.captureDurationMs/1000-0.45).toFixed(3))")
+          TERM_MS=$(node -e "const t=require('./video-output/capture-timeline.json'); process.stdout.write(String(Math.round(t.markers.termTurn)))")
+          BOOKMARK_MS=$(node -e "const t=require('./video-output/capture-timeline.json'); process.stdout.write(String(Math.round(t.markers.bookmark)))")
+          ABOUT_MS=$(node -e "const t=require('./video-output/capture-timeline.json'); process.stdout.write(String(Math.round(t.markers.aboutTurn)))")
+
+          echo "trim start=${START}s duration=${DUR}s"
+          echo "sound markers: term=${TERM_MS}ms bookmark=${BOOKMARK_MS}ms about=${ABOUT_MS}ms"
+
+          FLIP=public/sounds/page-flip.mp3
+          TEAR=public/sounds/paper-tear.mp3
+          test -f "$FLIP"
+          test -f "$TEAR"
+
+          ffmpeg -y \
+            -ss "$START" -t "$DUR" -i video-output/almanac-real-ui.webm \
+            -i "$FLIP" \
+            -i "$TEAR" \
+            -f lavfi -t "$DUR" -i anullsrc=r=48000:cl=stereo \
+            -filter_complex "[1:a]aformat=sample_rates=48000:channel_layouts=stereo,volume=0.55,adelay=${TERM_MS}|${TERM_MS}[flip1];[1:a]aformat=sample_rates=48000:channel_layouts=stereo,volume=0.48,adelay=${ABOUT_MS}|${ABOUT_MS}[flip2];[2:a]aformat=sample_rates=48000:channel_layouts=stereo,volume=0.42,adelay=${BOOKMARK_MS}|${BOOKMARK_MS}[tear];[3:a]volume=0.001[silence];[silence][flip1][flip2][tear]amix=inputs=4:normalize=0:duration=longest,afade=t=in:st=0:d=0.15,afade=t=out:st=${OUTFADE}:d=0.45[aout];[0:v]fps=24,format=yuv420p,fade=t=in:st=0:d=0.28,fade=t=out:st=${OUTFADE}:d=0.45[vout]" \
+            -map "[vout]" -map "[aout]" \
+            -c:v libx264 -preset medium -crf 17 -profile:v high -level 4.2 \
+            -c:a aac -b:a 192k -ar 48000 \
+            -movflags +faststart \
+            -shortest \
+            video-output/final/ai-almanac-real-ui-product-film.mp4
+
+      - name: Quality-control output
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffprobe -v error \
+            -show_entries format=duration,size:stream=index,codec_name,width,height,r_frame_rate,sample_rate,channels \
+            -of json \
+            video-output/final/ai-almanac-real-ui-product-film.mp4 \
+            > video-output/qc/ffprobe.json
+
+          ffmpeg -y \
+            -i video-output/final/ai-almanac-real-ui-product-film.mp4 \
+            -vf "fps=1/2,scale=480:-2,tile=4x2" \
+            -frames:v 1 \
+            video-output/qc/contact-sheet.jpg
+
+          ffmpeg -i video-output/final/ai-almanac-real-ui-product-film.mp4 \
+            -filter_complex ebur128=peak=true \
+            -f null - 2> video-output/qc/loudness.txt || true
+
+          cat video-output/qc/ffprobe.json
+
+      - name: Upload product-film artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-almanac-real-ui-product-video
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            video-output/final/ai-almanac-real-ui-product-film.mp4
+            video-output/capture-timeline.json
+            video-output/qc/contact-sheet.jpg
+            video-output/qc/ffprobe.json
+            video-output/qc/loudness.txt
