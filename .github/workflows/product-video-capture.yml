@@ -1,4 +1,4 @@
-name: Capture real UI product video
+name: Capture 60fps product intro
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout capture branch
@@ -27,8 +27,19 @@ jobs:
       - name: Install app dependencies
         run: npm ci
 
-      - name: Install Chromium for Playwright
+      - name: Install Chromium and headed-browser dependencies
         run: npx playwright install --with-deps chromium
+
+      - name: Ensure FFmpeg and Xvfb are available
+        shell: bash
+        run: |
+          set -e
+          if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg xvfb
+          fi
+          ffmpeg -version | head -n 1
+          xvfb-run --help >/dev/null
 
       - name: Build the real application
         run: npm run build
@@ -47,83 +58,93 @@ jobs:
           cat /tmp/almanac-preview.log
           exit 1
 
-      - name: Record actual React components and interactions
-        run: node scripts/capture-product-video.mjs
-
-      - name: Ensure FFmpeg is available
-        shell: bash
-        run: |
-          if ! command -v ffmpeg >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y ffmpeg
-          fi
-          ffmpeg -version | head -n 1
-
-      - name: Assemble master using only app recording and app sounds
+      - name: Record actual React UI at native 60fps
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p video-output/final video-output/qc
+          xvfb-run -a -s "-screen 0 1920x1080x24 -ac +extension RANDR" \
+            node scripts/capture-product-intro.mjs
 
-          START=$(node -e "const t=require('./video-output/capture-timeline.json'); process.stdout.write((t.captureStartOffsetMs/1000).toFixed(3))")
-          DUR=$(node -e "const t=require('./video-output/capture-timeline.json'); process.stdout.write((t.captureDurationMs/1000).toFixed(3))")
-          OUTFADE=$(node -e "const t=require('./video-output/capture-timeline.json'); process.stdout.write(Math.max(0, t.captureDurationMs/1000-0.45).toFixed(3))")
-          TERM_MS=$(node -e "const t=require('./video-output/capture-timeline.json'); process.stdout.write(String(Math.round(t.markers.termTurn)))")
-          BOOKMARK_MS=$(node -e "const t=require('./video-output/capture-timeline.json'); process.stdout.write(String(Math.round(t.markers.bookmark)))")
-          ABOUT_MS=$(node -e "const t=require('./video-output/capture-timeline.json'); process.stdout.write(String(Math.round(t.markers.aboutTurn)))")
+      - name: Assemble 30-second launch-film master
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p video-output-intro/final video-output-intro/qc
 
-          echo "trim start=${START}s duration=${DUR}s"
-          echo "sound markers: term=${TERM_MS}ms bookmark=${BOOKMARK_MS}ms about=${ABOUT_MS}ms"
-
+          RAW=video-output-intro/almanac-product-intro-60fps.mp4
+          JSON=video-output-intro/capture-timeline.json
+          OUT=video-output-intro/final/ai-almanac-product-intro-30s-60fps.mp4
           FLIP=public/sounds/page-flip.mp3
           TEAR=public/sounds/paper-tear.mp3
+          test -f "$RAW"
           test -f "$FLIP"
           test -f "$TEAR"
 
+          # Capture has a deliberate ~0.5s recorder pre-roll; retain 50ms of it for the opening settle.
+          START=0.450
+          DUR=30.000
+          TERM_MS=$(node -e "const t=require('./$JSON'); process.stdout.write(String(Math.max(0,Math.round(t.markers.termTurn+50))))")
+          RELATED_MS=$(node -e "const t=require('./$JSON'); process.stdout.write(String(Math.max(0,Math.round((t.markers.relatedTurn??t.markers.termTurn)+50))))")
+          BOOKMARK_MS=$(node -e "const t=require('./$JSON'); process.stdout.write(String(Math.max(0,Math.round(t.markers.bookmark+50))))")
+          ABOUT_MS=$(node -e "const t=require('./$JSON'); process.stdout.write(String(Math.max(0,Math.round(t.markers.aboutTurn+50))))")
+
+          echo "page sound markers term=$TERM_MS related=$RELATED_MS bookmark=$BOOKMARK_MS about=$ABOUT_MS"
+
           ffmpeg -y \
-            -ss "$START" -t "$DUR" -i video-output/almanac-real-ui.webm \
+            -ss "$START" -i "$RAW" \
+            -i "$FLIP" \
+            -i "$FLIP" \
             -i "$FLIP" \
             -i "$TEAR" \
-            -f lavfi -t "$DUR" -i anullsrc=r=48000:cl=stereo \
-            -filter_complex "[1:a]aformat=sample_rates=48000:channel_layouts=stereo,volume=0.55,adelay=${TERM_MS}|${TERM_MS}[flip1];[1:a]aformat=sample_rates=48000:channel_layouts=stereo,volume=0.48,adelay=${ABOUT_MS}|${ABOUT_MS}[flip2];[2:a]aformat=sample_rates=48000:channel_layouts=stereo,volume=0.42,adelay=${BOOKMARK_MS}|${BOOKMARK_MS}[tear];[3:a]volume=0.001[silence];[silence][flip1][flip2][tear]amix=inputs=4:normalize=0:duration=longest,afade=t=in:st=0:d=0.15,afade=t=out:st=${OUTFADE}:d=0.45[aout];[0:v]fps=24,format=yuv420p,fade=t=in:st=0:d=0.28,fade=t=out:st=${OUTFADE}:d=0.45[vout]" \
+            -f lavfi -t "$DUR" -i "sine=frequency=55:sample_rate=48000" \
+            -f lavfi -t "$DUR" -i "sine=frequency=110:sample_rate=48000" \
+            -f lavfi -t "$DUR" -i "anoisesrc=color=pink:amplitude=0.08:sample_rate=48000" \
+            -filter_complex "\
+              [0:v]fps=60,tpad=stop_mode=clone:stop_duration=6,trim=duration=${DUR},setpts=PTS-STARTPTS,format=yuv420p,fade=t=in:st=0:d=.24,fade=t=out:st=29.18:d=.82[vout];\
+              [1:a]aformat=sample_rates=48000:channel_layouts=stereo,volume=.60,adelay=${TERM_MS}|${TERM_MS}[flip1];\
+              [2:a]aformat=sample_rates=48000:channel_layouts=stereo,volume=.48,adelay=${RELATED_MS}|${RELATED_MS}[flip2];\
+              [3:a]aformat=sample_rates=48000:channel_layouts=stereo,volume=.52,adelay=${ABOUT_MS}|${ABOUT_MS}[flip3];\
+              [4:a]aformat=sample_rates=48000:channel_layouts=stereo,volume=.38,adelay=${BOOKMARK_MS}|${BOOKMARK_MS}[tear];\
+              [5:a]volume=.055,lowpass=f=180,afade=t=in:st=0:d=1.4,afade=t=out:st=28.2:d=1.8[drone];\
+              [6:a]volume=.016,lowpass=f=420,afade=t=in:st=2:d=2.2,afade=t=out:st=28:d=2[harmonic];\
+              [7:a]highpass=f=120,lowpass=f=1100,volume=.028,afade=t=in:st=0:d=1.2,afade=t=out:st=28.4:d=1.6[air];\
+              [drone][harmonic][air][flip1][flip2][flip3][tear]amix=inputs=7:normalize=0:duration=longest,alimiter=limit=.88,atrim=duration=${DUR},afade=t=out:st=29.25:d=.75[aout]" \
             -map "[vout]" -map "[aout]" \
-            -c:v libx264 -preset medium -crf 17 -profile:v high -level 4.2 \
-            -c:a aac -b:a 192k -ar 48000 \
+            -c:v libx264 -preset slow -crf 16 -profile:v high -level 4.2 \
+            -c:a aac -b:a 256k -ar 48000 \
             -movflags +faststart \
-            -shortest \
-            video-output/final/ai-almanac-real-ui-product-film.mp4
+            -t "$DUR" \
+            "$OUT"
 
-      - name: Quality-control output
+      - name: Quality-control master
         shell: bash
         run: |
           set -euo pipefail
+          OUT=video-output-intro/final/ai-almanac-product-intro-30s-60fps.mp4
+
           ffprobe -v error \
-            -show_entries format=duration,size:stream=index,codec_name,width,height,r_frame_rate,sample_rate,channels \
-            -of json \
-            video-output/final/ai-almanac-real-ui-product-film.mp4 \
-            > video-output/qc/ffprobe.json
+            -show_entries format=duration,size:stream=index,codec_name,width,height,r_frame_rate,avg_frame_rate,sample_rate,channels \
+            -of json "$OUT" > video-output-intro/qc/ffprobe.json
 
-          ffmpeg -y \
-            -i video-output/final/ai-almanac-real-ui-product-film.mp4 \
-            -vf "fps=1/2,scale=480:-2,tile=4x2" \
-            -frames:v 1 \
-            video-output/qc/contact-sheet.jpg
+          ffmpeg -y -i "$OUT" \
+            -vf "fps=1/3,scale=480:-2,tile=5x2" \
+            -frames:v 1 video-output-intro/qc/contact-sheet.jpg
 
-          ffmpeg -i video-output/final/ai-almanac-real-ui-product-film.mp4 \
+          ffmpeg -i "$OUT" \
             -filter_complex ebur128=peak=true \
-            -f null - 2> video-output/qc/loudness.txt || true
+            -f null - 2> video-output-intro/qc/loudness.txt || true
 
-          cat video-output/qc/ffprobe.json
+          cat video-output-intro/qc/ffprobe.json
 
-      - name: Upload product-film artifact
+      - name: Upload 60fps launch-film artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ai-almanac-real-ui-product-video
+          name: ai-almanac-product-intro-30s-60fps
           if-no-files-found: error
           retention-days: 7
           path: |
-            video-output/final/ai-almanac-real-ui-product-film.mp4
-            video-output/capture-timeline.json
-            video-output/qc/contact-sheet.jpg
-            video-output/qc/ffprobe.json
-            video-output/qc/loudness.txt
+            video-output-intro/final/ai-almanac-product-intro-30s-60fps.mp4
+            video-output-intro/capture-timeline.json
+            video-output-intro/qc/contact-sheet.jpg
+            video-output-intro/qc/ffprobe.json
+            video-output-intro/qc/loudness.txt
