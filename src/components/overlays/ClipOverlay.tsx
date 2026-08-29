@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import type { Term, ClipStyle } from '../../types/almanac';
-import { downloadCanvasAsPng, renderClipPreviewToCanvas } from '../../utils/canvasExport';
 import { playPaperTearSound } from '../../utils/sound';
 import { getPublicPath, getTermRoutePath } from '../../utils/ogImage';
 import { useDialogFocus } from '../../hooks/useDialogFocus';
@@ -92,6 +91,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
     }
     const filename = `the-ai-almanac-${term.word.toLowerCase().replace(/\s+/g, '-')}.png`;
     try {
+      const { downloadCanvasAsPng, renderClipPreviewToCanvas } = await import('../../utils/canvasExport');
       await renderClipPreviewToCanvas(canvasRef.current, previewRef.current);
       downloadCanvasAsPng(canvasRef.current, filename);
       onShowStamp('ENTRY SAVED');
