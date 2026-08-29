@@ -179,10 +179,15 @@ await sleep(320);
 // Use the app's real solid-cover page transition into About.
 mark('aboutTurn', captureStart);
 await page.locator('#navAbout').click();
-await page.locator('.about-page').waitFor({ state: 'visible' });
-await sleep(1050);
+await page.waitForFunction(() => document.querySelectorAll('.about-page').length > 0);
+await sleep(1100); // allow the app's duplicated transition surface to settle.
 await page.evaluate(() => {
-  const about = document.querySelector('.about-page');
+  const pages = [...document.querySelectorAll('.about-page')];
+  const about = pages.find((el) => {
+    const style = getComputedStyle(el);
+    const rect = el.getBoundingClientRect();
+    return style.visibility !== 'hidden' && style.display !== 'none' && rect.width > 0 && rect.height > 0;
+  }) ?? pages[0];
   if (!about) return;
   about.animate(
     [
