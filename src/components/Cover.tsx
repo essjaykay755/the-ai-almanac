@@ -200,14 +200,14 @@ export const Cover: React.FC<CoverProps> = ({
       <div className="cover-sound-panel">
         <small className="cover-version">v{APP_VERSION}</small>
         <div className="sound-row">
-          <span>Paper &amp; ink sounds</span>
+          <span>Sound Effects</span>
           <button
             type="button"
             className="sound-toggle"
             onClick={onToggleSound}
             id="soundToggle"
             aria-pressed={soundEnabled}
-            aria-label={`Paper and ink sounds ${soundEnabled ? 'on' : 'off'}`}
+            aria-label={`Sound effects ${soundEnabled ? 'on' : 'off'}`}
           >
             {soundEnabled ? 'On' : 'Off'}
           </button>
