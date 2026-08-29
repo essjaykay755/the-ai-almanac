@@ -104,7 +104,8 @@ function scoreIndexedTerm(index: SearchIndexEntry, query: string, tokens: string
   }
 
   if (hits > 0) {
-    score = Math.min(score, 3.8 - hits * 0.7);
+    const tokenScore = Math.max(1.5, 3.8 - hits * 0.7);
+    score = Math.min(score, tokenScore);
   }
 
   if (tokens.length > 1 && tokens.every((token) => word.includes(token))) {
