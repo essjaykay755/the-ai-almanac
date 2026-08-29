@@ -173,7 +173,7 @@ await page.locator('#navIndex').click();
 await page.locator('#indexOverlay').waitFor({ state: 'visible' });
 await sleep(1200);
 await page.locator('#indexOverlay .close').click();
-await page.locator('#indexOverlay').waitFor({ state: 'detached' }).catch(() => {});
+await page.locator('#indexOverlay').waitFor({ state: 'hidden', timeout: 2000 }).catch(() => {});
 await sleep(320);
 
 // Use the app's real solid-cover page transition into About.
