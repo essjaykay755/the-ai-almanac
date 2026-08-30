@@ -1,10 +1,65 @@
 @media (max-width: 760px) {
   /*
+   * iOS Safari treats 100vh as the large viewport, which can extend behind the
+   * browser's bottom toolbar. Desktop responsive emulation does not reproduce
+   * that behaviour. Anchor the app shell to the dynamic visual viewport so the
+   * in-flow page footer always remains above Safari chrome.
+   */
+  html,
+  body {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  #root {
+    height: 100vh;
+    height: 100svh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100svh;
+    min-height: 100dvh;
+    max-height: 100vh;
+    max-height: 100svh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  /*
+   * Remove the mobile 100vh minimums inherited from index.css. Those minimums
+   * are what pushed the navigation strip below the visible iPhone viewport.
+   * Keep one bounded viewport shell and let only .page-layout scroll.
+   */
+  .stage,
+  .book,
+  .paper-block,
+  .term-page-layer,
+  .page,
+  .page-inner {
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+  }
+
+  .stage {
+    overflow: hidden;
+  }
+
+  .book,
+  .paper-block,
+  .term-page-layer,
+  .page {
+    overflow: hidden;
+  }
+
+  /*
    * The mobile header casts a fairly deep shadow. Keep the first page content
    * below that visual shadow instead of letting the headword sit inside it.
    */
   .page-inner {
     padding-top: calc(var(--mobile-bar-height) + 16px);
+    padding-bottom: 0;
+    overflow: hidden;
   }
 
   /* Keep the expanded search field visually separated from the fixed mobile header. */
@@ -13,13 +68,24 @@
   }
 
   /*
-   * Keep mobile page navigation in the page's flex layout rather than using
-   * position: fixed. iOS Safari can anchor a fixed descendant to a transformed
-   * book/page ancestor instead of the visual viewport, which made the footer
-   * disappear while still leaving its reserved whitespace behind.
-   *
-   * .page-layout is already the scrolling flex child, so the footer naturally
-   * stays visible at the bottom while the entry content scrolls above it.
+   * This is the sole scrolling region on mobile. min-height: 0 is important in
+   * Safari so the flex child is allowed to shrink and leave room for the footer.
+   */
+  .page-layout {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    padding-bottom: 12px;
+  }
+
+  /*
+   * Keep mobile page navigation in normal flex flow. It is deliberately outside
+   * .page-layout, so entry content scrolls while Previous / Page / Next stays
+   * visible at the bottom of the current visual viewport.
    */
   .page-footer {
     position: relative;
@@ -27,20 +93,22 @@
     left: auto;
     right: auto;
     bottom: auto;
-    flex: 0 0 calc(46px + env(safe-area-inset-bottom, 0px));
+    flex: 0 0 46px;
     width: 100%;
     min-width: 0;
-    min-height: calc(46px + env(safe-area-inset-bottom, 0px));
+    height: 46px;
+    min-height: 46px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     gap: 8px;
     margin: 0;
-    padding: 0 18px env(safe-area-inset-bottom, 0px);
+    padding: 0 18px;
     border-top: 1px solid rgba(76, 58, 35, 0.2);
-    background: rgba(242, 232, 212, 0.97);
+    background: rgba(242, 232, 212, 0.985);
     box-shadow: 0 -4px 14px rgba(58, 39, 23, 0.06);
     text-align: center;
+    transform: translateZ(0);
   }
 
   .page-footer .left,
@@ -101,16 +169,6 @@
 
   .page-footer .footer-nav:active {
     transform: scale(0.96);
-  }
-
-  /* The footer is now an in-flow flex child; no fake bottom reserve is needed. */
-  .page-inner {
-    padding-bottom: 0;
-  }
-
-  /* Let the scrolling content stop cleanly above the navigation strip. */
-  .page-layout {
-    padding-bottom: 12px;
   }
 }
 
