@@ -1,0 +1,6 @@
+@media (max-width: 760px) {
+  /* Keep the expanded search field visually separated from the fixed mobile header. */
+  .topline.mobile-search-open {
+    padding-top: 12px;
+  }
+}
