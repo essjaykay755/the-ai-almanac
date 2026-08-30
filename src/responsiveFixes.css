@@ -70,6 +70,8 @@
   /*
    * This is the sole scrolling region on mobile. min-height: 0 is important in
    * Safari so the flex child is allowed to shrink and leave room for the footer.
+   * Give its first line enough internal space that Newsreader's tall ascenders
+   * cannot be clipped by the scroll container's top edge.
    */
   .page-layout {
     flex: 1 1 0;
@@ -79,7 +81,18 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
+    padding-top: 22px;
     padding-bottom: 12px;
+    scroll-padding-top: 22px;
+  }
+
+  .entry {
+    padding-top: 8px;
+  }
+
+  /* Do not let the bookmark hang into the scroll clipping edge on mobile. */
+  .bookmark-btn {
+    top: 0;
   }
 
   /*
