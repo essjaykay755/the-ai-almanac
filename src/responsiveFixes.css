@@ -5,28 +5,33 @@
   }
 
   /*
-   * Mobile page navigation: keep the folio compact and useful instead of
-   * reserving a large, page-number-only area at the bottom of the sheet.
-   * Equal outer columns keep the page number mathematically centered even
-   * though "Previous" and "Next" have different label widths.
+   * Keep mobile page navigation in the page's flex layout rather than using
+   * position: fixed. iOS Safari can anchor a fixed descendant to a transformed
+   * book/page ancestor instead of the visual viewport, which made the footer
+   * disappear while still leaving its reserved whitespace behind.
+   *
+   * .page-layout is already the scrolling flex child, so the footer naturally
+   * stays visible at the bottom while the entry content scrolls above it.
    */
   .page-footer {
-    position: fixed;
+    position: relative;
     z-index: 94;
-    left: 0;
-    right: 25px; /* leave the alphabet tab rail unobstructed */
-    bottom: 0;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    flex: 0 0 calc(46px + env(safe-area-inset-bottom, 0px));
+    width: 100%;
+    min-width: 0;
+    min-height: calc(46px + env(safe-area-inset-bottom, 0px));
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     gap: 8px;
-    min-height: calc(46px + env(safe-area-inset-bottom, 0px));
+    margin: 0;
     padding: 0 18px env(safe-area-inset-bottom, 0px);
     border-top: 1px solid rgba(76, 58, 35, 0.2);
     background: rgba(242, 232, 212, 0.97);
-    box-shadow: 0 -6px 18px rgba(58, 39, 23, 0.08);
-    backdrop-filter: blur(7px);
-    -webkit-backdrop-filter: blur(7px);
+    box-shadow: 0 -4px 14px rgba(58, 39, 23, 0.06);
     text-align: center;
   }
 
@@ -90,9 +95,14 @@
     transform: scale(0.96);
   }
 
-  /* The footer now floats in a 46px strip, so the old 82px footer reserve is unnecessary. */
+  /* The footer is now an in-flow flex child; no fake bottom reserve is needed. */
   .page-inner {
-    padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: 0;
+  }
+
+  /* Let the scrolling content stop cleanly above the navigation strip. */
+  .page-layout {
+    padding-bottom: 12px;
   }
 }
 
