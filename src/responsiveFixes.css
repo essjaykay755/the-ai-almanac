@@ -3,4 +3,107 @@
   .topline.mobile-search-open {
     padding-top: 12px;
   }
+
+  /*
+   * Mobile page navigation: keep the folio compact and useful instead of
+   * reserving a large, page-number-only area at the bottom of the sheet.
+   * Equal outer columns keep the page number mathematically centered even
+   * though "Previous" and "Next" have different label widths.
+   */
+  .page-footer {
+    position: fixed;
+    z-index: 94;
+    left: 0;
+    right: 25px; /* leave the alphabet tab rail unobstructed */
+    bottom: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    min-height: calc(46px + env(safe-area-inset-bottom, 0px));
+    padding: 0 18px env(safe-area-inset-bottom, 0px);
+    border-top: 1px solid rgba(76, 58, 35, 0.2);
+    background: rgba(242, 232, 212, 0.97);
+    box-shadow: 0 -6px 18px rgba(58, 39, 23, 0.08);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    text-align: center;
+  }
+
+  .page-footer .left,
+  .page-footer .right {
+    display: inline-flex;
+  }
+
+  .page-footer .center {
+    grid-column: 2;
+    justify-self: center;
+    align-self: center;
+    margin: 0;
+    white-space: nowrap;
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.075em;
+    color: #725f43;
+  }
+
+  .page-footer .footer-nav {
+    min-width: 0;
+    min-height: 38px;
+    margin: 0;
+    padding: 0 2px;
+    border: 0;
+    background: transparent;
+    color: var(--red);
+    cursor: pointer;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--ui);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    touch-action: manipulation;
+  }
+
+  .page-footer .footer-prev {
+    grid-column: 1;
+    justify-self: start;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .page-footer .footer-next {
+    grid-column: 3;
+    justify-self: end;
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  .page-footer .footer-nav .nav-arrow {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .page-footer .footer-nav:active {
+    transform: scale(0.96);
+  }
+
+  /* The footer now floats in a 46px strip, so the old 82px footer reserve is unnecessary. */
+  .page-inner {
+    padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 340px) {
+  .page-footer {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .page-footer .footer-nav {
+    font-size: 8px;
+    letter-spacing: 0.05em;
+  }
 }
