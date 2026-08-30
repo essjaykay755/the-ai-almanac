@@ -1,4 +1,12 @@
 @media (max-width: 760px) {
+  /*
+   * The mobile header casts a fairly deep shadow. Keep the first page content
+   * below that visual shadow instead of letting the headword sit inside it.
+   */
+  .page-inner {
+    padding-top: calc(var(--mobile-bar-height) + 16px);
+  }
+
   /* Keep the expanded search field visually separated from the fixed mobile header. */
   .topline.mobile-search-open {
     padding-top: 12px;
