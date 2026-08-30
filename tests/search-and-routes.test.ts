@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import type { Term } from '../src/types/almanac.ts';
 import { createSearchIndex, findBestMatch, searchTerms } from '../src/utils/search.ts';
 import { getTermRoutePath, slugifyTerm } from '../src/utils/ogImage.ts';
@@ -37,4 +38,14 @@ test('search includes aliases and preserves an intentional no-match state', () =
 test('term routes remain stable and crawlable', () => {
   assert.equal(slugifyTerm('Vision + Language # Action'), 'vision-language-sharp-action');
   assert.equal(getTermRoutePath({ word: 'context window' }), 'term/context-window/');
+});
+
+test('sound effects default to off until the user opts in', () => {
+  const appSource = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
+
+  assert.match(
+    appSource,
+    /loadStorage<boolean>\('aiAlmanacSound',\s*false,\s*isBoolean\)/,
+    'Sound effects must default to disabled when no saved preference exists.'
+  );
 });
