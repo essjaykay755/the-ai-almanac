@@ -1,9 +1,8 @@
 @media (max-width: 760px) {
   /*
-   * iOS Safari treats 100vh as the large viewport, which can extend behind the
-   * browser's bottom toolbar. Desktop responsive emulation does not reproduce
-   * that behaviour. Anchor the app shell to the dynamic visual viewport so the
-   * in-flow page footer always remains above Safari chrome.
+   * Keep the mobile document bounded to the browser's current visual viewport.
+   * The svh/dvh fallbacks are intentionally ordered so modern iOS Safari uses
+   * the dynamic viewport while older browsers still get a sensible height.
    */
   html,
   body {
@@ -16,20 +15,13 @@
     height: 100vh;
     height: 100svh;
     height: 100dvh;
-    min-height: 100vh;
-    min-height: 100svh;
-    min-height: 100dvh;
+    min-height: 0;
     max-height: 100vh;
     max-height: 100svh;
     max-height: 100dvh;
     overflow: hidden;
   }
 
-  /*
-   * Remove the mobile 100vh minimums inherited from index.css. Those minimums
-   * are what pushed the navigation strip below the visible iPhone viewport.
-   * Keep one bounded viewport shell and let only .page-layout scroll.
-   */
   .stage,
   .book,
   .paper-block,
@@ -45,21 +37,26 @@
     overflow: hidden;
   }
 
+  /*
+   * Do not clip the fixed navigation strip inside the book/page hierarchy.
+   * Safari is much more aggressive than desktop emulation about clipping fixed
+   * descendants of positioned/3D page containers.
+   */
   .book,
   .paper-block,
   .term-page-layer,
-  .page {
-    overflow: hidden;
+  .page,
+  .page-inner {
+    overflow: visible;
   }
 
   /*
-   * The mobile header casts a fairly deep shadow. Keep the first page content
-   * below that visual shadow instead of letting the headword sit inside it.
+   * The mobile header has a deep shadow. Leave enough actual layout space below
+   * it so the headword cannot sit inside or be clipped by that shadow.
    */
   .page-inner {
-    padding-top: calc(var(--mobile-bar-height) + 16px);
+    padding-top: calc(var(--mobile-bar-height) + 28px);
     padding-bottom: 0;
-    overflow: hidden;
   }
 
   /* Keep the expanded search field visually separated from the fixed mobile header. */
@@ -68,10 +65,9 @@
   }
 
   /*
-   * This is the sole scrolling region on mobile. min-height: 0 is important in
-   * Safari so the flex child is allowed to shrink and leave room for the footer.
-   * Give its first line enough internal space that Newsreader's tall ascenders
-   * cannot be clipped by the scroll container's top edge.
+   * The entry itself is the only scrolling region on mobile. The large bottom
+   * padding is a real content reserve for the viewport-pinned navigation bar,
+   * not an empty footer block in document flow.
    */
   .page-layout {
     flex: 1 1 0;
@@ -81,13 +77,15 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
+    overflow-anchor: none;
     padding-top: 22px;
-    padding-bottom: 12px;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
     scroll-padding-top: 22px;
+    scroll-padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
   }
 
   .entry {
-    padding-top: 8px;
+    padding-top: 10px;
   }
 
   /* Do not let the bookmark hang into the scroll clipping edge on mobile. */
@@ -96,37 +94,44 @@
   }
 
   /*
-   * Keep mobile page navigation in normal flex flow. It is deliberately outside
-   * .page-layout, so entry content scrolls while Previous / Page / Next stays
-   * visible at the bottom of the current visual viewport.
+   * iPhone Safari fix: pin Previous / Page / Next directly to the visual
+   * viewport. Keeping this bar in normal page flow proved unreliable on a real
+   * device because Safari can size the page/3D book tree differently from its
+   * responsive desktop emulator.
    */
   .page-footer {
-    position: relative;
-    z-index: 94;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    flex: 0 0 46px;
-    width: 100%;
+    position: fixed !important;
+    z-index: 220;
+    left: 12px !important;
+    right: 37px !important; /* keep the A-Z tab rail clear */
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+    width: auto;
     min-width: 0;
-    height: 46px;
-    min-height: 46px;
+    height: 48px;
+    min-height: 48px;
+    max-height: 48px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
     align-items: center;
     gap: 8px;
     margin: 0;
-    padding: 0 18px;
-    border-top: 1px solid rgba(76, 58, 35, 0.2);
+    padding: 0 14px;
+    border: 1px solid rgba(76, 58, 35, 0.2);
+    border-radius: 8px;
     background: rgba(242, 232, 212, 0.985);
-    box-shadow: 0 -4px 14px rgba(58, 39, 23, 0.06);
+    box-shadow:
+      0 -2px 12px rgba(58, 39, 23, 0.08),
+      0 6px 22px rgba(28, 19, 12, 0.18);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     text-align: center;
-    transform: translateZ(0);
+    transform: none !important;
+    isolation: isolate;
   }
 
   .page-footer .left,
   .page-footer .right {
-    display: inline-flex;
+    display: inline-flex !important;
   }
 
   .page-footer .center {
@@ -143,7 +148,7 @@
 
   .page-footer .footer-nav {
     min-width: 0;
-    min-height: 38px;
+    min-height: 40px;
     margin: 0;
     padding: 0 2px;
     border: 0;
@@ -183,12 +188,19 @@
   .page-footer .footer-nav:active {
     transform: scale(0.96);
   }
+
+  /* Keep the alphabet rail above the floating navigation strip. */
+  .tabs {
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 @media (max-width: 340px) {
   .page-footer {
-    padding-left: 12px;
-    padding-right: 12px;
+    left: 8px !important;
+    right: 33px !important;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   .page-footer .footer-nav {
