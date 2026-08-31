@@ -137,4 +137,32 @@ test.describe('mobile navigation', () => {
     const fontSize = await search.evaluate((input) => parseFloat(getComputedStyle(input).fontSize));
     expect(fontSize).toBeGreaterThanOrEqual(16);
   });
+
+  test('clears a restored nested scroll offset before it can clip the headword', async ({ page }) => {
+    await page.goto('/');
+
+    const layout = page.locator('.page-layout');
+    await layout.evaluate((node) => {
+      (node as HTMLElement).scrollTop = 36;
+    });
+    await expect.poll(() => layout.evaluate((node) => (node as HTMLElement).scrollTop)).toBeGreaterThan(0);
+
+    // Safari can restore nested overflow positions on pageshow/bfcache. The
+    // stability guard should reassert the dictionary page's intended top.
+    await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
+    await expect.poll(() => layout.evaluate((node) => (node as HTMLElement).scrollTop)).toBe(0);
+
+    const positions = await page.evaluate(() => {
+      const scrollport = document.querySelector<HTMLElement>('.page-layout');
+      const word = document.querySelector<HTMLElement>('#entry h1.word');
+      if (!scrollport || !word) return null;
+      return {
+        layoutTop: scrollport.getBoundingClientRect().top,
+        wordTop: word.getBoundingClientRect().top
+      };
+    });
+
+    expect(positions).not.toBeNull();
+    expect(positions!.wordTop).toBeGreaterThan(positions!.layoutTop);
+  });
 });
