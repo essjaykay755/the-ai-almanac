@@ -112,4 +112,29 @@ test.describe('mobile navigation', () => {
     await page.locator('#mobileSearch').click();
     await expect(page.getByRole('combobox', { name: 'Search The AI Almanac' })).toBeVisible();
   });
+
+  test('keeps the headword clear and uses an iOS-safe search font size', async ({ page }) => {
+    await page.goto('/');
+
+    const positions = await page.evaluate(() => {
+      const layout = document.querySelector<HTMLElement>('.page-layout');
+      const word = document.querySelector<HTMLElement>('#entry h1.word');
+      if (!layout || !word) return null;
+      return {
+        layoutTop: layout.getBoundingClientRect().top,
+        wordTop: word.getBoundingClientRect().top
+      };
+    });
+
+    expect(positions).not.toBeNull();
+    expect(positions!.wordTop).toBeGreaterThan(positions!.layoutTop);
+
+    await page.locator('#mobileSearch').click();
+    const search = page.getByRole('combobox', { name: 'Search The AI Almanac' });
+    await expect(search).toBeVisible();
+    await search.focus();
+
+    const fontSize = await search.evaluate((input) => parseFloat(getComputedStyle(input).fontSize));
+    expect(fontSize).toBeGreaterThanOrEqual(16);
+  });
 });
