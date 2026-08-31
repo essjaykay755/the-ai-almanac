@@ -38,25 +38,36 @@
   }
 
   /*
-   * Do not clip the fixed navigation strip inside the book/page hierarchy.
-   * Safari is much more aggressive than desktop emulation about clipping fixed
-   * descendants of positioned/3D page containers.
+   * Keep the book/page hierarchy from clipping fixed descendants. The only
+   * intentional mobile clipping/scrolling surface is .page-inner below.
    */
   .book,
   .paper-block,
   .term-page-layer,
-  .page,
-  .page-inner {
+  .page {
     overflow: visible;
   }
 
   /*
-   * The mobile header has a deep shadow. Leave enough actual layout space below
-   * it so the headword cannot sit inside or be clipped by that shadow.
+   * IMPORTANT: scroll the whole paper interior, not .page-layout.
+   *
+   * The previous implementation made .page-layout the nested scrollport. Its
+   * top edge sits directly above the headword, so iOS Safari could clip the
+   * glyphs on that invisible overflow boundary even when the content appeared
+   * to be at the top. Moving the scrollport one level up leaves the header
+   * reserve between the scrollport edge and the headword, eliminating that
+   * mid-page clipping plane entirely.
    */
   .page-inner {
     padding-top: calc(var(--mobile-bar-height) + 28px);
     padding-bottom: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    overflow-anchor: none;
+    scroll-padding-top: calc(var(--mobile-bar-height) + 28px);
+    scroll-padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
   }
 
   /* Keep the expanded search field visually separated from the fixed mobile header. */
@@ -74,39 +85,27 @@
   }
 
   /*
-   * The entry itself is the only scrolling region on mobile. The large bottom
-   * padding is a real content reserve for the viewport-pinned navigation bar,
-   * not an empty footer block in document flow.
+   * This is now normal content inside the .page-inner scrollport. In particular,
+   * it must not create its own overflow clipping edge above the headword.
    */
   .page-layout {
-    flex: 1 1 0;
+    flex: 0 0 auto;
     min-height: 0;
     height: auto;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-    overflow-anchor: none;
+    overflow: visible;
     padding-top: 22px;
     padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
-    scroll-padding-top: 22px;
-    scroll-padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
   }
 
   .entry {
     padding-top: 10px;
   }
 
-  /*
-   * Newsreader's ink can extend above its nominal line box on iOS. Give the
-   * headword its own non-scrolling inset so glyph tops never meet the scroll
-   * container's clipping edge, even after Safari restores an inner scroll offset.
-   */
   .headword-line {
     padding-top: 10px;
   }
 
-  /* Do not let the bookmark hang into the scroll clipping edge on mobile. */
+  /* Do not let the bookmark hang into the visible top edge of the entry. */
   .bookmark-btn {
     top: 0;
   }
