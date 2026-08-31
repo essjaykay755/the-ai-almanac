@@ -113,22 +113,33 @@ test.describe('mobile navigation', () => {
     await expect(page.getByRole('combobox', { name: 'Search The AI Almanac' })).toBeVisible();
   });
 
-  test('keeps the headword clear and uses an iOS-safe search font size', async ({ page }) => {
+  test('keeps the headword outside any mid-page clipping scrollport', async ({ page }) => {
     await page.goto('/');
 
-    const positions = await page.evaluate(() => {
+    const geometry = await page.evaluate(() => {
+      const inner = document.querySelector<HTMLElement>('.page-inner');
       const layout = document.querySelector<HTMLElement>('.page-layout');
       const word = document.querySelector<HTMLElement>('#entry h1.word');
-      if (!layout || !word) return null;
+      if (!inner || !layout || !word) return null;
+
       return {
+        innerTop: inner.getBoundingClientRect().top,
         layoutTop: layout.getBoundingClientRect().top,
-        wordTop: word.getBoundingClientRect().top
+        wordTop: word.getBoundingClientRect().top,
+        innerOverflowY: getComputedStyle(inner).overflowY,
+        layoutOverflowY: getComputedStyle(layout).overflowY
       };
     });
 
-    expect(positions).not.toBeNull();
-    expect(positions!.wordTop).toBeGreaterThan(positions!.layoutTop);
+    expect(geometry).not.toBeNull();
+    expect(geometry!.innerOverflowY).toBe('auto');
+    expect(geometry!.layoutOverflowY).toBe('visible');
+    expect(geometry!.wordTop).toBeGreaterThan(geometry!.layoutTop);
+    expect(geometry!.layoutTop).toBeGreaterThan(geometry!.innerTop);
+  });
 
+  test('uses an iOS-safe search font size', async ({ page }) => {
+    await page.goto('/');
     await page.locator('#mobileSearch').click();
     const search = page.getByRole('combobox', { name: 'Search The AI Almanac' });
     await expect(search).toBeVisible();
@@ -138,31 +149,16 @@ test.describe('mobile navigation', () => {
     expect(fontSize).toBeGreaterThanOrEqual(16);
   });
 
-  test('clears a restored nested scroll offset before it can clip the headword', async ({ page }) => {
+  test('clears a restored outer paper scroll offset on page restore', async ({ page }) => {
     await page.goto('/');
 
-    const layout = page.locator('.page-layout');
-    await layout.evaluate((node) => {
+    const inner = page.locator('.page-inner');
+    await inner.evaluate((node) => {
       (node as HTMLElement).scrollTop = 36;
     });
-    await expect.poll(() => layout.evaluate((node) => (node as HTMLElement).scrollTop)).toBeGreaterThan(0);
+    await expect.poll(() => inner.evaluate((node) => (node as HTMLElement).scrollTop)).toBeGreaterThan(0);
 
-    // Safari can restore nested overflow positions on pageshow/bfcache. The
-    // stability guard should reassert the dictionary page's intended top.
     await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
-    await expect.poll(() => layout.evaluate((node) => (node as HTMLElement).scrollTop)).toBe(0);
-
-    const positions = await page.evaluate(() => {
-      const scrollport = document.querySelector<HTMLElement>('.page-layout');
-      const word = document.querySelector<HTMLElement>('#entry h1.word');
-      if (!scrollport || !word) return null;
-      return {
-        layoutTop: scrollport.getBoundingClientRect().top,
-        wordTop: word.getBoundingClientRect().top
-      };
-    });
-
-    expect(positions).not.toBeNull();
-    expect(positions!.wordTop).toBeGreaterThan(positions!.layoutTop);
+    await expect.poll(() => inner.evaluate((node) => (node as HTMLElement).scrollTop)).toBe(0);
   });
 });
