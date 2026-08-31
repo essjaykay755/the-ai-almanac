@@ -65,6 +65,15 @@
   }
 
   /*
+   * iOS Safari zooms the visual viewport when a focused input is rendered below
+   * 16px. Keep the search input at 16px on mobile instead of disabling pinch
+   * zoom at the viewport level, which would hurt accessibility.
+   */
+  .search-box input {
+    font-size: 16px;
+  }
+
+  /*
    * The entry itself is the only scrolling region on mobile. The large bottom
    * padding is a real content reserve for the viewport-pinned navigation bar,
    * not an empty footer block in document flow.
@@ -85,6 +94,15 @@
   }
 
   .entry {
+    padding-top: 10px;
+  }
+
+  /*
+   * Newsreader's ink can extend above its nominal line box on iOS. Give the
+   * headword its own non-scrolling inset so glyph tops never meet the scroll
+   * container's clipping edge, even after Safari restores an inner scroll offset.
+   */
+  .headword-line {
     padding-top: 10px;
   }
 
