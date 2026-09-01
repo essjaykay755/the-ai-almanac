@@ -3,10 +3,14 @@ import { spawn } from 'node:child_process';
 const host = '127.0.0.1';
 const port = '4173';
 const url = `http://${host}:${port}/`;
-const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', '--host', host, '--port', port], {
-  cwd: process.cwd(),
-  stdio: 'inherit'
-});
+const server = spawn(
+  process.execPath,
+  ['node_modules/astro/bin/astro.mjs', 'dev', '--host', host, '--port', port],
+  {
+    cwd: process.cwd(),
+    stdio: 'inherit'
+  }
+);
 
 let cleanedUp = false;
 
@@ -46,11 +50,11 @@ const waitForServer = async () => {
       const response = await fetch(url);
       if (response.ok) return;
     } catch {
-      // Vite is still starting.
+      // Astro is still starting.
     }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
-  throw new Error(`Timed out waiting for Vite at ${url}`);
+  throw new Error(`Timed out waiting for Astro at ${url}`);
 };
 
 try {
@@ -68,8 +72,8 @@ try {
     output += text;
     process.stdout.write(text);
 
-    // Playwright on Windows can retain a Chrome/Vite handle after printing its
-    // final summary. Reap the test tree once the result is authoritative so
+    // Playwright on Windows can retain a Chrome/dev-server handle after printing
+    // its final summary. Reap the test tree once the result is authoritative so
     // `npm run test:e2e` returns instead of waiting for the orphaned handle.
     if (!summaryHandled && /\b(?:\d+ passed|\d+ failed)\b/.test(output)) {
       summaryHandled = true;
