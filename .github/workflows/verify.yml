@@ -1,6 +1,9 @@
 name: Verify
 
 on:
+  push:
+    branches:
+      - astro-migration
   pull_request:
     branches:
       - main
