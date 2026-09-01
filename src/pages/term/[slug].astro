@@ -1,0 +1,28 @@
+---
+import AppShell from '../../layouts/AppShell.astro';
+import { terms } from '../../data/terms';
+import type { Term } from '../../types/almanac';
+import { getTermOgImagePath, getTermRoutePath, slugifyTerm } from '../../utils/ogImage';
+
+export function getStaticPaths() {
+  return terms.map((term) => ({
+    params: { slug: slugifyTerm(term.word) },
+    props: { term }
+  }));
+}
+
+interface Props {
+  term: Term;
+}
+
+const { term } = Astro.props as Props;
+---
+
+<AppShell
+  title={`${term.word} - The AI Almanac`}
+  description={term.definition}
+  canonicalPath={getTermRoutePath(term)}
+  imagePath={getTermOgImagePath(term)}
+  imageAlt={`${term.word} definition card from The AI Almanac`}
+  ogType="article"
+/>
