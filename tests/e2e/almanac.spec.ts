@@ -124,13 +124,21 @@ test.describe('mobile navigation', () => {
 
       return {
         innerTop: inner.getBoundingClientRect().top,
+        innerBottom: inner.getBoundingClientRect().bottom,
+        innerHeight: inner.getBoundingClientRect().height,
         layoutTop: layout.getBoundingClientRect().top,
+        layoutHeight: layout.getBoundingClientRect().height,
         wordTop: word.getBoundingClientRect().top,
+        rootHeight: document.querySelector<HTMLElement>('#root')?.getBoundingClientRect().height ?? null,
+        islandDisplay: getComputedStyle(document.querySelector('astro-island') as HTMLElement).display,
         innerOverflowY: getComputedStyle(inner).overflowY,
-        layoutOverflowY: getComputedStyle(layout).overflowY
+        layoutOverflowY: getComputedStyle(layout).overflowY,
+        innerPaddingTop: getComputedStyle(inner).paddingTop,
+        layoutPaddingTop: getComputedStyle(layout).paddingTop
       };
     });
 
+    console.log(`MOBILE_GEOMETRY ${JSON.stringify(geometry)}`);
     expect(geometry).not.toBeNull();
     expect(geometry!.innerOverflowY).toBe('auto');
     expect(geometry!.layoutOverflowY).toBe('visible');
