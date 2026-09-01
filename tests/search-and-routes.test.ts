@@ -83,17 +83,20 @@ test('localized routes use the same React app while keeping English bootstrap is
   assert.doesNotMatch(localizedHome, /locale-term-card/);
 });
 
-test('IP country detection selects supported languages and protects the India default', () => {
+test('language detection suggests supported languages and protects the India default', () => {
   assert.equal(resolveAutoLocale('BR', ['en-US']), 'pt');
   assert.equal(resolveAutoLocale('ES', ['en-US']), 'es');
   assert.equal(resolveAutoLocale('DE', ['en-US']), 'de');
+  assert.equal(resolveAutoLocale('BR', ['fr-FR', 'en-US']), 'fr');
   assert.equal(resolveAutoLocale('IN', ['en-IN']), null);
   assert.equal(resolveAutoLocale('IN', ['hi-IN', 'en-IN']), 'hi');
   assert.equal(resolveAutoLocale(null, ['fr-FR']), 'fr');
 
   const source = readFileSync(new URL('../src/client/languagePreference.ts', import.meta.url), 'utf8');
   const endpoint = readFileSync(new URL('../api/locale.js', import.meta.url), 'utf8');
-  assert.match(source, /window\.location\.replace\(href\)/);
+  assert.doesNotMatch(source, /window\.location\.replace/);
+  assert.match(source, /showLanguageSuggestion/);
+  assert.match(source, /Stay in English/);
   assert.match(endpoint, /x-vercel-ip-country/);
 });
 
