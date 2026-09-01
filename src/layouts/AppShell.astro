@@ -5,7 +5,8 @@ import {
   getHomeAlternateLinks,
   getLanguageSwitchPath,
   getTermAlternateLinks,
-  localeMeta
+  localeMeta,
+  type SupportedLocale
 } from '../i18n/catalog';
 import '../index.css';
 import '../coverTransition.css';
@@ -20,6 +21,7 @@ interface Props {
   imageAlt?: string;
   ogType?: 'website' | 'article';
   translationKey?: string;
+  locale?: SupportedLocale;
 }
 
 const {
@@ -27,11 +29,13 @@ const {
   description,
   canonicalPath = '',
   imagePath = 'og-image.svg',
-  imageAlt = 'The AI Almanac - an evolving field guide to artificial intelligence.',
+  imageAlt = 'The AI Almanac, an evolving field guide to artificial intelligence.',
   ogType = 'website',
-  translationKey
+  translationKey,
+  locale = 'en'
 } = Astro.props;
 
+const currentMeta = localeMeta[locale];
 const base = import.meta.env.BASE_URL || '/';
 const withBase = (path: string) => `${base}${path.replace(/^\/+/, '')}`;
 const absoluteUrl = (path: string) => Astro.site
@@ -41,22 +45,18 @@ const rootPath = withBase('');
 const aboutPath = withBase('about/');
 const canonicalUrl = absoluteUrl(canonicalPath);
 const imageUrl = absoluteUrl(imagePath);
-const isHome = canonicalPath === '';
-const alternateLinks = isHome
-  ? getHomeAlternateLinks()
-  : translationKey
-    ? getTermAlternateLinks(translationKey)
-    : [];
+const alternateLinks = translationKey ? getTermAlternateLinks(translationKey) : getHomeAlternateLinks();
 const xDefault = alternateLinks.find((link) => link.locale === 'en');
 const languageLinks = allLocaleCodes.map((code) => ({
   code,
   meta: localeMeta[code],
   href: withBase(getLanguageSwitchPath(code, translationKey))
 }));
+const shouldBridgeAbout = locale === 'en';
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={currentMeta.htmlLang}>
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg?v=2')} />
@@ -81,7 +81,7 @@ const languageLinks = allLocaleCodes.map((code) => ({
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale" content={currentMeta.ogLocale} />
     <meta property="og:image" content={imageUrl} />
     <meta property="og:image:alt" content={imageAlt} />
     <meta property="og:image:type" content="image/svg+xml" />
@@ -164,129 +164,44 @@ const languageLinks = allLocaleCodes.map((code) => ({
         font-weight: 700;
       }
 
-      .language-suggestion {
-        position: fixed;
-        top: 62px;
-        right: 14px;
-        z-index: 10018;
-        width: min(330px, calc(100vw - 28px));
-        padding: 16px 46px 15px 16px;
-        border: 1px solid rgba(92, 69, 48, .58);
-        background: #efe3cd;
-        color: #2c2118;
-        box-shadow: 0 16px 36px rgba(0, 0, 0, .28);
-        font-family: 'Plus Jakarta Sans', sans-serif;
-      }
-
-      .language-suggestion[hidden] {
-        display: none;
-      }
-
-      .language-suggestion strong {
-        display: block;
-        margin-bottom: 5px;
-        font-family: 'Newsreader', Georgia, serif;
-        font-size: 19px;
-        font-weight: 600;
-      }
-
-      .language-suggestion p {
-        margin: 0 0 12px;
-        font-size: 12px;
-        line-height: 1.5;
-      }
-
-      .language-suggestion-actions {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .language-suggestion-switch,
-      .language-suggestion-stay,
-      .language-suggestion-close {
-        font: inherit;
-      }
-
-      .language-suggestion-switch {
-        display: inline-flex;
-        padding: 8px 10px;
-        border: 1px solid #39291d;
-        background: #39291d;
-        color: #f6ead5;
-        text-decoration: none;
-        font-size: 11px;
-        font-weight: 700;
-      }
-
-      .language-suggestion-stay {
-        padding: 7px 8px;
-        border: 0;
-        background: transparent;
-        color: #594331;
-        cursor: pointer;
-        font-size: 11px;
-        text-decoration: underline;
-        text-underline-offset: 3px;
-      }
-
-      .language-suggestion-close {
-        position: absolute;
-        top: 9px;
-        right: 9px;
-        width: 28px;
-        height: 28px;
-        border: 0;
-        background: transparent;
-        color: #594331;
-        cursor: pointer;
-        font-size: 18px;
-        line-height: 1;
-      }
-
       @media (max-width: 640px) {
         .site-language-switcher {
           top: 8px;
           right: 8px;
         }
-
-        .language-suggestion {
-          top: 56px;
-          right: 8px;
-          width: calc(100vw - 16px);
-        }
       }
     </style>
   </head>
   <body>
-    <script is:inline define:vars={{ rootPath, aboutPath }}>
-      const normalizedPath = window.location.pathname.endsWith('/')
-        ? window.location.pathname
-        : `${window.location.pathname}/`;
+    {shouldBridgeAbout && (
+      <script is:inline define:vars={{ rootPath, aboutPath }}>
+        const normalizedPath = window.location.pathname.endsWith('/')
+          ? window.location.pathname
+          : `${window.location.pathname}/`;
 
-      if (normalizedPath === aboutPath && !window.location.hash) {
-        window.history.replaceState(
-          window.history.state,
-          '',
-          `${rootPath}${window.location.search}#about`
-        );
-      }
-    </script>
+        if (normalizedPath === aboutPath && !window.location.hash) {
+          window.history.replaceState(
+            window.history.state,
+            '',
+            `${rootPath}${window.location.search}#about`
+          );
+        }
+      </script>
+    )}
 
     <div id="root">
-      <ClientApp client:only="react" />
+      <ClientApp locale={locale} initialTermKey={translationKey} client:only="react" />
     </div>
 
     <details class="site-language-switcher">
-      <summary aria-label="Language">EN ▾</summary>
-      <nav class="site-language-menu" aria-label="Language">
+      <summary aria-label={currentMeta.languageLabel}>{currentMeta.shortName} ▾</summary>
+      <nav class="site-language-menu" aria-label={currentMeta.languageLabel}>
         {languageLinks.map((link) => (
           <a
             href={link.href}
             hreflang={link.meta.htmlLang}
             lang={link.meta.htmlLang}
-            aria-current={link.code === 'en' ? 'true' : undefined}
+            aria-current={link.code === locale ? 'true' : undefined}
             data-language-code={link.code}
           >
             <span>{link.meta.nativeName}</span>
@@ -295,16 +210,6 @@ const languageLinks = allLocaleCodes.map((code) => ({
         ))}
       </nav>
     </details>
-
-    <aside class="language-suggestion" data-language-suggestion hidden aria-live="polite">
-      <button class="language-suggestion-close" type="button" aria-label="Dismiss language suggestion" data-language-suggestion-close>×</button>
-      <strong data-language-suggestion-title></strong>
-      <p data-language-suggestion-copy></p>
-      <div class="language-suggestion-actions">
-        <a class="language-suggestion-switch" href="/" data-language-suggestion-switch>Switch language</a>
-        <button class="language-suggestion-stay" type="button" data-language-suggestion-stay>Stay in English</button>
-      </div>
-    </aside>
 
     <script>
       import '../client/navigation';
