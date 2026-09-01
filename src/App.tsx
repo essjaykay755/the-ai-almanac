@@ -53,7 +53,7 @@ type TermSelectionOptions = {
 
 type Collections = Record<string, string[]>;
 
-const DEFAULT_PAGE_TITLE = 'The AI Almanac — Expanded Living Dictionary v0.7';
+const DEFAULT_PAGE_TITLE = 'The AI Almanac - Expanded Living Dictionary v0.7';
 const DEFAULT_PAGE_DESCRIPTION =
   'An evolving reference book for AI enthusiasts & vibe coders. Living dictionary of artificial intelligence concepts, architectures, and practices.';
 
@@ -99,7 +99,7 @@ function updateCanonicalUrl(href: string): void {
 
 function updateDocumentMetadata(term: Term | null, bookView: BookView): void {
   const isTermView = bookView === 'term' && Boolean(term);
-  const title = isTermView && term ? `${term.word} — The AI Almanac` : DEFAULT_PAGE_TITLE;
+  const title = isTermView && term ? `${term.word} - The AI Almanac` : DEFAULT_PAGE_TITLE;
   const description = isTermView && term ? term.definition : DEFAULT_PAGE_DESCRIPTION;
   const imagePath = isTermView && term ? getTermOgImagePath(term) : 'og-image.svg';
   const pagePath = isTermView && term ? getTermRoutePath(term) : '';
@@ -264,7 +264,9 @@ function createDestinationSnapshot(
   if (searchInput) {
     searchInput.value = searchQueryValue;
     searchInput.setAttribute('value', searchQueryValue);
+    searchInput.setAttribute('aria-expanded', 'false');
   }
+  clone.querySelector('.suggestions')?.remove();
 
   // 5. Lower grid (Origin & In Practice)
   const lowerGridPs = clone.querySelectorAll('.lower-grid p');
