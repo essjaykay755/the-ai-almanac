@@ -36,6 +36,7 @@ jobs:
             .split('\0')
             .filter(Boolean)
             .filter((file) => !skipped.has(file))
+            .filter((file) => !file.startsWith('.github/workflows/'))
             .filter((file) => allowedExtensions.has(path.extname(file).toLowerCase()) || file === 'README');
 
           let emDashCount = 0;
@@ -43,13 +44,13 @@ jobs:
           const changed = [];
 
           for (const file of files) {
-            let input = fs.readFileSync(file, 'utf8');
+            const input = fs.readFileSync(file, 'utf8');
             const emMatches = input.match(/—|&mdash;|&#8212;|&#x2014;/gi);
             const commaMatches = input.match(/, and\b/g);
             emDashCount += emMatches?.length ?? 0;
             commaAndCount += commaMatches?.length ?? 0;
 
-            let output = input
+            const output = input
               .replace(/\s*—\s*/g, ' - ')
               .replace(/&mdash;|&#8212;|&#x2014;/gi, '-')
               .replace(/, and\b/g, ' and');
@@ -68,9 +69,7 @@ jobs:
           const remaining = [];
           for (const file of files) {
             const text = fs.readFileSync(file, 'utf8');
-            if (/—|&mdash;|&#8212;|&#x2014;/i.test(text) || /, and\b/.test(text)) {
-              remaining.push(file);
-            }
+            if (/—|&mdash;|&#8212;|&#x2014;/i.test(text) || /, and\b/.test(text)) remaining.push(file);
           }
           if (remaining.length) {
             console.error('Punctuation cleanup left matches in:', remaining.join(', '));
@@ -85,5 +84,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
           git diff --cached --quiet && exit 0
-          git commit -m 'style: remove em dashes and comma-before-and phrasing [skip ci]'
+          git commit -m 'style: normalize punctuation [skip ci]'
           git push
