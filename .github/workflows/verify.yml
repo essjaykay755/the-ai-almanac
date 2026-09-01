@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -28,5 +30,32 @@ jobs:
       - name: Build Astro site
         run: npm run build
 
-      - name: Run end-to-end tests
-        run: npm run test:e2e
+      - name: Compare end-to-end results with main
+        shell: bash
+        run: |
+          set +e
+          npm run test:e2e > /tmp/astro-e2e.log 2>&1
+          astro_status=$?
+
+          git worktree add /tmp/almanac-main origin/main
+          (
+            cd /tmp/almanac-main
+            npm ci > /tmp/main-install.log 2>&1
+            npm run test:e2e > /tmp/main-e2e.log 2>&1
+          )
+          main_status=$?
+
+          echo '=== Astro branch failures ==='
+          grep -E '^[[:space:]]+[0-9]+\)' /tmp/astro-e2e.log || true
+          tail -n 8 /tmp/astro-e2e.log
+
+          echo '=== Main baseline failures ==='
+          grep -E '^[[:space:]]+[0-9]+\)' /tmp/main-e2e.log || true
+          tail -n 8 /tmp/main-e2e.log
+
+          if [ "$astro_status" -ne "$main_status" ]; then
+            echo "E2E status differs: Astro=$astro_status main=$main_status"
+            exit 1
+          fi
+
+          exit "$astro_status"
