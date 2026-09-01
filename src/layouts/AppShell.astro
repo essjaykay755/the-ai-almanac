@@ -1,11 +1,13 @@
 ---
 import ClientApp from '../components/ClientApp';
+import LocalizedClientApp from '../components/LocalizedClientApp';
 import {
   allLocaleCodes,
   getHomeAlternateLinks,
   getLanguageSwitchPath,
   getTermAlternateLinks,
   localeMeta,
+  type LocalizedLocale,
   type SupportedLocale
 } from '../i18n/catalog';
 import '../index.css';
@@ -36,6 +38,7 @@ const {
 } = Astro.props;
 
 const currentMeta = localeMeta[locale];
+const localizedLocale = locale === 'en' ? null : locale as LocalizedLocale;
 const base = import.meta.env.BASE_URL || '/';
 const withBase = (path: string) => `${base}${path.replace(/^\/+/, '')}`;
 const absoluteUrl = (path: string) => Astro.site
@@ -190,7 +193,11 @@ const shouldBridgeAbout = locale === 'en';
     )}
 
     <div id="root">
-      <ClientApp locale={locale} initialTermKey={translationKey} client:only="react" />
+      {localizedLocale ? (
+        <LocalizedClientApp locale={localizedLocale} initialTermKey={translationKey} client:only="react" />
+      ) : (
+        <ClientApp client:only="react" />
+      )}
     </div>
 
     <details class="site-language-switcher">
