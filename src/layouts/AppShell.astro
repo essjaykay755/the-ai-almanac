@@ -1,0 +1,103 @@
+---
+import ClientApp from '../components/ClientApp';
+import '../index.css';
+import '../coverTransition.css';
+import '../loading.css';
+import '../responsiveFixes.css';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  imagePath?: string;
+  imageAlt?: string;
+  ogType?: 'website' | 'article';
+}
+
+const {
+  title,
+  description,
+  canonicalPath = '',
+  imagePath = 'og-image.svg',
+  imageAlt = 'The AI Almanac - an evolving field guide to artificial intelligence.',
+  ogType = 'website'
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL || '/';
+const withBase = (path: string) => `${base}${path.replace(/^\/+/, '')}`;
+const rootPath = withBase('');
+const aboutPath = withBase('about/');
+const canonicalUrl = Astro.site
+  ? new URL(withBase(canonicalPath), Astro.site).toString()
+  : withBase(canonicalPath);
+const imageUrl = Astro.site
+  ? new URL(withBase(imagePath), Astro.site).toString()
+  : withBase(imagePath);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg?v=2')} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#17130f" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="The AI Almanac" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta property="og:image:type" content="image/svg+xml" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baskervville:ital@0;1&family=Cinzel:wght@500;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style is:global>
+      #root > astro-island {
+        display: contents;
+      }
+    </style>
+  </head>
+  <body>
+    <script is:inline define:vars={{ rootPath, aboutPath }}>
+      const normalizedPath = window.location.pathname.endsWith('/')
+        ? window.location.pathname
+        : `${window.location.pathname}/`;
+
+      if (normalizedPath === aboutPath && !window.location.hash) {
+        window.history.replaceState(
+          window.history.state,
+          '',
+          `${rootPath}${window.location.search}#about`
+        );
+      }
+    </script>
+
+    <div id="root">
+      <ClientApp client:only="react" />
+    </div>
+
+    <script>
+      import '../client/navigation';
+    </script>
+  </body>
+</html>

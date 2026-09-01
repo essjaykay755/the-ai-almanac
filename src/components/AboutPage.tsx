@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Ornament } from './Ornament';
 import { APP_VERSION } from '../version';
-import essjaykayLogoUrl from '../assets/essjaykay-logo.svg';
+import essjaykayLogoUrl from '../assets/essjaykay-logo.svg?url';
 
 interface AboutPageProps {
   totalTerms: number;
