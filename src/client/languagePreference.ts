@@ -1,16 +1,17 @@
 const PREFERENCE_KEY = 'aiAlmanacLanguage';
-const DISMISSED_KEY = 'aiAlmanacLanguageSuggestionDismissed';
 
 const supportedLocales = ['es', 'pt', 'it', 'fr', 'de', 'hi'] as const;
-type SupportedLocale = (typeof supportedLocales)[number];
+export type AutoLocale = (typeof supportedLocales)[number];
 
-const regionDefaultLocale: Partial<Record<string, SupportedLocale>> = {
+const countryDefaultLocale: Partial<Record<string, AutoLocale>> = {
   AR: 'es',
+  AT: 'de',
   BO: 'es',
   BR: 'pt',
   CL: 'es',
   CO: 'es',
   CR: 'es',
+  CU: 'es',
   DE: 'de',
   DO: 'es',
   EC: 'es',
@@ -31,89 +32,34 @@ const regionDefaultLocale: Partial<Record<string, SupportedLocale>> = {
   VE: 'es'
 };
 
-const timezoneRegion: Record<string, string> = {
-  'America/Argentina/Buenos_Aires': 'AR',
-  'America/Bogota': 'CO',
-  'America/Caracas': 'VE',
-  'America/Costa_Rica': 'CR',
-  'America/Fortaleza': 'BR',
-  'America/Guatemala': 'GT',
-  'America/La_Paz': 'BO',
-  'America/Lima': 'PE',
-  'America/Manaus': 'BR',
-  'America/Mexico_City': 'MX',
-  'America/Montevideo': 'UY',
-  'America/Panama': 'PA',
-  'America/Recife': 'BR',
-  'America/Santiago': 'CL',
-  'America/Santo_Domingo': 'DO',
-  'America/Sao_Paulo': 'BR',
-  'Asia/Calcutta': 'IN',
-  'Asia/Kolkata': 'IN',
-  'Europe/Berlin': 'DE',
-  'Europe/Lisbon': 'PT',
-  'Europe/Madrid': 'ES',
-  'Europe/Paris': 'FR',
-  'Europe/Rome': 'IT'
-};
-
-const localeNames: Record<SupportedLocale, string> = {
-  es: 'Español',
-  pt: 'Português',
-  it: 'Italiano',
-  fr: 'Français',
-  de: 'Deutsch',
-  hi: 'हिन्दी'
-};
-
-function getBrowserLocales(): Intl.Locale[] {
-  const values = navigator.languages?.length ? navigator.languages : [navigator.language];
-  return values.flatMap((value) => {
-    try {
-      return [new Intl.Locale(value)];
-    } catch {
-      return [];
-    }
-  });
+function normalizeLanguage(value: string): AutoLocale | null {
+  const language = value.trim().toLowerCase().split(/[-_]/)[0];
+  return supportedLocales.includes(language as AutoLocale) ? language as AutoLocale : null;
 }
 
-function getRegion(locales: Intl.Locale[]): string | null {
-  try {
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (timezone && timezoneRegion[timezone]) return timezoneRegion[timezone];
-  } catch {}
-
-  return locales.find((locale) => locale.region)?.region?.toUpperCase() || null;
-}
-
-function getBrowserLocale(locales: Intl.Locale[]): SupportedLocale | null {
-  for (const locale of locales) {
-    const language = locale.language.toLowerCase();
-    if (supportedLocales.includes(language as SupportedLocale)) return language as SupportedLocale;
+export function getPreferredBrowserLocale(languages: readonly string[]): AutoLocale | null {
+  for (const language of languages) {
+    const locale = normalizeLanguage(language);
+    if (locale) return locale;
   }
   return null;
 }
 
-function getCountryName(region: string | null): string | null {
-  if (!region) return null;
-  try {
-    const displayNames = new Intl.DisplayNames([navigator.language || 'en'], { type: 'region' });
-    return displayNames.of(region) || region;
-  } catch {
-    return region;
-  }
-}
+export function resolveAutoLocale(country: string | null, browserLanguages: readonly string[]): AutoLocale | null {
+  const browserLocale = getPreferredBrowserLocale(browserLanguages);
+  const region = country?.trim().toUpperCase() || null;
 
-function getCandidateLocale(locales: Intl.Locale[], region: string | null): SupportedLocale | null {
-  const browserLocale = getBrowserLocale(locales);
-
-  // India deliberately stays English unless the browser explicitly prefers Hindi.
+  // India stays English unless the browser itself prefers Hindi.
   if (region === 'IN') return browserLocale === 'hi' ? 'hi' : null;
 
-  // When we recognize the country, keep the suggestion aligned with that country.
-  // Browser language remains the fallback when the region is unknown.
-  const regionalLocale = region ? regionDefaultLocale[region] || null : null;
-  return regionalLocale || browserLocale;
+  if (region && countryDefaultLocale[region]) return countryDefaultLocale[region] || null;
+  return browserLocale;
+}
+
+function getBrowserLanguages(): string[] {
+  if (typeof navigator === 'undefined') return [];
+  if (navigator.languages?.length) return Array.from(navigator.languages);
+  return navigator.language ? [navigator.language] : [];
 }
 
 function getLanguageHref(locale: string): string | null {
@@ -123,15 +69,15 @@ function getLanguageHref(locale: string): string | null {
 function rememberLanguageChoice(locale: string): void {
   try {
     localStorage.setItem(PREFERENCE_KEY, locale);
-    localStorage.removeItem(DISMISSED_KEY);
   } catch {}
 }
 
-function dismissSuggestion(value = '1'): void {
+function getSavedLanguage(): string | null {
   try {
-    localStorage.setItem(DISMISSED_KEY, value);
-  } catch {}
-  document.querySelector<HTMLElement>('[data-language-suggestion]')?.setAttribute('hidden', '');
+    return localStorage.getItem(PREFERENCE_KEY);
+  } catch {
+    return null;
+  }
 }
 
 function bindLanguageLinks(): void {
@@ -140,71 +86,50 @@ function bindLanguageLinks(): void {
   });
 }
 
-function showSuggestion(locale: SupportedLocale, region: string | null, savedPreference: boolean): void {
-  const suggestion = document.querySelector<HTMLElement>('[data-language-suggestion]');
-  const title = suggestion?.querySelector<HTMLElement>('[data-language-suggestion-title]');
-  const copy = suggestion?.querySelector<HTMLElement>('[data-language-suggestion-copy]');
-  const switchLink = suggestion?.querySelector<HTMLAnchorElement>('[data-language-suggestion-switch]');
-  const stayButton = suggestion?.querySelector<HTMLButtonElement>('[data-language-suggestion-stay]');
-  const closeButton = suggestion?.querySelector<HTMLButtonElement>('[data-language-suggestion-close]');
-  const href = getLanguageHref(locale);
-  if (!suggestion || !title || !copy || !switchLink || !stayButton || !closeButton || !href) return;
-
-  const countryName = getCountryName(region);
-  title.textContent = savedPreference
-    ? `Continue in ${localeNames[locale]}?`
-    : countryName
-      ? `${countryName} detected`
-      : `${localeNames[locale]} available`;
-  copy.textContent = savedPreference
-    ? `You previously selected ${localeNames[locale]}. Would you like to continue in that language?`
-    : countryName
-      ? `The AI Almanac is available in ${localeNames[locale]}. Would you like to switch?`
-      : `Your browser prefers ${localeNames[locale]}. Would you like to switch?`;
-  switchLink.textContent = `Switch to ${localeNames[locale]}`;
-  switchLink.href = href;
-  switchLink.onclick = () => rememberLanguageChoice(locale);
-  stayButton.onclick = () => {
-    rememberLanguageChoice('en');
-    dismissSuggestion('english');
-  };
-  closeButton.onclick = () => dismissSuggestion(`${locale}:${region || 'browser'}`);
-  suggestion.removeAttribute('hidden');
+async function getIpCountry(): Promise<string | null> {
+  try {
+    const response = await fetch('/api/locale', {
+      headers: { Accept: 'application/json' },
+      cache: 'no-store'
+    });
+    if (!response.ok) return null;
+    const payload = await response.json() as { country?: unknown };
+    return typeof payload.country === 'string' ? payload.country.toUpperCase() : null;
+  } catch {
+    return null;
+  }
 }
 
-function initializeSuggestion(): void {
+function navigateToLocale(locale: AutoLocale): void {
+  const href = getLanguageHref(locale);
+  if (!href || href === window.location.href) return;
+  window.location.replace(href);
+}
+
+async function initializeLanguagePreference(): Promise<void> {
   if (document.documentElement.lang !== 'en') return;
 
-  let dismissed = false;
-  let savedLanguage: string | null = null;
-  try {
-    dismissed = Boolean(localStorage.getItem(DISMISSED_KEY));
-    savedLanguage = localStorage.getItem(PREFERENCE_KEY);
-  } catch {}
-  if (dismissed || savedLanguage === 'en') return;
-
-  if (savedLanguage && supportedLocales.includes(savedLanguage as SupportedLocale)) {
-    showSuggestion(savedLanguage as SupportedLocale, null, true);
+  const savedLanguage = getSavedLanguage();
+  if (savedLanguage === 'en') return;
+  if (savedLanguage && supportedLocales.includes(savedLanguage as AutoLocale)) {
+    navigateToLocale(savedLanguage as AutoLocale);
     return;
   }
 
-  const browserLocales = getBrowserLocales();
-  const region = getRegion(browserLocales);
-  const candidate = getCandidateLocale(browserLocales, region);
-  if (candidate) showSuggestion(candidate, region, false);
+  const country = await getIpCountry();
+  const locale = resolveAutoLocale(country, getBrowserLanguages());
+  if (locale) navigateToLocale(locale);
 }
 
 function bootLanguagePreference(): void {
-  try {
-    bindLanguageLinks();
-    initializeSuggestion();
-  } catch (error) {
-    console.warn('Language suggestion unavailable.', error);
-  }
+  bindLanguageLinks();
+  void initializeLanguagePreference();
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bootLanguagePreference, { once: true });
-} else {
-  queueMicrotask(bootLanguagePreference);
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootLanguagePreference, { once: true });
+  } else {
+    queueMicrotask(bootLanguagePreference);
+  }
 }
