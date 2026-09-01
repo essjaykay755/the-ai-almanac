@@ -5,10 +5,6 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-  pull-requests: write
-
 concurrency:
   group: verify-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -37,27 +33,4 @@ jobs:
         run: npm run build
 
       - name: Run end-to-end tests
-        id: e2e
-        shell: bash
-        run: |
-          set +e
-          npm run test:e2e 2>&1 | tee /tmp/e2e.log
-          status=${PIPESTATUS[0]}
-          echo "status=$status" >> "$GITHUB_OUTPUT"
-          exit "$status"
-
-      - name: Publish failed E2E details
-        if: failure() && steps.e2e.outputs.status != '0'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          {
-            echo '<!-- astro-e2e-failure -->'
-            echo '### Astro E2E failure details'
-            echo
-            echo '```text'
-            tail -n 120 /tmp/e2e.log
-            echo '```'
-          } > /tmp/e2e-report.md
-          gh pr comment "$PR_NUMBER" --body-file /tmp/e2e-report.md
+        run: npm run test:e2e
