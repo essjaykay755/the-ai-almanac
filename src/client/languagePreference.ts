@@ -1,4 +1,5 @@
 const PREFERENCE_KEY = 'aiAlmanacLanguage';
+const DISMISSAL_KEY = 'aiAlmanacLanguageSuggestionDismissed';
 
 const supportedLocales = ['es', 'pt', 'it', 'fr', 'de', 'hi'] as const;
 export type AutoLocale = (typeof supportedLocales)[number];
@@ -52,8 +53,10 @@ export function resolveAutoLocale(country: string | null, browserLanguages: read
   // India stays English unless the browser itself prefers Hindi.
   if (region === 'IN') return browserLocale === 'hi' ? 'hi' : null;
 
+  // Browser language is the primary signal. Country is a fallback only.
+  if (browserLocale) return browserLocale;
   if (region && countryDefaultLocale[region]) return countryDefaultLocale[region] || null;
-  return browserLocale;
+  return null;
 }
 
 function getBrowserLanguages(): string[] {
@@ -62,8 +65,13 @@ function getBrowserLanguages(): string[] {
   return navigator.language ? [navigator.language] : [];
 }
 
-function getLanguageHref(locale: string): string | null {
-  return document.querySelector<HTMLAnchorElement>(`[data-language-code="${locale}"]`)?.href || null;
+function getLanguageLink(locale: string): HTMLAnchorElement | null {
+  return document.querySelector<HTMLAnchorElement>(`[data-language-code="${locale}"]`);
+}
+
+function getLanguageName(locale: AutoLocale): string {
+  const link = getLanguageLink(locale);
+  return link?.querySelector('span')?.textContent?.trim() || locale.toUpperCase();
 }
 
 function rememberLanguageChoice(locale: string): void {
@@ -80,9 +88,32 @@ function getSavedLanguage(): string | null {
   }
 }
 
+function rememberDismissedLocale(locale: AutoLocale): void {
+  try {
+    localStorage.setItem(DISMISSAL_KEY, locale);
+  } catch {}
+}
+
+function getDismissedLocale(): string | null {
+  try {
+    return localStorage.getItem(DISMISSAL_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function clearDismissedLocale(): void {
+  try {
+    localStorage.removeItem(DISMISSAL_KEY);
+  } catch {}
+}
+
 function bindLanguageLinks(): void {
   document.querySelectorAll<HTMLAnchorElement>('[data-language-code]').forEach((link) => {
-    link.addEventListener('click', () => rememberLanguageChoice(link.dataset.languageCode || 'en'));
+    link.addEventListener('click', () => {
+      rememberLanguageChoice(link.dataset.languageCode || 'en');
+      clearDismissedLocale();
+    });
   });
 }
 
@@ -100,10 +131,94 @@ async function getIpCountry(): Promise<string | null> {
   }
 }
 
-function navigateToLocale(locale: AutoLocale): void {
-  const href = getLanguageHref(locale);
-  if (!href || href === window.location.href) return;
-  window.location.replace(href);
+function getCountryName(country: string): string {
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'region' }).of(country) || country;
+  } catch {
+    return country;
+  }
+}
+
+function countrySupportsLocale(country: string | null, locale: AutoLocale): boolean {
+  if (!country) return false;
+  const region = country.trim().toUpperCase();
+  if (region === 'IN') return locale === 'hi';
+  return countryDefaultLocale[region] === locale;
+}
+
+function buildSuggestionMessage(
+  locale: AutoLocale,
+  country: string | null,
+  isSavedPreference: boolean
+): string {
+  const languageName = getLanguageName(locale);
+
+  if (isSavedPreference) return `Continue in ${languageName}?`;
+
+  if (countrySupportsLocale(country, locale) && country) {
+    return `Visiting from ${getCountryName(country)}? The AI Almanac is available in ${languageName}.`;
+  }
+
+  return `Your browser prefers ${languageName}. The AI Almanac is available in ${languageName}.`;
+}
+
+function showLanguageSuggestion(
+  locale: AutoLocale,
+  country: string | null,
+  isSavedPreference: boolean
+): void {
+  const host = document.querySelector<HTMLElement>('[data-language-suggestion-host]');
+  const link = getLanguageLink(locale);
+  if (!host || !link || host.querySelector('[data-language-suggestion]')) return;
+
+  const languageName = getLanguageName(locale);
+  const card = document.createElement('aside');
+  card.className = 'site-language-suggestion';
+  card.dataset.languageSuggestion = locale;
+  card.setAttribute('role', 'status');
+  card.setAttribute('aria-live', 'polite');
+
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.className = 'site-language-suggestion-close';
+  closeButton.setAttribute('aria-label', 'Dismiss language suggestion');
+  closeButton.textContent = '×';
+
+  const message = document.createElement('p');
+  message.textContent = buildSuggestionMessage(locale, country, isSavedPreference);
+
+  const actions = document.createElement('div');
+  actions.className = 'site-language-suggestion-actions';
+
+  const switchButton = document.createElement('button');
+  switchButton.type = 'button';
+  switchButton.className = 'site-language-suggestion-primary';
+  switchButton.textContent = `Switch to ${languageName}`;
+
+  const stayButton = document.createElement('button');
+  stayButton.type = 'button';
+  stayButton.className = 'site-language-suggestion-secondary';
+  stayButton.textContent = 'Stay in English';
+
+  const dismiss = (): void => {
+    rememberDismissedLocale(locale);
+    card.remove();
+  };
+
+  closeButton.addEventListener('click', dismiss);
+  stayButton.addEventListener('click', () => {
+    rememberLanguageChoice('en');
+    dismiss();
+  });
+  switchButton.addEventListener('click', () => {
+    rememberLanguageChoice(locale);
+    clearDismissedLocale();
+    window.location.assign(link.href);
+  });
+
+  actions.append(switchButton, stayButton);
+  card.append(closeButton, message, actions);
+  host.append(card);
 }
 
 async function initializeLanguagePreference(): Promise<void> {
@@ -111,14 +226,15 @@ async function initializeLanguagePreference(): Promise<void> {
 
   const savedLanguage = getSavedLanguage();
   if (savedLanguage === 'en') return;
-  if (savedLanguage && supportedLocales.includes(savedLanguage as AutoLocale)) {
-    navigateToLocale(savedLanguage as AutoLocale);
-    return;
-  }
 
   const country = await getIpCountry();
-  const locale = resolveAutoLocale(country, getBrowserLanguages());
-  if (locale) navigateToLocale(locale);
+  const savedLocale = supportedLocales.includes(savedLanguage as AutoLocale)
+    ? savedLanguage as AutoLocale
+    : null;
+  const locale = savedLocale || resolveAutoLocale(country, getBrowserLanguages());
+
+  if (!locale || getDismissedLocale() === locale) return;
+  showLanguageSuggestion(locale, country, savedLocale === locale);
 }
 
 function bootLanguagePreference(): void {
