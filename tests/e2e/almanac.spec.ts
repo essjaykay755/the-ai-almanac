@@ -88,45 +88,75 @@ test.describe('desktop regression flows', () => {
     await expect(page.locator('#stamp')).toHaveText('ENTRY SAVE FAILED');
   });
 
-  test('manual language switching keeps the same translated term', async ({ page }) => {
+  test('manual language switching keeps the same translated term and the same app UI', async ({ page }) => {
     await page.goto('/term/context-window/');
     await page.locator('.site-language-switcher summary').click();
     await page.locator('[data-language-code="pt"]').click();
-    await expect(page).toHaveURL(/\/pt\/term\/janela-de-contexto\/$/);
+
+    await expect(page).toHaveURL(/\/pt\/term\/janela-de-contexto\/(?:#.*)?$/);
     await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
+    await expect(page.locator('#entry h1.word')).toHaveText('janela de contexto');
+    await expect(page.locator('#page')).toBeVisible();
+    await expect(page.locator('#search')).toBeVisible();
+  });
+
+  test('direct localized term routes use the full Almanac interface', async ({ page }) => {
+    await page.goto('/hi/term/kritrim-buddhimatta/');
+
+    await expect(page.locator('html')).toHaveAttribute('lang', 'hi');
+    await expect(page.locator('#entry h1.word')).toHaveText('कृत्रिम बुद्धिमत्ता');
+    await expect(page.locator('#page')).toBeVisible();
+    await expect(page.locator('#bookmarkBtn')).toBeVisible();
+    await expect(page.locator('.site-language-switcher summary')).toContainText('HI');
   });
 });
 
-test.describe('smart language suggestions', () => {
+test.describe('automatic language selection', () => {
   test.describe('Brazil', () => {
     test.use({ locale: 'pt-BR', timezoneId: 'America/Sao_Paulo' });
 
-    test('offers Portuguese without changing the page automatically', async ({ page }) => {
+    test('automatically opens Portuguese from the IP country signal', async ({ page }) => {
+      await page.route('**/api/locale', (route) => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ country: 'BR' })
+      }));
+
       await page.goto('/term/context-window/');
-      await expect(page.locator('[data-language-suggestion]')).toBeVisible();
-      await expect(page.locator('[data-language-suggestion-switch]')).toHaveText('Switch to Português');
-      await expect(page).toHaveURL(/\/term\/context-window\/$/);
+      await expect(page).toHaveURL(/\/pt\/term\/janela-de-contexto\/(?:#.*)?$/);
+      await expect(page.locator('#entry h1.word')).toHaveText('janela de contexto');
     });
   });
 
   test.describe('India with English browser', () => {
     test.use({ locale: 'en-IN', timezoneId: 'Asia/Kolkata' });
 
-    test('keeps English without suggesting Hindi', async ({ page }) => {
+    test('keeps English by default', async ({ page }) => {
+      await page.route('**/api/locale', (route) => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ country: 'IN' })
+      }));
+
       await page.goto('/');
-      await expect(page.locator('[data-language-suggestion]')).toBeHidden();
       await expect(page).toHaveURL(/\/$/);
+      await expect(page.locator('#entry h1.word')).toHaveText('artificial intelligence');
     });
   });
 
   test.describe('India with Hindi browser', () => {
     test.use({ locale: 'hi-IN', timezoneId: 'Asia/Kolkata' });
 
-    test('offers Hindi without changing the page automatically', async ({ page }) => {
+    test('automatically opens Hindi when Hindi is preferred', async ({ page }) => {
+      await page.route('**/api/locale', (route) => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ country: 'IN' })
+      }));
+
       await page.goto('/');
-      await expect(page.locator('[data-language-suggestion]')).toBeVisible();
-      await expect(page.locator('[data-language-suggestion-switch]')).toHaveText('Switch to हिन्दी');
-      await expect(page).toHaveURL(/\/$/);
+      await expect(page).toHaveURL(/\/hi\/(?:#.*)?$/);
+      await expect(page.locator('#entry h1.word')).toHaveText('कृत्रिम बुद्धिमत्ता');
     });
   });
 });
