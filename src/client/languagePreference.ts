@@ -108,12 +108,54 @@ function clearDismissedLocale(): void {
   } catch {}
 }
 
+function clearLanguagePreferenceMemory(): void {
+  try {
+    localStorage.removeItem(PREFERENCE_KEY);
+    localStorage.removeItem(DISMISSAL_KEY);
+  } catch {}
+}
+
+function syncLanguagePreferenceState(): void {
+  const savedLanguage = getSavedLanguage();
+  const automaticButton = document.querySelector<HTMLButtonElement>('[data-language-auto]');
+
+  if (automaticButton) {
+    if (savedLanguage) automaticButton.removeAttribute('aria-current');
+    else automaticButton.setAttribute('aria-current', 'true');
+  }
+
+  document.querySelectorAll<HTMLAnchorElement>('[data-language-code]').forEach((link) => {
+    if (savedLanguage && link.dataset.languageCode === savedLanguage) {
+      link.dataset.languageRemembered = 'true';
+    } else {
+      delete link.dataset.languageRemembered;
+    }
+  });
+}
+
 function bindLanguageLinks(): void {
   document.querySelectorAll<HTMLAnchorElement>('[data-language-code]').forEach((link) => {
     link.addEventListener('click', () => {
       rememberLanguageChoice(link.dataset.languageCode || 'en');
       clearDismissedLocale();
+      syncLanguagePreferenceState();
     });
+  });
+}
+
+function bindAutomaticLanguageControl(): void {
+  const button = document.querySelector<HTMLButtonElement>('[data-language-auto]');
+  if (!button) return;
+
+  button.addEventListener('click', () => {
+    clearLanguagePreferenceMemory();
+    syncLanguagePreferenceState();
+    document.querySelector<HTMLElement>('[data-language-suggestion]')?.remove();
+    button.closest('details')?.removeAttribute('open');
+
+    if (document.documentElement.lang === 'en') {
+      void initializeLanguagePreference();
+    }
   });
 }
 
@@ -209,10 +251,12 @@ function showLanguageSuggestion(
   stayButton.addEventListener('click', () => {
     rememberLanguageChoice('en');
     dismiss();
+    syncLanguagePreferenceState();
   });
   switchButton.addEventListener('click', () => {
     rememberLanguageChoice(locale);
     clearDismissedLocale();
+    syncLanguagePreferenceState();
     window.location.assign(link.href);
   });
 
@@ -239,6 +283,8 @@ async function initializeLanguagePreference(): Promise<void> {
 
 function bootLanguagePreference(): void {
   bindLanguageLinks();
+  bindAutomaticLanguageControl();
+  syncLanguagePreferenceState();
   void initializeLanguagePreference();
 }
 
