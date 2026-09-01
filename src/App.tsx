@@ -17,6 +17,7 @@ import { CompareOverlay } from './components/overlays/CompareOverlay';
 import { NotFoundPage } from './components/NotFoundPage';
 import { TutorialOverlay } from './components/TutorialOverlay';
 import { TUTORIAL_STEPS } from './components/tutorialSteps';
+import { isAlmanacAppPath } from './i18n/catalog';
 import {
   playPageTurnSound,
   playPaperTearSound,
@@ -395,16 +396,23 @@ const AlmanacApp: React.FC = () => {
     if (typeof window === 'undefined') return null;
     const pathMatch = window.location.pathname.match(/\/term\/([^/]+)\/?$/);
     const hashMatch = window.location.hash.match(/(?:^#|&)term=([^&]+)/);
-    const requestedValue = pathMatch?.[1] || hashMatch?.[1];
+
+    if (pathMatch) {
+      try {
+        const decoded = decodeURIComponent(pathMatch[1].replace(/\+/g, ' '));
+        const fromSlug = sortedTerms.find((term) => slugifyTerm(term.word) === decoded) ||
+          resolveTerm(decoded.replace(/-/g, ' '));
+        if (fromSlug) return fromSlug;
+      } catch {
+        // Localized term slugs are resolved through the hash key set at bootstrap.
+      }
+    }
+
+    const requestedValue = hashMatch?.[1];
     if (!requestedValue) return null;
 
     try {
-      const decoded = decodeURIComponent(requestedValue.replace(/\+/g, ' '));
-      if (pathMatch) {
-        return sortedTerms.find((term) => slugifyTerm(term.word) === decoded) ||
-          resolveTerm(decoded.replace(/-/g, ' '));
-      }
-      return resolveTerm(decoded);
+      return resolveTerm(decodeURIComponent(requestedValue.replace(/\+/g, ' ')));
     } catch {
       return null;
     }
@@ -1593,6 +1601,7 @@ const AlmanacApp: React.FC = () => {
       historyCount={historyTerms.length}
       collectionCount={Object.keys(collections).length}
       soundEnabled={soundEnabled}
+      termKey={currentTerm.word}
       onPlayTutorial={handlePlayTutorial}
       isMobileOpen={isMobileOpen}
       isMobileClosing={isMobileClosing}
@@ -1815,8 +1824,7 @@ const AlmanacApp: React.FC = () => {
 
 export const App: React.FC = () => {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
-  const isTermPath = /\/term\/[^/]+\/?$/.test(pathname);
-  const isKnownPath = pathname === '/' || pathname === '' || pathname === '/index.html' || isTermPath;
+  const isKnownPath = isAlmanacAppPath(pathname, import.meta.env.BASE_URL || '/');
 
   return isKnownPath ? <AlmanacApp /> : <NotFoundPage />;
 };

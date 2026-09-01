@@ -5,8 +5,11 @@ import type { Term } from '../src/types/almanac.ts';
 import { createSearchIndex, findBestMatch, searchTerms } from '../src/utils/search.ts';
 import { getTermRoutePath, slugifyTerm } from '../src/utils/ogImage.ts';
 import {
+  getLanguageSwitchPath,
   getLocalizedEntries,
   getLocalizedTermPath,
+  getLocaleFromPathname,
+  isAlmanacAppPath,
   localizedLocales
 } from '../src/i18n/catalog.ts';
 import { resolveAutoLocale } from '../src/client/languagePreference.ts';
@@ -69,6 +72,7 @@ test('localized routes use the same React app while keeping English bootstrap is
   const localizedHome = readFileSync(new URL('../src/pages/[lang]/index.astro', import.meta.url), 'utf8');
   const localizedTerm = readFileSync(new URL('../src/pages/[lang]/term/[slug].astro', import.meta.url), 'utf8');
   const shell = readFileSync(new URL('../src/layouts/AppShell.astro', import.meta.url), 'utf8');
+  const cover = readFileSync(new URL('../src/components/Cover.tsx', import.meta.url), 'utf8');
   const englishClient = readFileSync(new URL('../src/components/ClientApp.tsx', import.meta.url), 'utf8');
   const localizedClient = readFileSync(new URL('../src/components/LocalizedClientApp.tsx', import.meta.url), 'utf8');
 
@@ -76,11 +80,26 @@ test('localized routes use the same React app while keeping English bootstrap is
   assert.match(localizedTerm, /import AppShell from '..\/..\/..\/layouts\/AppShell\.astro'/);
   assert.match(shell, /<ClientApp client:only="react" \/>/);
   assert.match(shell, /<LocalizedClientApp locale=\{localizedLocale\} initialTermKey=\{translationKey\} client:only="react" \/>/);
+  assert.match(cover, /<LanguageSwitcher termKey=\{termKey\} \/>/);
   assert.match(englishClient, /import App from '..\/App'/);
   assert.doesNotMatch(englishClient, /runtimeClient/);
   assert.match(localizedClient, /import App from '..\/App'/);
   assert.match(localizedClient, /prepareLocalizedRuntime/);
   assert.doesNotMatch(localizedHome, /locale-term-card/);
+});
+
+test('language homes and localized term routes stay inside the almanac app', () => {
+  assert.equal(isAlmanacAppPath('/'), true);
+  assert.equal(isAlmanacAppPath('/term/context-window/'), true);
+  assert.equal(isAlmanacAppPath('/es/'), true);
+  assert.equal(isAlmanacAppPath('/pt/term/janela-de-contexto/'), true);
+  assert.equal(isAlmanacAppPath('/hi/'), true);
+  assert.equal(isAlmanacAppPath('/not-a-page/'), false);
+  assert.equal(getLocaleFromPathname('/pt/term/janela-de-contexto/'), 'pt');
+  assert.equal(getLocaleFromPathname('/term/context-window/'), 'en');
+  assert.equal(getLanguageSwitchPath('pt', 'context window'), 'pt/term/janela-de-contexto/');
+  assert.equal(getLanguageSwitchPath('es'), 'es/');
+  assert.equal(getLanguageSwitchPath('en', 'context window'), 'term/context-window/');
 });
 
 test('language detection suggests supported languages and protects the India default', () => {
@@ -94,6 +113,7 @@ test('language detection suggests supported languages and protects the India def
 
   const source = readFileSync(new URL('../src/client/languagePreference.ts', import.meta.url), 'utf8');
   const shell = readFileSync(new URL('../src/layouts/AppShell.astro', import.meta.url), 'utf8');
+  const switcher = readFileSync(new URL('../src/components/LanguageSwitcher.tsx', import.meta.url), 'utf8');
   const endpoint = readFileSync(new URL('../api/locale.js', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /window\.location\.replace/);
   assert.match(source, /showLanguageSuggestion/);
@@ -101,8 +121,9 @@ test('language detection suggests supported languages and protects the India def
   assert.match(source, /localStorage\.removeItem\(PREFERENCE_KEY\)/);
   assert.match(source, /localStorage\.removeItem\(DISMISSAL_KEY\)/);
   assert.match(source, /syncLanguagePreferenceState/);
-  assert.match(shell, /data-language-auto/);
-  assert.match(shell, /automaticLanguageLabels/);
+  assert.match(shell, /data-language-suggestion-host/);
+  assert.match(switcher, /data-language-auto/);
+  assert.match(switcher, /automaticLanguageLabels/);
   assert.match(endpoint, /x-vercel-ip-country/);
 });
 

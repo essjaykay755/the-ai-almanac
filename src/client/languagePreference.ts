@@ -117,12 +117,11 @@ function clearLanguagePreferenceMemory(): void {
 
 function syncLanguagePreferenceState(): void {
   const savedLanguage = getSavedLanguage();
-  const automaticButton = document.querySelector<HTMLButtonElement>('[data-language-auto]');
 
-  if (automaticButton) {
-    if (savedLanguage) automaticButton.removeAttribute('aria-current');
-    else automaticButton.setAttribute('aria-current', 'true');
-  }
+  document.querySelectorAll<HTMLButtonElement>('[data-language-auto]').forEach((button) => {
+    if (savedLanguage) button.removeAttribute('aria-current');
+    else button.setAttribute('aria-current', 'true');
+  });
 
   document.querySelectorAll<HTMLAnchorElement>('[data-language-code]').forEach((link) => {
     if (savedLanguage && link.dataset.languageCode === savedLanguage) {
@@ -133,30 +132,53 @@ function syncLanguagePreferenceState(): void {
   });
 }
 
-function bindLanguageLinks(): void {
-  document.querySelectorAll<HTMLAnchorElement>('[data-language-code]').forEach((link) => {
-    link.addEventListener('click', () => {
+let controlsBound = false;
+
+function bindLanguageControls(): void {
+  if (controlsBound) return;
+  controlsBound = true;
+
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const link = target.closest<HTMLAnchorElement>('[data-language-code]');
+    if (link) {
       rememberLanguageChoice(link.dataset.languageCode || 'en');
       clearDismissedLocale();
       syncLanguagePreferenceState();
-    });
-  });
-}
+      return;
+    }
 
-function bindAutomaticLanguageControl(): void {
-  const button = document.querySelector<HTMLButtonElement>('[data-language-auto]');
-  if (!button) return;
+    const autoButton = target.closest<HTMLButtonElement>('[data-language-auto]');
+    if (!autoButton) return;
 
-  button.addEventListener('click', () => {
     clearLanguagePreferenceMemory();
     syncLanguagePreferenceState();
     document.querySelector<HTMLElement>('[data-language-suggestion]')?.remove();
-    button.closest('details')?.removeAttribute('open');
+    document.querySelectorAll('details.site-language-switcher').forEach((details) => {
+      details.removeAttribute('open');
+    });
 
     if (document.documentElement.lang === 'en') {
       void initializeLanguagePreference();
     }
   });
+}
+
+function whenLanguageMenuReady(callback: () => void): void {
+  if (document.querySelector('[data-language-code]')) {
+    callback();
+    return;
+  }
+
+  const observer = new MutationObserver(() => {
+    if (!document.querySelector('[data-language-code]')) return;
+    observer.disconnect();
+    callback();
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
 }
 
 async function getIpCountry(): Promise<string | null> {
@@ -282,10 +304,11 @@ async function initializeLanguagePreference(): Promise<void> {
 }
 
 function bootLanguagePreference(): void {
-  bindLanguageLinks();
-  bindAutomaticLanguageControl();
-  syncLanguagePreferenceState();
-  void initializeLanguagePreference();
+  bindLanguageControls();
+  whenLanguageMenuReady(() => {
+    syncLanguagePreferenceState();
+    void initializeLanguagePreference();
+  });
 }
 
 if (typeof document !== 'undefined') {

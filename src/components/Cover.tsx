@@ -1,6 +1,7 @@
 import React from 'react';
 import type { OverlayType } from '../types/almanac';
 import { APP_VERSION } from '../version';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { Ornament } from './Ornament';
 
 interface CoverProps {
@@ -20,6 +21,7 @@ interface CoverProps {
   onCloseMobile?: () => void;
   onMobileAnimationEnd?: () => void;
   isAboutActive?: boolean;
+  termKey?: string;
 }
 
 export const Cover: React.FC<CoverProps> = ({
@@ -38,7 +40,8 @@ export const Cover: React.FC<CoverProps> = ({
   onCloseMobile,
   isMobileClosing = false,
   onMobileAnimationEnd,
-  isAboutActive = false
+  isAboutActive = false,
+  termKey
 }) => {
   const mobileClass = isMobileOpen
     ? ` mobile-sidebar${isMobileClosing ? ' mobile-sidebar-closing' : ''}`
@@ -83,6 +86,8 @@ export const Cover: React.FC<CoverProps> = ({
       </div>
 
       <nav className="cover-nav" id="coverNav" aria-label="Almanac navigation">
+        <LanguageSwitcher termKey={termKey} />
+
         <button className="nav-btn" onClick={onFocusSearch} id="navSearch">
           <svg viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="7" />

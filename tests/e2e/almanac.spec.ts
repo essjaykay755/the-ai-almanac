@@ -88,6 +88,18 @@ test.describe('desktop regression flows', () => {
     await expect(page.locator('#stamp')).toHaveText('ENTRY SAVE FAILED');
   });
 
+  test('language switching from the cover stays on the almanac instead of 404', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.site-language-switcher summary').click();
+    await page.locator('[data-language-code="es"]').click();
+
+    await expect(page).toHaveURL(/\/es\/(?:term\/[^/]+\/)?(?:#.*)?$/);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+    await expect(page.locator('#page')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Page not found' })).toHaveCount(0);
+    await expect(page.locator('.site-language-switcher summary')).toContainText('ES');
+  });
+
   test('manual language switching keeps the same translated term and remembers the choice', async ({ page }) => {
     await page.goto('/term/context-window/');
     await page.locator('.site-language-switcher summary').click();

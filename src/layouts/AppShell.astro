@@ -2,9 +2,7 @@
 import ClientApp from '../components/ClientApp';
 import LocalizedClientApp from '../components/LocalizedClientApp';
 import {
-  allLocaleCodes,
   getHomeAlternateLinks,
-  getLanguageSwitchPath,
   getTermAlternateLinks,
   localeMeta,
   type LocalizedLocale,
@@ -50,21 +48,7 @@ const canonicalUrl = absoluteUrl(canonicalPath);
 const imageUrl = absoluteUrl(imagePath);
 const alternateLinks = translationKey ? getTermAlternateLinks(translationKey) : getHomeAlternateLinks();
 const xDefault = alternateLinks.find((link) => link.locale === 'en');
-const languageLinks = allLocaleCodes.map((code) => ({
-  code,
-  meta: localeMeta[code],
-  href: withBase(getLanguageSwitchPath(code, translationKey))
-}));
 const shouldBridgeAbout = locale === 'en';
-const automaticLanguageLabels: Record<SupportedLocale, string> = {
-  en: 'Automatic',
-  es: 'Automático',
-  pt: 'Automático',
-  it: 'Automatico',
-  fr: 'Automatique',
-  de: 'Automatisch',
-  hi: 'स्वचालित'
-};
 ---
 
 <!doctype html>
@@ -117,158 +101,6 @@ const automaticLanguageLabels: Record<SupportedLocale, string> = {
       #root > astro-island {
         display: contents;
       }
-
-      .site-language-control {
-        position: fixed;
-        right: 14px;
-        top: 14px;
-        z-index: 10020;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-      }
-
-      .site-language-switcher {
-        position: relative;
-        margin-left: auto;
-        width: fit-content;
-      }
-
-      .site-language-switcher summary {
-        list-style: none;
-        cursor: pointer;
-        min-width: 46px;
-        padding: 8px 10px;
-        border: 1px solid rgba(238, 222, 194, .55);
-        background: rgba(35, 27, 21, .92);
-        color: #f1e5cf;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: .08em;
-        text-align: center;
-        box-shadow: 0 5px 18px rgba(0, 0, 0, .24);
-      }
-
-      .site-language-switcher summary::-webkit-details-marker {
-        display: none;
-      }
-
-      .site-language-menu {
-        position: absolute;
-        right: 0;
-        top: calc(100% + 7px);
-        width: 190px;
-        padding: 7px;
-        border: 1px solid rgba(92, 69, 48, .55);
-        background: #efe3cd;
-        color: #2c2118;
-        box-shadow: 0 14px 32px rgba(0, 0, 0, .28);
-      }
-
-      .site-language-menu a,
-      .site-language-auto {
-        display: flex;
-        width: 100%;
-        box-sizing: border-box;
-        justify-content: space-between;
-        gap: 14px;
-        padding: 8px 9px;
-        border: 0;
-        background: transparent;
-        color: inherit;
-        text-decoration: none;
-        font: inherit;
-        font-size: 12px;
-        text-align: left;
-      }
-
-      .site-language-auto {
-        margin-top: 6px;
-        padding-top: 11px;
-        border-top: 1px solid rgba(92, 69, 48, .22);
-        cursor: pointer;
-      }
-
-      .site-language-menu a:hover,
-      .site-language-menu a:focus-visible,
-      .site-language-auto:hover,
-      .site-language-auto:focus-visible {
-        background: rgba(80, 59, 40, .1);
-      }
-
-      .site-language-menu a[aria-current='true'],
-      .site-language-auto[aria-current='true'] {
-        font-weight: 700;
-      }
-
-      .site-language-menu a[data-language-remembered='true'] span:last-child::after {
-        content: ' ✓';
-      }
-
-      .site-language-suggestion {
-        position: relative;
-        width: min(320px, calc(100vw - 28px));
-        margin-top: 8px;
-        padding: 14px 14px 12px;
-        border: 1px solid rgba(92, 69, 48, .55);
-        background: #efe3cd;
-        color: #2c2118;
-        box-shadow: 0 14px 32px rgba(0, 0, 0, .28);
-      }
-
-      .site-language-suggestion p {
-        margin: 0;
-        padding-right: 22px;
-        font-size: 12px;
-        line-height: 1.5;
-      }
-
-      .site-language-suggestion-close {
-        position: absolute;
-        top: 6px;
-        right: 7px;
-        width: 26px;
-        height: 26px;
-        border: 0;
-        background: transparent;
-        color: inherit;
-        cursor: pointer;
-        font: inherit;
-        font-size: 18px;
-        line-height: 1;
-      }
-
-      .site-language-suggestion-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 7px;
-        margin-top: 10px;
-      }
-
-      .site-language-suggestion-actions button {
-        min-height: 34px;
-        padding: 7px 10px;
-        border: 1px solid rgba(70, 50, 34, .5);
-        cursor: pointer;
-        font: inherit;
-        font-size: 11px;
-        font-weight: 600;
-      }
-
-      .site-language-suggestion-primary {
-        background: #34271d;
-        color: #f6ead5;
-      }
-
-      .site-language-suggestion-secondary {
-        background: transparent;
-        color: #34271d;
-      }
-
-      @media (max-width: 640px) {
-        .site-language-control {
-          top: calc(8px + env(safe-area-inset-top));
-          right: 8px;
-        }
-      }
     </style>
   </head>
   <body>
@@ -296,30 +128,7 @@ const automaticLanguageLabels: Record<SupportedLocale, string> = {
       )}
     </div>
 
-    <div class="site-language-control" data-language-control>
-      <details class="site-language-switcher">
-        <summary aria-label={currentMeta.languageLabel}>{currentMeta.shortName} ▾</summary>
-        <nav class="site-language-menu" aria-label={currentMeta.languageLabel}>
-          {languageLinks.map((link) => (
-            <a
-              href={link.href}
-              hreflang={link.meta.htmlLang}
-              lang={link.meta.htmlLang}
-              aria-current={link.code === locale ? 'true' : undefined}
-              data-language-code={link.code}
-            >
-              <span>{link.meta.nativeName}</span>
-              <span>{link.meta.shortName}</span>
-            </a>
-          ))}
-          <button type="button" class="site-language-auto" data-language-auto>
-            <span>{automaticLanguageLabels[locale]}</span>
-            <span>AUTO</span>
-          </button>
-        </nav>
-      </details>
-      <div data-language-suggestion-host></div>
-    </div>
+    <div class="site-language-suggestion-host" data-language-suggestion-host></div>
 
     <script>
       import '../client/navigation';
