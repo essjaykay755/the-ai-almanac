@@ -9,6 +9,8 @@ import {
   getLocalizedTermPath,
   localizedLocales
 } from '../src/i18n/catalog.ts';
+import { getSuggestedLocale } from '../src/i18n/detection.ts';
+import { getLocalizedSearchText, matchesLocalizedSearch } from '../src/i18n/search.ts';
 
 const term = (word: string, definition: string, aliases: string[] = []): Term => ({
   word,
@@ -58,6 +60,30 @@ test('multilingual starter exposes six locales with ten translated entries each'
     getLocalizedTermPath('hi', 'artificial intelligence'),
     'hi/term/kritrim-buddhimatta/'
   );
+});
+
+test('smart language detection prefers browser language and never infers Hindi from India alone', () => {
+  assert.equal(getSuggestedLocale(['pt-BR'], 'BR'), 'pt');
+  assert.equal(getSuggestedLocale(['de-DE'], 'FR'), 'de');
+  assert.equal(getSuggestedLocale(['en-US'], 'BR'), 'pt');
+  assert.equal(getSuggestedLocale(['en-IN'], 'IN'), null);
+  assert.equal(getSuggestedLocale(['hi-IN'], 'IN'), 'hi');
+});
+
+test('Portuguese localized search understands native phrasing and English AI terms', () => {
+  const contextWindow = getLocalizedEntries('pt').find((entry) => entry.key === 'context window');
+  const llm = getLocalizedEntries('pt').find((entry) => entry.key === 'large language model');
+  assert.ok(contextWindow);
+  assert.ok(llm);
+
+  const contextSearchText = getLocalizedSearchText('pt', contextWindow);
+  assert.equal(matchesLocalizedSearch(contextSearchText, 'janela de contexto'), true);
+  assert.equal(matchesLocalizedSearch(contextSearchText, 'context window'), true);
+  assert.equal(matchesLocalizedSearch(contextSearchText, 'o que é limite de contexto do ChatGPT'), true);
+
+  const llmSearchText = getLocalizedSearchText('pt', llm);
+  assert.equal(matchesLocalizedSearch(llmSearchText, 'LLM'), true);
+  assert.equal(matchesLocalizedSearch(llmSearchText, 'modelo de linguagem de grande porte'), true);
 });
 
 test('sound effects default to off until the user opts in', () => {

@@ -4,6 +4,7 @@ import {
   allLocaleCodes,
   getHomeAlternateLinks,
   getLanguageSwitchPath,
+  getLocalizedTermPath,
   getTermAlternateLinks,
   localeMeta
 } from '../i18n/catalog';
@@ -51,7 +52,8 @@ const xDefault = alternateLinks.find((link) => link.locale === 'en');
 const languageLinks = allLocaleCodes.map((code) => ({
   code,
   meta: localeMeta[code],
-  href: withBase(getLanguageSwitchPath(code, translationKey))
+  href: withBase(getLanguageSwitchPath(code, translationKey)),
+  hasTranslation: code === 'en' || !translationKey || Boolean(getLocalizedTermPath(code, translationKey))
 }));
 ---
 
@@ -109,7 +111,7 @@ const languageLinks = allLocaleCodes.map((code) => ({
       .site-language-switcher {
         position: fixed;
         right: 14px;
-        bottom: 14px;
+        top: 14px;
         z-index: 10020;
         font-family: 'Plus Jakarta Sans', sans-serif;
       }
@@ -117,8 +119,8 @@ const languageLinks = allLocaleCodes.map((code) => ({
       .site-language-switcher summary {
         list-style: none;
         cursor: pointer;
-        min-width: 42px;
-        padding: 8px 9px;
+        min-width: 46px;
+        padding: 8px 10px;
         border: 1px solid rgba(238, 222, 194, .55);
         background: rgba(35, 27, 21, .92);
         color: #f1e5cf;
@@ -136,8 +138,8 @@ const languageLinks = allLocaleCodes.map((code) => ({
       .site-language-menu {
         position: absolute;
         right: 0;
-        bottom: calc(100% + 7px);
-        width: 178px;
+        top: calc(100% + 7px);
+        width: 190px;
         padding: 7px;
         border: 1px solid rgba(92, 69, 48, .55);
         background: #efe3cd;
@@ -164,10 +166,82 @@ const languageLinks = allLocaleCodes.map((code) => ({
         font-weight: 700;
       }
 
+      .language-suggestion {
+        position: fixed;
+        right: 14px;
+        top: 62px;
+        z-index: 10019;
+        width: min(340px, calc(100vw - 28px));
+        padding: 15px 16px;
+        border: 1px solid rgba(92, 69, 48, .55);
+        background: #f2e7d3;
+        color: #2c2118;
+        box-shadow: 0 16px 38px rgba(0, 0, 0, .3);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+
+      .language-suggestion[hidden] {
+        display: none;
+      }
+
+      .language-suggestion strong {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 13px;
+      }
+
+      .language-suggestion p {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.5;
+        color: #5d4b3b;
+      }
+
+      .language-suggestion-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .language-suggestion-primary,
+      .language-suggestion-dismiss {
+        min-height: 34px;
+        padding: 8px 10px;
+        border: 1px solid #5f4936;
+        font: inherit;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .language-suggestion-primary {
+        background: #2f241c;
+        color: #f5ead6;
+        text-decoration: none;
+      }
+
+      .language-suggestion-dismiss {
+        background: transparent;
+        color: #4e3d30;
+      }
+
+      .language-suggestion-note {
+        margin-top: 9px !important;
+        font-size: 10px !important;
+        color: #7a6653 !important;
+      }
+
       @media (max-width: 640px) {
         .site-language-switcher {
           right: 8px;
-          bottom: 8px;
+          top: 8px;
+        }
+
+        .language-suggestion {
+          right: 8px;
+          top: 56px;
+          width: min(330px, calc(100vw - 16px));
         }
       }
     </style>
@@ -200,6 +274,10 @@ const languageLinks = allLocaleCodes.map((code) => ({
             hreflang={link.meta.htmlLang}
             lang={link.meta.htmlLang}
             aria-current={link.code === 'en' ? 'true' : undefined}
+            data-language-choice
+            data-language-code={link.code}
+            data-language-native={link.meta.nativeName}
+            data-has-translation={link.hasTranslation ? 'true' : 'false'}
           >
             <span>{link.meta.nativeName}</span>
             <span>{link.meta.shortName}</span>
@@ -208,8 +286,128 @@ const languageLinks = allLocaleCodes.map((code) => ({
       </nav>
     </details>
 
+    <aside class="language-suggestion" data-language-suggestion data-current-key={translationKey || ''} hidden>
+      <strong data-language-suggestion-title></strong>
+      <p data-language-suggestion-body></p>
+      <div class="language-suggestion-actions">
+        <a class="language-suggestion-primary" data-language-suggestion-link href="/"></a>
+        <button class="language-suggestion-dismiss" type="button" data-language-suggestion-dismiss>Stay in English</button>
+      </div>
+      <p class="language-suggestion-note">Suggestion only. Your page never changes automatically.</p>
+    </aside>
+
     <script>
       import '../client/navigation';
+      import { getSuggestedLocale } from '../i18n/detection';
+
+      const preferenceKey = 'aiAlmanacLanguage';
+      const dismissedKey = 'aiAlmanacLanguageSuggestionDismissed';
+      const choiceLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-language-choice]'));
+      const suggestion = document.querySelector<HTMLElement>('[data-language-suggestion]');
+
+      for (const link of choiceLinks) {
+        link.addEventListener('click', () => {
+          const code = link.dataset.languageCode;
+          if (!code) return;
+          try {
+            localStorage.setItem(preferenceKey, code);
+            localStorage.removeItem(dismissedKey);
+          } catch {}
+        });
+      }
+
+      async function getApproximateCountry(): Promise<string | null> {
+        try {
+          const response = await fetch('/api/geo', { headers: { accept: 'application/json' } });
+          if (!response.ok) return null;
+          const payload = await response.json() as { country?: unknown };
+          return typeof payload.country === 'string' ? payload.country.toUpperCase() : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function getCountryName(countryCode: string | null): string | null {
+        if (!countryCode) return null;
+        try {
+          return new Intl.DisplayNames(['en'], { type: 'region' }).of(countryCode) || countryCode;
+        } catch {
+          return countryCode;
+        }
+      }
+
+      async function showLanguageSuggestion(): Promise<void> {
+        if (!suggestion) return;
+
+        try {
+          if (localStorage.getItem(preferenceKey)) return;
+        } catch {}
+
+        const languages = navigator.languages?.length
+          ? navigator.languages
+          : navigator.language
+            ? [navigator.language]
+            : [];
+        const country = await getApproximateCountry();
+        const locale = getSuggestedLocale(languages, country);
+        if (!locale) return;
+
+        try {
+          if (localStorage.getItem(dismissedKey) === locale) return;
+        } catch {}
+
+        const languageLink = choiceLinks.find((link) => link.dataset.languageCode === locale);
+        if (!languageLink) return;
+
+        const nativeName = languageLink.dataset.languageNative || locale.toUpperCase();
+        const countryName = getCountryName(country);
+        const hasTranslation = languageLink.dataset.hasTranslation === 'true';
+        const currentKey = suggestion.dataset.currentKey || '';
+        const primaryBrowserLanguage = languages[0]?.toLowerCase().split('-')[0] || '';
+        const browserMatches = primaryBrowserLanguage === locale;
+        const title = suggestion.querySelector<HTMLElement>('[data-language-suggestion-title]');
+        const body = suggestion.querySelector<HTMLElement>('[data-language-suggestion-body]');
+        const switchLink = suggestion.querySelector<HTMLAnchorElement>('[data-language-suggestion-link]');
+
+        if (!title || !body || !switchLink) return;
+
+        title.textContent = countryName ? `Visiting from ${countryName}?` : `${nativeName} available`;
+        if (currentKey && hasTranslation) {
+          body.textContent = browserMatches
+            ? `Your browser prefers ${nativeName}. This entry is available in ${nativeName}.`
+            : `This entry is also available in ${nativeName}.`;
+        } else {
+          body.textContent = browserMatches
+            ? `Your browser prefers ${nativeName}. The AI Almanac has a ${nativeName} edition.`
+            : `The AI Almanac is available in ${nativeName}.`;
+        }
+
+        switchLink.href = languageLink.href;
+        switchLink.textContent = `View in ${nativeName}`;
+        suggestion.dataset.suggestedLocale = locale;
+        suggestion.hidden = false;
+      }
+
+      suggestion?.querySelector<HTMLButtonElement>('[data-language-suggestion-dismiss]')?.addEventListener('click', () => {
+        const locale = suggestion.dataset.suggestedLocale;
+        if (locale) {
+          try {
+            localStorage.setItem(dismissedKey, locale);
+          } catch {}
+        }
+        suggestion.hidden = true;
+      });
+
+      suggestion?.querySelector<HTMLAnchorElement>('[data-language-suggestion-link]')?.addEventListener('click', () => {
+        const locale = suggestion.dataset.suggestedLocale;
+        if (!locale) return;
+        try {
+          localStorage.setItem(preferenceKey, locale);
+          localStorage.removeItem(dismissedKey);
+        } catch {}
+      });
+
+      void showLanguageSuggestion();
     </script>
   </body>
 </html>
