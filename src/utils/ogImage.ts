@@ -20,10 +20,10 @@ const DEFAULT_TOTAL_TERMS = 791;
 const DEFAULT_TERM: OgImageTerm = {
   word: 'The AI Almanac',
   part: 'living reference book',
-  definition: 'An evolving field guide to artificial intelligence concepts, architectures, and practices.',
+  definition: 'An evolving field guide to artificial intelligence concepts, architectures and practices.',
   example: '',
   origin: 'A living reference for the language of AI.',
-  note: 'Browse the index, follow related terms, and keep the useful ones close.',
+  note: 'Browse the index, follow related terms and keep the useful ones close.',
   related: ['artificial intelligence', 'vibe coding'],
   category: 'AI concepts & practice'
 };
@@ -135,7 +135,7 @@ export function getOgImageSvg(term?: OgImageTerm, options: OgImageOptions = {}):
     : '';
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_IMAGE_WIDTH}" height="${OG_IMAGE_HEIGHT}" viewBox="0 0 ${OG_IMAGE_WIDTH} ${OG_IMAGE_HEIGHT}" role="img" aria-labelledby="title description">
-  <title id="title">${escapeXml(entry.word)} — The AI Almanac</title>
+  <title id="title">${escapeXml(entry.word)} - The AI Almanac</title>
   <desc id="description">${escapeXml(entry.definition)}</desc>
   <defs>
     <linearGradient id="desk" x1="0" y1="0" x2="0" y2="1">

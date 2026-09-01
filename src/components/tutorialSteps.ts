@@ -36,7 +36,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   {
     id: 'search',
     title: 'Ask or search',
-    body: 'Type a term or describe an idea in plain language. Suggestions appear as you type, and ⌘ K or Ctrl K focuses the field from anywhere.',
+    body: 'Type a term or describe an idea in plain language. Suggestions appear as you type and ⌘ K or Ctrl K focuses the field from anywhere.',
     target: '#search',
     fallbackTarget: '#page',
     region: 'page',
@@ -45,7 +45,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   {
     id: 'entry',
     title: 'Read the current entry',
-    body: 'Each page gives you the definition, an example, where the term came from, and how it shows up in practice.',
+    body: 'Each page gives you the definition, an example, where the term came from and how it shows up in practice.',
     target: '#definitionContent',
     fallbackTarget: '#entry',
     region: 'page',
@@ -54,7 +54,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   {
     id: 'modes',
     title: 'Change the explanation mode',
-    body: 'Switch between Dictionary, Plain English, Technical, and Vibe Coder when you want the same idea explained from a different angle.',
+    body: 'Switch between Dictionary, Plain English, Technical and Vibe Coder when you want the same idea explained from a different angle.',
     target: '#modeSwitch',
     fallbackTarget: '#entry',
     region: 'page',
@@ -71,7 +71,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   },
   {
     id: 'entry-actions',
-    title: 'Save, collect, and share',
+    title: 'Save, collect and share',
     body: 'Add an entry to a collection, save a designed copy, copy its deep link, or open its timeline from these page actions.',
     target: '#entryActions',
     fallbackTarget: '#entry',
@@ -81,7 +81,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   {
     id: 'references',
     title: 'Follow the references',
-    body: 'The margin gathers related terms, comparisons, common confusions, and the category where the current entry is filed.',
+    body: 'The margin gathers related terms, comparisons, common confusions and the category where the current entry is filed.',
     target: '#margin',
     fallbackTarget: '#entry',
     region: 'page',

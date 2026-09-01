@@ -5,7 +5,7 @@ const FOCUSABLE_SELECTOR =
 
 /**
  * Gives the small, insert-style dialogs a consistent modal contract: initial
- * focus, Escape-to-close, Tab containment, body scroll locking, and focus
+ * focus, Escape-to-close, Tab containment, body scroll locking and focus
  * restoration when the insert closes.
  */
 export function useDialogFocus(isOpen: boolean, onClose: () => void) {
