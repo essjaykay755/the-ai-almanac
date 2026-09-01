@@ -114,6 +114,53 @@ test.describe('desktop regression flows', () => {
     await expect.poll(() => page.evaluate(() => localStorage.getItem('aiAlmanacLanguage'))).toBe('pt');
   });
 
+  test('manual language selection wins over a pending automatic detection', async ({ page }) => {
+    let releaseLocale = () => {};
+    const localeGate = new Promise<void>((resolve) => {
+      releaseLocale = resolve;
+    });
+    let releaseGerman = () => {};
+    const germanGate = new Promise<void>((resolve) => {
+      releaseGerman = resolve;
+    });
+
+    await page.route('**/api/locale', async (route) => {
+      await localeGate;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ country: 'BR' })
+      });
+    });
+    await page.route('**/de/term/kuenstliche-intelligenz/', async (route) => {
+      await germanGate;
+      await route.continue();
+    });
+
+    const localeRequest = page.waitForRequest((request) => request.url().endsWith('/api/locale'));
+    await page.goto('/');
+    await localeRequest;
+
+    await page.locator('.site-language-switcher summary').click();
+    const germanRequest = page.waitForRequest((request) => request.url().includes('/de/term/kuenstliche-intelligenz/'));
+    const clickNavigation = page.locator('[data-language-code="de"]').click({ noWaitAfter: true });
+    await germanRequest;
+    releaseLocale();
+
+    const automaticRedirect = page.waitForRequest(
+      (request) => request.url().includes('/pt/term/inteligencia-artificial/'),
+      { timeout: 2_000 }
+    ).then(() => true).catch(() => false);
+    expect(await automaticRedirect).toBe(false);
+
+    releaseGerman();
+    await clickNavigation;
+
+    await expect(page).toHaveURL(/\/de\/term\/kuenstliche-intelligenz\/(?:#.*)?$/);
+    await page.waitForTimeout(1000);
+    await expect(page).toHaveURL(/\/de\/term\/kuenstliche-intelligenz\/(?:#.*)?$/);
+  });
+
   test('direct localized term routes keep the English headword with a native definition', async ({ page }) => {
     await page.goto('/hi/term/kritrim-buddhimatta/');
 
