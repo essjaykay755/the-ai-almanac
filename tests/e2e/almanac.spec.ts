@@ -108,7 +108,7 @@ test.describe('smart language behavior', () => {
     await expect(suggestion).toContainText('Visiting from Brazil?');
     await expect(suggestion.getByRole('link', { name: 'View in Português' })).toHaveAttribute(
       'href',
-      /\/pt\/term\/janela-de-contexto\/$/
+      /\/pt\/term\/janela-contexto\/$/
     );
     await expect(page).toHaveURL(/\/term\/context-window\/$/);
   });
