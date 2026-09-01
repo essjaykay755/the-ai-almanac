@@ -199,6 +199,34 @@ test.describe('desktop regression flows', () => {
     await expect(page.locator('[data-language-auto]')).toHaveAttribute('aria-current', 'true');
     await expect(page.locator('[data-language-code="hi"]')).not.toHaveAttribute('data-language-remembered', 'true');
   });
+
+  test('automatic selection settles after leaving a localized edition', async ({ page }) => {
+    let localeRequests = 0;
+    const navigationPaths: string[] = [];
+    page.on('framenavigated', (frame) => {
+      if (!frame.parentFrame()) navigationPaths.push(new URL(frame.url()).pathname);
+    });
+
+    await page.route('**/api/locale', (route) => {
+      localeRequests += 1;
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ country: 'BR' })
+      });
+    });
+
+    await page.goto('/de/term/kuenstliche-intelligenz/');
+    await page.locator('.site-language-switcher summary').click();
+    await page.locator('[data-language-auto]').click({ noWaitAfter: true });
+
+    await expect(page).toHaveURL(/\/pt\/term\/inteligencia-artificial\/(?:#.*)?$/);
+    await page.waitForTimeout(1500);
+
+    await expect(page).toHaveURL(/\/pt\/term\/inteligencia-artificial\/(?:#.*)?$/);
+    expect(localeRequests).toBe(1);
+    expect(navigationPaths).not.toContain('/term/artificial-intelligence/');
+  });
 });
 
 test.describe('automatic language selection', () => {
