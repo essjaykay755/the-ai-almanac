@@ -1,4 +1,4 @@
-import { localizedLocales, type LocalizedLocale } from './catalog';
+import { localizedLocales, type LocalizedLocale } from './catalog.ts';
 
 function stripBasePath(pathname: string, baseUrl = '/'): string {
   const base = baseUrl.replace(/\/+$/, '');
