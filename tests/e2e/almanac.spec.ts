@@ -87,6 +87,48 @@ test.describe('desktop regression flows', () => {
     await page.getByRole('dialog', { name: 'Save this entry' }).getByRole('button', { name: 'Download PNG' }).click();
     await expect(page.locator('#stamp')).toHaveText('ENTRY SAVE FAILED');
   });
+
+  test('manual language switching keeps the same translated term', async ({ page }) => {
+    await page.goto('/term/context-window/');
+    await page.locator('.site-language-switcher summary').click();
+    await page.locator('[data-language-code="pt"]').click();
+    await expect(page).toHaveURL(/\/pt\/term\/janela-de-contexto\/$/);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
+  });
+});
+
+test.describe('smart language suggestions', () => {
+  test.describe('Brazil', () => {
+    test.use({ locale: 'pt-BR', timezoneId: 'America/Sao_Paulo' });
+
+    test('offers Portuguese without changing the page automatically', async ({ page }) => {
+      await page.goto('/term/context-window/');
+      await expect(page.locator('[data-language-suggestion]')).toBeVisible();
+      await expect(page.locator('[data-language-suggestion-switch]')).toHaveText('Switch to Português');
+      await expect(page).toHaveURL(/\/term\/context-window\/$/);
+    });
+  });
+
+  test.describe('India with English browser', () => {
+    test.use({ locale: 'en-IN', timezoneId: 'Asia/Kolkata' });
+
+    test('keeps English without suggesting Hindi', async ({ page }) => {
+      await page.goto('/');
+      await expect(page.locator('[data-language-suggestion]')).toBeHidden();
+      await expect(page).toHaveURL(/\/$/);
+    });
+  });
+
+  test.describe('India with Hindi browser', () => {
+    test.use({ locale: 'hi-IN', timezoneId: 'Asia/Kolkata' });
+
+    test('offers Hindi without changing the page automatically', async ({ page }) => {
+      await page.goto('/');
+      await expect(page.locator('[data-language-suggestion]')).toBeVisible();
+      await expect(page.locator('[data-language-suggestion-switch]')).toHaveText('Switch to हिन्दी');
+      await expect(page).toHaveURL(/\/$/);
+    });
+  });
 });
 
 test.describe('reduced motion', () => {
