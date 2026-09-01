@@ -93,10 +93,16 @@ test('language detection suggests supported languages and protects the India def
   assert.equal(resolveAutoLocale(null, ['fr-FR']), 'fr');
 
   const source = readFileSync(new URL('../src/client/languagePreference.ts', import.meta.url), 'utf8');
+  const shell = readFileSync(new URL('../src/layouts/AppShell.astro', import.meta.url), 'utf8');
   const endpoint = readFileSync(new URL('../api/locale.js', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /window\.location\.replace/);
   assert.match(source, /showLanguageSuggestion/);
   assert.match(source, /Stay in English/);
+  assert.match(source, /localStorage\.removeItem\(PREFERENCE_KEY\)/);
+  assert.match(source, /localStorage\.removeItem\(DISMISSAL_KEY\)/);
+  assert.match(source, /syncLanguagePreferenceState/);
+  assert.match(shell, /data-language-auto/);
+  assert.match(shell, /automaticLanguageLabels/);
   assert.match(endpoint, /x-vercel-ip-country/);
 });
 
