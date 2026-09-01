@@ -31,6 +31,32 @@ const regionDefaultLocale: Partial<Record<string, SupportedLocale>> = {
   VE: 'es'
 };
 
+const timezoneRegion: Record<string, string> = {
+  'America/Argentina/Buenos_Aires': 'AR',
+  'America/Bogota': 'CO',
+  'America/Caracas': 'VE',
+  'America/Costa_Rica': 'CR',
+  'America/Fortaleza': 'BR',
+  'America/Guatemala': 'GT',
+  'America/La_Paz': 'BO',
+  'America/Lima': 'PE',
+  'America/Manaus': 'BR',
+  'America/Mexico_City': 'MX',
+  'America/Montevideo': 'UY',
+  'America/Panama': 'PA',
+  'America/Recife': 'BR',
+  'America/Santiago': 'CL',
+  'America/Santo_Domingo': 'DO',
+  'America/Sao_Paulo': 'BR',
+  'Asia/Calcutta': 'IN',
+  'Asia/Kolkata': 'IN',
+  'Europe/Berlin': 'DE',
+  'Europe/Lisbon': 'PT',
+  'Europe/Madrid': 'ES',
+  'Europe/Paris': 'FR',
+  'Europe/Rome': 'IT'
+};
+
 const localeNames: Record<SupportedLocale, string> = {
   es: 'Español',
   pt: 'Português',
@@ -52,6 +78,11 @@ function getBrowserLocales(): Intl.Locale[] {
 }
 
 function getRegion(locales: Intl.Locale[]): string | null {
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (timezone && timezoneRegion[timezone]) return timezoneRegion[timezone];
+  } catch {}
+
   return locales.find((locale) => locale.region)?.region?.toUpperCase() || null;
 }
 
