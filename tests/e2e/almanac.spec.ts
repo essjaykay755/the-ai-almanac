@@ -20,7 +20,7 @@ test.describe('desktop regression flows', () => {
     await page.goto('/term/context-window/');
 
     await expect(page.locator('h1.word')).toHaveText('context window');
-    await expect(page).toHaveTitle('context window — The AI Almanac');
+    await expect(page).toHaveTitle('context window - The AI Almanac');
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /term\/context-window\//);
   });
 
