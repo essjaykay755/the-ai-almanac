@@ -89,6 +89,59 @@ test.describe('desktop regression flows', () => {
   });
 });
 
+test.describe('smart language behavior', () => {
+  test('suggests Portuguese in Brazil without redirecting the English term page', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'language', { get: () => 'en-US' });
+      Object.defineProperty(navigator, 'languages', { get: () => ['en-US'] });
+    });
+    await page.route('**/api/geo', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ country: 'BR' })
+    }));
+
+    await page.goto('/term/context-window/');
+
+    const suggestion = page.locator('[data-language-suggestion]');
+    await expect(suggestion).toBeVisible();
+    await expect(suggestion).toContainText('Visiting from Brazil?');
+    await expect(suggestion.getByRole('link', { name: 'View in Português' })).toHaveAttribute(
+      'href',
+      /\/pt\/term\/janela-de-contexto\/$/
+    );
+    await expect(page).toHaveURL(/\/term\/context-window\/$/);
+  });
+
+  test('does not infer Hindi from India when the browser prefers English', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'language', { get: () => 'en-IN' });
+      Object.defineProperty(navigator, 'languages', { get: () => ['en-IN'] });
+    });
+    await page.route('**/api/geo', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ country: 'IN' })
+    }));
+
+    await page.goto('/');
+    await expect(page.locator('[data-language-suggestion]')).toBeHidden();
+  });
+
+  test('filters Portuguese terms with native questions and English terminology', async ({ page }) => {
+    await page.goto('/pt/');
+
+    const search = page.locator('#localeTermSearch');
+    await search.fill('o que é limite de contexto do ChatGPT');
+    await expect(page.locator('[data-locale-term]:visible')).toHaveCount(1);
+    await expect(page.locator('[data-locale-term]:visible')).toContainText('janela de contexto');
+
+    await search.fill('context window');
+    await expect(page.locator('[data-locale-term]:visible')).toHaveCount(1);
+    await expect(page.locator('[data-locale-term]:visible')).toContainText('janela de contexto');
+  });
+});
+
 test.describe('reduced motion', () => {
   test('navigates without waiting for the page-turn animation', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
