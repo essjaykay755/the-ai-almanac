@@ -5,9 +5,9 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-  pull-requests: write
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test-and-build:
@@ -16,8 +16,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -34,67 +32,5 @@ jobs:
       - name: Build Astro site
         run: npm run build
 
-      - name: Compare end-to-end results with main
-        id: e2e
-        shell: bash
-        run: |
-          set +e
-          npm run test:e2e > /tmp/astro-e2e.log 2>&1
-          astro_status=$?
-
-          git worktree add /tmp/almanac-main origin/main
-          (
-            cd /tmp/almanac-main
-            npm ci > /tmp/main-install.log 2>&1
-            npm run test:e2e > /tmp/main-e2e.log 2>&1
-          )
-          main_status=$?
-
-          echo "astro_status=$astro_status" >> "$GITHUB_OUTPUT"
-          echo "main_status=$main_status" >> "$GITHUB_OUTPUT"
-
-          {
-            echo '<!-- astro-e2e-diagnostic -->'
-            echo '### E2E parity diagnostic'
-            echo
-            echo "Astro status: \`$astro_status\`"
-            echo "Main status: \`$main_status\`"
-            echo
-            echo '#### Astro branch output'
-            echo '```text'
-            tail -n 100 /tmp/astro-e2e.log
-            echo '```'
-            echo
-            echo '#### Main baseline output'
-            echo '```text'
-            tail -n 60 /tmp/main-e2e.log
-            echo '```'
-          } > /tmp/e2e-report.md
-
-          cat /tmp/e2e-report.md
-
-      - name: Publish E2E diagnostic
-        if: always()
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: gh pr comment "$PR_NUMBER" --body-file /tmp/e2e-report.md
-
-      - name: Enforce E2E parity
-        if: always()
-        shell: bash
-        run: |
-          astro_status='${{ steps.e2e.outputs.astro_status }}'
-          main_status='${{ steps.e2e.outputs.main_status }}'
-
-          if [ -z "$astro_status" ] || [ -z "$main_status" ]; then
-            echo 'E2E comparison did not produce statuses.'
-            exit 1
-          fi
-
-          if [ "$astro_status" -ne "$main_status" ]; then
-            echo "E2E status differs: Astro=$astro_status main=$main_status"
-            exit 1
-          fi
-
-          exit "$astro_status"
+      - name: Run end-to-end tests
+        run: npm run test:e2e
