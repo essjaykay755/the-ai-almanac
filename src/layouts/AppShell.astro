@@ -109,12 +109,18 @@ const shouldBridgeAbout = locale === 'en';
         display: contents;
       }
 
-      .site-language-switcher {
+      .site-language-control {
         position: fixed;
         right: 14px;
         top: 14px;
         z-index: 10020;
         font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+
+      .site-language-switcher {
+        position: relative;
+        margin-left: auto;
+        width: fit-content;
       }
 
       .site-language-switcher summary {
@@ -167,9 +173,69 @@ const shouldBridgeAbout = locale === 'en';
         font-weight: 700;
       }
 
+      .site-language-suggestion {
+        position: relative;
+        width: min(320px, calc(100vw - 28px));
+        margin-top: 8px;
+        padding: 14px 14px 12px;
+        border: 1px solid rgba(92, 69, 48, .55);
+        background: #efe3cd;
+        color: #2c2118;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, .28);
+      }
+
+      .site-language-suggestion p {
+        margin: 0;
+        padding-right: 22px;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .site-language-suggestion-close {
+        position: absolute;
+        top: 6px;
+        right: 7px;
+        width: 26px;
+        height: 26px;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+        font: inherit;
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .site-language-suggestion-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 10px;
+      }
+
+      .site-language-suggestion-actions button {
+        min-height: 34px;
+        padding: 7px 10px;
+        border: 1px solid rgba(70, 50, 34, .5);
+        cursor: pointer;
+        font: inherit;
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .site-language-suggestion-primary {
+        background: #34271d;
+        color: #f6ead5;
+      }
+
+      .site-language-suggestion-secondary {
+        background: transparent;
+        color: #34271d;
+      }
+
       @media (max-width: 640px) {
-        .site-language-switcher {
-          top: 8px;
+        .site-language-control {
+          top: calc(8px + env(safe-area-inset-top));
           right: 8px;
         }
       }
@@ -200,23 +266,26 @@ const shouldBridgeAbout = locale === 'en';
       )}
     </div>
 
-    <details class="site-language-switcher">
-      <summary aria-label={currentMeta.languageLabel}>{currentMeta.shortName} ▾</summary>
-      <nav class="site-language-menu" aria-label={currentMeta.languageLabel}>
-        {languageLinks.map((link) => (
-          <a
-            href={link.href}
-            hreflang={link.meta.htmlLang}
-            lang={link.meta.htmlLang}
-            aria-current={link.code === locale ? 'true' : undefined}
-            data-language-code={link.code}
-          >
-            <span>{link.meta.nativeName}</span>
-            <span>{link.meta.shortName}</span>
-          </a>
-        ))}
-      </nav>
-    </details>
+    <div class="site-language-control" data-language-control>
+      <details class="site-language-switcher">
+        <summary aria-label={currentMeta.languageLabel}>{currentMeta.shortName} ▾</summary>
+        <nav class="site-language-menu" aria-label={currentMeta.languageLabel}>
+          {languageLinks.map((link) => (
+            <a
+              href={link.href}
+              hreflang={link.meta.htmlLang}
+              lang={link.meta.htmlLang}
+              aria-current={link.code === locale ? 'true' : undefined}
+              data-language-code={link.code}
+            >
+              <span>{link.meta.nativeName}</span>
+              <span>{link.meta.shortName}</span>
+            </a>
+          ))}
+        </nav>
+      </details>
+      <div data-language-suggestion-host></div>
+    </div>
 
     <script>
       import '../client/navigation';
