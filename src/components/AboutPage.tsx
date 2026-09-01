@@ -8,7 +8,8 @@ interface AboutPageProps {
   onClose?: () => void;
 }
 
-const authorVideoUrl = `${import.meta.env.BASE_URL || '/'}author-video.mp4`;
+const AUTHOR_VIDEO_VERSION = '1';
+const authorVideoUrl = `${import.meta.env.BASE_URL || '/'}author-video.mp4?v=${AUTHOR_VIDEO_VERSION}`;
 
 export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => {
   const [showVideo, setShowVideo] = useState(false);
@@ -19,7 +20,33 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
   const authorVideoRef = useRef<HTMLVideoElement>(null);
   const firstTouchTap = useRef(false);
   const wantsVideoPreview = showVideo || touchPreviewOpen;
-  const videoVisible = wantsVideoPreview && videoReady;
+  const videoShouldPlay = wantsVideoPreview && videoReady;
+
+  useEffect(() => {
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    const shouldAvoidIdlePreload =
+      connection?.saveData ||
+      connection?.effectiveType === 'slow-2g' ||
+      connection?.effectiveType === '2g';
+
+    if (shouldAvoidIdlePreload) return;
+
+    const startPreload = () => setVideoRequested(true);
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    if (idleWindow.requestIdleCallback) {
+      const handle = idleWindow.requestIdleCallback(startPreload, { timeout: 1800 });
+      return () => idleWindow.cancelIdleCallback?.(handle);
+    }
+
+    const handle = window.setTimeout(startPreload, 900);
+    return () => window.clearTimeout(handle);
+  }, []);
 
   useEffect(() => {
     const video = authorVideoRef.current;
@@ -28,8 +55,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
     if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
       setVideoReady(true);
     } else {
-      // Start buffering in the hidden popup and reveal it only after the first
-      // usable frame has decoded. This avoids a black preview on slow networks.
+      // Buffer during browser idle time so the first real interaction does not
+      // pay the network and first-frame decode cost.
       video.load();
     }
   }, [videoRequested]);
@@ -38,7 +65,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
     const video = authorVideoRef.current;
     if (!video) return;
 
-    if (videoVisible) {
+    if (videoShouldPlay) {
       void video.play().catch(() => {
         // Keep the decoded first frame visible if autoplay is blocked.
       });
@@ -48,7 +75,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
         video.currentTime = 0;
       }
     }
-  }, [videoVisible, wantsVideoPreview]);
+  }, [videoShouldPlay, wantsVideoPreview]);
 
   useEffect(() => {
     const handleTouchOutside = (event: PointerEvent) => {
@@ -167,7 +194,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
                   href="https://x.com/essjaykay755"
                   target="_blank"
                   rel="noreferrer"
-                  aria-expanded={videoVisible}
+                  aria-expanded={wantsVideoPreview}
                   aria-controls="author-video-popup"
                   onPointerDown={handleAuthorPointerDown}
                   onClick={handleAuthorClick}
@@ -176,13 +203,33 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
                 </a>
                 <div
                   id="author-video-popup"
-                  className={`author-video-popup${videoVisible ? ' is-visible' : ''}`}
-                  aria-hidden={!videoVisible}
+                  className={`author-video-popup${wantsVideoPreview ? ' is-visible' : ''}`}
+                  aria-hidden={!wantsVideoPreview}
                 >
+                  <img
+                    src={essjaykayLogoUrl}
+                    alt=""
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      padding: '24px',
+                      background: '#000',
+                      opacity: videoReady ? 0 : 1,
+                      transition: 'opacity 120ms ease'
+                    }}
+                  />
                   <video
                     ref={authorVideoRef}
                     src={videoRequested ? authorVideoUrl : undefined}
-                    preload="none"
+                    preload={videoRequested ? 'auto' : 'none'}
+                    style={{
+                      opacity: videoReady ? 1 : 0,
+                      transition: 'opacity 120ms ease'
+                    }}
                     onLoadedData={() => setVideoReady(true)}
                     onCanPlay={() => setVideoReady(true)}
                     onError={() => setVideoReady(false)}
