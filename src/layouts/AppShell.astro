@@ -109,7 +109,7 @@ const languageLinks = allLocaleCodes.map((code) => ({
       .site-language-switcher {
         position: fixed;
         right: 14px;
-        bottom: 14px;
+        top: 14px;
         z-index: 10020;
         font-family: 'Plus Jakarta Sans', sans-serif;
       }
@@ -117,8 +117,8 @@ const languageLinks = allLocaleCodes.map((code) => ({
       .site-language-switcher summary {
         list-style: none;
         cursor: pointer;
-        min-width: 42px;
-        padding: 8px 9px;
+        min-width: 46px;
+        padding: 8px 10px;
         border: 1px solid rgba(238, 222, 194, .55);
         background: rgba(35, 27, 21, .92);
         color: #f1e5cf;
@@ -136,8 +136,8 @@ const languageLinks = allLocaleCodes.map((code) => ({
       .site-language-menu {
         position: absolute;
         right: 0;
-        bottom: calc(100% + 7px);
-        width: 178px;
+        top: calc(100% + 7px);
+        width: 190px;
         padding: 7px;
         border: 1px solid rgba(92, 69, 48, .55);
         background: #efe3cd;
@@ -164,10 +164,97 @@ const languageLinks = allLocaleCodes.map((code) => ({
         font-weight: 700;
       }
 
+      .language-suggestion {
+        position: fixed;
+        top: 62px;
+        right: 14px;
+        z-index: 10018;
+        width: min(330px, calc(100vw - 28px));
+        padding: 16px 46px 15px 16px;
+        border: 1px solid rgba(92, 69, 48, .58);
+        background: #efe3cd;
+        color: #2c2118;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, .28);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+
+      .language-suggestion[hidden] {
+        display: none;
+      }
+
+      .language-suggestion strong {
+        display: block;
+        margin-bottom: 5px;
+        font-family: 'Newsreader', Georgia, serif;
+        font-size: 19px;
+        font-weight: 600;
+      }
+
+      .language-suggestion p {
+        margin: 0 0 12px;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .language-suggestion-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .language-suggestion-switch,
+      .language-suggestion-stay,
+      .language-suggestion-close {
+        font: inherit;
+      }
+
+      .language-suggestion-switch {
+        display: inline-flex;
+        padding: 8px 10px;
+        border: 1px solid #39291d;
+        background: #39291d;
+        color: #f6ead5;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .language-suggestion-stay {
+        padding: 7px 8px;
+        border: 0;
+        background: transparent;
+        color: #594331;
+        cursor: pointer;
+        font-size: 11px;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .language-suggestion-close {
+        position: absolute;
+        top: 9px;
+        right: 9px;
+        width: 28px;
+        height: 28px;
+        border: 0;
+        background: transparent;
+        color: #594331;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+      }
+
       @media (max-width: 640px) {
         .site-language-switcher {
+          top: 8px;
           right: 8px;
-          bottom: 8px;
+        }
+
+        .language-suggestion {
+          top: 56px;
+          right: 8px;
+          width: calc(100vw - 16px);
         }
       }
     </style>
@@ -192,7 +279,7 @@ const languageLinks = allLocaleCodes.map((code) => ({
     </div>
 
     <details class="site-language-switcher">
-      <summary aria-label="Language">EN</summary>
+      <summary aria-label="Language">EN ▾</summary>
       <nav class="site-language-menu" aria-label="Language">
         {languageLinks.map((link) => (
           <a
@@ -200,6 +287,7 @@ const languageLinks = allLocaleCodes.map((code) => ({
             hreflang={link.meta.htmlLang}
             lang={link.meta.htmlLang}
             aria-current={link.code === 'en' ? 'true' : undefined}
+            data-language-code={link.code}
           >
             <span>{link.meta.nativeName}</span>
             <span>{link.meta.shortName}</span>
@@ -208,8 +296,19 @@ const languageLinks = allLocaleCodes.map((code) => ({
       </nav>
     </details>
 
+    <aside class="language-suggestion" data-language-suggestion hidden aria-live="polite">
+      <button class="language-suggestion-close" type="button" aria-label="Dismiss language suggestion" data-language-suggestion-close>×</button>
+      <strong data-language-suggestion-title></strong>
+      <p data-language-suggestion-copy></p>
+      <div class="language-suggestion-actions">
+        <a class="language-suggestion-switch" href="/" data-language-suggestion-switch>Switch language</a>
+        <button class="language-suggestion-stay" type="button" data-language-suggestion-stay>Stay in English</button>
+      </div>
+    </aside>
+
     <script>
       import '../client/navigation';
+      import '../client/languagePreference';
     </script>
   </body>
 </html>
