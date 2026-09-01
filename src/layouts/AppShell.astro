@@ -56,6 +56,15 @@ const languageLinks = allLocaleCodes.map((code) => ({
   href: withBase(getLanguageSwitchPath(code, translationKey))
 }));
 const shouldBridgeAbout = locale === 'en';
+const automaticLanguageLabels: Record<SupportedLocale, string> = {
+  en: 'Automatic',
+  es: 'Automático',
+  pt: 'Automático',
+  it: 'Automatico',
+  fr: 'Automatique',
+  de: 'Automatisch',
+  hi: 'स्वचालित'
+};
 ---
 
 <!doctype html>
@@ -154,23 +163,44 @@ const shouldBridgeAbout = locale === 'en';
         box-shadow: 0 14px 32px rgba(0, 0, 0, .28);
       }
 
-      .site-language-menu a {
+      .site-language-menu a,
+      .site-language-auto {
         display: flex;
+        width: 100%;
+        box-sizing: border-box;
         justify-content: space-between;
         gap: 14px;
         padding: 8px 9px;
+        border: 0;
+        background: transparent;
         color: inherit;
         text-decoration: none;
+        font: inherit;
         font-size: 12px;
+        text-align: left;
+      }
+
+      .site-language-auto {
+        margin-top: 6px;
+        padding-top: 11px;
+        border-top: 1px solid rgba(92, 69, 48, .22);
+        cursor: pointer;
       }
 
       .site-language-menu a:hover,
-      .site-language-menu a:focus-visible {
+      .site-language-menu a:focus-visible,
+      .site-language-auto:hover,
+      .site-language-auto:focus-visible {
         background: rgba(80, 59, 40, .1);
       }
 
-      .site-language-menu a[aria-current='true'] {
+      .site-language-menu a[aria-current='true'],
+      .site-language-auto[aria-current='true'] {
         font-weight: 700;
+      }
+
+      .site-language-menu a[data-language-remembered='true'] span:last-child::after {
+        content: ' ✓';
       }
 
       .site-language-suggestion {
@@ -282,6 +312,10 @@ const shouldBridgeAbout = locale === 'en';
               <span>{link.meta.shortName}</span>
             </a>
           ))}
+          <button type="button" class="site-language-auto" data-language-auto>
+            <span>{automaticLanguageLabels[locale]}</span>
+            <span>AUTO</span>
+          </button>
         </nav>
       </details>
       <div data-language-suggestion-host></div>
