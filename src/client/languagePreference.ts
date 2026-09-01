@@ -124,6 +124,11 @@ function navigateToLocale(locale: AutoLocale): void {
 }
 
 let controlsBound = false;
+let languagePreferenceRequestId = 0;
+
+function cancelLanguagePreferenceInitialization(): void {
+  languagePreferenceRequestId += 1;
+}
 
 function bindLanguageControls(): void {
   if (controlsBound) return;
@@ -135,6 +140,7 @@ function bindLanguageControls(): void {
 
     const link = target.closest<HTMLAnchorElement>('[data-language-code]');
     if (link) {
+      cancelLanguagePreferenceInitialization();
       rememberLanguageChoice(link.dataset.languageCode || 'en');
       clearDismissedLocale();
       syncLanguagePreferenceState();
@@ -144,6 +150,7 @@ function bindLanguageControls(): void {
     const autoButton = target.closest<HTMLButtonElement>('[data-language-auto]');
     if (!autoButton) return;
 
+    cancelLanguagePreferenceInitialization();
     clearLanguagePreferenceMemory();
     syncLanguagePreferenceState();
     closeLanguageMenus();
@@ -191,6 +198,7 @@ async function getIpCountry(): Promise<string | null> {
 }
 
 async function initializeLanguagePreference(): Promise<void> {
+  const requestId = ++languagePreferenceRequestId;
   if (document.documentElement.lang !== 'en') return;
 
   const savedLanguage = getSavedLanguage();
@@ -202,7 +210,15 @@ async function initializeLanguagePreference(): Promise<void> {
   }
 
   const country = await getIpCountry();
+  if (requestId !== languagePreferenceRequestId) return;
+
+  // A manual choice may have been made while the country lookup was pending.
+  // Let the link navigation finish instead of overriding it with stale detection.
+  const latestSavedLanguage = getSavedLanguage();
+  if (latestSavedLanguage || document.documentElement.lang !== 'en') return;
+
   const locale = resolveAutoLocale(country, getBrowserLanguages());
+  if (requestId !== languagePreferenceRequestId) return;
   if (locale) navigateToLocale(locale);
 }
 
