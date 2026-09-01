@@ -88,7 +88,7 @@ test.describe('desktop regression flows', () => {
     await expect(page.locator('#stamp')).toHaveText('ENTRY SAVE FAILED');
   });
 
-  test('manual language switching keeps the same translated term and the same app UI', async ({ page }) => {
+  test('manual language switching keeps the same translated term and remembers the choice', async ({ page }) => {
     await page.goto('/term/context-window/');
     await page.locator('.site-language-switcher summary').click();
     await page.locator('[data-language-code="pt"]').click();
@@ -98,6 +98,7 @@ test.describe('desktop regression flows', () => {
     await expect(page.locator('#entry h1.word')).toHaveText('janela de contexto');
     await expect(page.locator('#page')).toBeVisible();
     await expect(page.locator('#search')).toBeVisible();
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('aiAlmanacLanguage'))).toBe('pt');
   });
 
   test('direct localized term routes use the full Almanac interface', async ({ page }) => {
@@ -108,6 +109,30 @@ test.describe('desktop regression flows', () => {
     await expect(page.locator('#page')).toBeVisible();
     await expect(page.locator('#bookmarkBtn')).toBeVisible();
     await expect(page.locator('.site-language-switcher summary')).toContainText('HI');
+  });
+
+  test('language menu clears remembered choices and returns to automatic mode', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('aiAlmanacLanguage', 'hi');
+      localStorage.setItem('aiAlmanacLanguageSuggestionDismissed', 'hi');
+    });
+
+    await page.goto('/hi/');
+    await page.locator('.site-language-switcher summary').click();
+
+    const automatic = page.locator('[data-language-auto]');
+    const hindi = page.locator('[data-language-code="hi"]');
+    await expect(automatic).toBeVisible();
+    await expect(automatic).not.toHaveAttribute('aria-current', 'true');
+    await expect(hindi).toHaveAttribute('data-language-remembered', 'true');
+
+    await automatic.click();
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('aiAlmanacLanguage'))).toBeNull();
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('aiAlmanacLanguageSuggestionDismissed'))).toBeNull();
+
+    await page.locator('.site-language-switcher summary').click();
+    await expect(automatic).toHaveAttribute('aria-current', 'true');
+    await expect(hindi).not.toHaveAttribute('data-language-remembered', 'true');
   });
 });
 
