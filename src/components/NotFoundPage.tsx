@@ -42,7 +42,7 @@ export const NotFoundPage: React.FC = () => {
   }));
 
   useEffect(() => {
-    document.title = '404 — The AI Almanac';
+    document.title = '404 - The AI Almanac';
   }, []);
 
   const openMobileMenu = () => {

@@ -55,7 +55,7 @@ type Collections = Record<string, string[]>;
 
 const DEFAULT_PAGE_TITLE = 'The AI Almanac - Expanded Living Dictionary v0.7';
 const DEFAULT_PAGE_DESCRIPTION =
-  'An evolving reference book for AI enthusiasts & vibe coders. Living dictionary of artificial intelligence concepts, architectures, and practices.';
+  'An evolving reference book for AI enthusiasts & vibe coders. Living dictionary of artificial intelligence concepts, architectures and practices.';
 
 const legacyDefaultCollections: Collections = {
   'Vibe coder essentials': ['vibe coding', 'diff', 'ship loop', 'taste', 'eval'],
@@ -107,7 +107,7 @@ function updateDocumentMetadata(term: Term | null, bookView: BookView): void {
   const imageUrl = getAbsoluteSiteUrl(imagePath);
   const imageAlt = isTermView && term
     ? `${term.word} definition card from The AI Almanac`
-    : 'The AI Almanac — an evolving field guide to artificial intelligence.';
+    : 'The AI Almanac - an evolving field guide to artificial intelligence.';
 
   document.title = title;
   updateMetaTag('name', 'description', description);
@@ -660,7 +660,7 @@ const AlmanacApp: React.FC = () => {
     [commitBookView, currentTerm.word, setLocationHash, soundEnabled]
   );
 
-  // Single-leaf page turn — soft-page geometry adapted from StPageFlip's fold model
+  // Single-leaf page turn - soft-page geometry adapted from StPageFlip's fold model
   const animatePageTurn = useCallback(
     async (
       nextTerm: Term,

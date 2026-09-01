@@ -81,7 +81,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
   };
 
   const getClipText = () => {
-    return `${term.word}${term.pron ? ` ${term.pron}` : ''} · ${term.part}\n\n${term.definition}\n\nThe AI Almanac — ${deepLink()}`;
+    return `${term.word}${term.pron ? ` ${term.pron}` : ''} · ${term.part}\n\n${term.definition}\n\nThe AI Almanac - ${deepLink()}`;
   };
 
   const handleDownloadPng = async () => {
@@ -123,7 +123,7 @@ export const ClipOverlay: React.FC<ClipOverlayProps> = ({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${term.word} — The AI Almanac`,
+          title: `${term.word} - The AI Almanac`,
           text: term.definition,
           url: deepLink()
         });

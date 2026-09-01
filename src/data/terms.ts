@@ -6,7 +6,7 @@ export const terms: Term[] = [
     "part": "adjective",
     "pron": "/ā-ˈjen-tik/",
     "definition": "Describing AI that can pursue a goal through multiple steps, choosing actions and using tools with some degree of autonomy rather than returning a single passive answer.",
-    "example": "“The prototype became agentic once it could inspect errors, edit files, and rerun the build on its own.”",
+    "example": "“The prototype became agentic once it could inspect errors, edit files and rerun the build on its own.”",
     "origin": "From “agent,” sharpened by the rise of tool-using AI systems.",
     "note": "Use this when the system is acting, not merely answering.",
     "related": [
@@ -25,10 +25,10 @@ export const terms: Term[] = [
     "word": "alignment",
     "part": "noun",
     "pron": "/ə-ˈlīn-mənt/",
-    "definition": "The work of making an AI system behave in ways that are consistent with intended goals, constraints, human preferences, and safety requirements.",
+    "definition": "The work of making an AI system behave in ways that are consistent with intended goals, constraints, human preferences and safety requirements.",
     "example": "“The model was capable, but alignment determined whether that capability was useful in the product.”",
     "origin": "Borrowed from the idea of bringing goals or systems into agreement.",
-    "note": "Capability answers “can it?” Alignment asks “should it, and how?”",
+    "note": "Capability answers “can it?” Alignment asks “should it and how?”",
     "related": [
       "guardrail",
       "policy",
@@ -84,7 +84,7 @@ export const terms: Term[] = [
     "word": "context window",
     "part": "noun",
     "pron": "/ˈkän-tekst ˈwin-dō/",
-    "definition": "The amount of text, code, images, instructions, and prior conversation an AI model can consider at one time while producing its next response.",
+    "definition": "The amount of text, code, images, instructions and prior conversation an AI model can consider at one time while producing its next response.",
     "example": "“Paste the relevant files, not the whole repository, unless the context window can handle it cleanly.”",
     "origin": "Borrowed from computing language around active working context.",
     "note": "More context is not automatically better context. Relevance still matters.",
@@ -323,7 +323,7 @@ export const terms: Term[] = [
     "part": "noun",
     "pron": "/prämpt/",
     "definition": "The instruction, context, examples, constraints, or question given to an AI model to shape what it produces.",
-    "example": "“The best prompt specified the goal, the constraints, and what a good output should look like.”",
+    "example": "“The best prompt specified the goal, the constraints and what a good output should look like.”",
     "origin": "An existing computing term that became a mainstream creative verb and noun.",
     "note": "Prompts are closer to briefs than magic spells.",
     "related": [
@@ -342,7 +342,7 @@ export const terms: Term[] = [
     "word": "prompt debt",
     "part": "noun",
     "pron": "/prämpt det/",
-    "definition": "The hidden maintenance burden created when a product depends on an accumulation of brittle prompt instructions instead of clear product logic, tests, tools, and structured data.",
+    "definition": "The hidden maintenance burden created when a product depends on an accumulation of brittle prompt instructions instead of clear product logic, tests, tools and structured data.",
     "example": "“We kept adding another sentence to the prompt until prompt debt made every change risky.”",
     "origin": "Modeled after “technical debt.”",
     "note": "If a prompt reads like a patchwork legal contract, the architecture may be asking for help.",
@@ -382,7 +382,7 @@ export const terms: Term[] = [
     "word": "retrieval",
     "part": "noun",
     "pron": "/ri-ˈtrē-vᵊl/",
-    "definition": "Finding relevant information from an external collection—such as documents, databases, or search results—so an AI system can use fresher or more specific evidence.",
+    "definition": "Finding relevant information from an external collection - such as documents, databases, or search results - so an AI system can use fresher or more specific evidence.",
     "example": "“Retrieval found the current policy before the model drafted the answer.”",
     "origin": "From information retrieval, a field older than modern generative AI.",
     "note": "Search first, generate second, when freshness matters.",
@@ -442,7 +442,7 @@ export const terms: Term[] = [
     "word": "system prompt",
     "part": "noun",
     "pron": "/ˈsis-təm prämt/",
-    "definition": "A high-priority instruction layer that sets an AI assistant’s role, behavior, constraints, tone, and tool-use expectations before ordinary user messages are considered.",
+    "definition": "A high-priority instruction layer that sets an AI assistant’s role, behavior, constraints, tone and tool-use expectations before ordinary user messages are considered.",
     "example": "“The system prompt defined the assistant as a strict code reviewer.”",
     "origin": "A practical term from chat-model application design.",
     "note": "It is product policy and behavior design, not just hidden copy.",
@@ -485,7 +485,7 @@ export const terms: Term[] = [
     "definition": "A small unit of text processed by a language model. Tokens are not always whole words; punctuation and word fragments may each count separately.",
     "example": "“The answer was short in words but expensive in tokens because the input context was huge.”",
     "origin": "From computational linguistics and text processing.",
-    "note": "Token count affects context limits, latency, and often cost.",
+    "note": "Token count affects context limits, latency and often cost.",
     "related": [
       "context window",
       "latency",
@@ -542,7 +542,7 @@ export const terms: Term[] = [
     "word": "vibe coding",
     "part": "noun",
     "pron": "/vīb ˈkō-diŋ/",
-    "definition": "A style of software creation where a person steers an AI coding system through natural-language intent, rapid feedback, and visual or behavioral judgment instead of manually authoring every line.",
+    "definition": "A style of software creation where a person steers an AI coding system through natural-language intent, rapid feedback and visual or behavioral judgment instead of manually authoring every line.",
     "example": "“We vibe coded the landing page, then tightened the data model and tests by hand.”",
     "origin": "Internet-native slang for AI-assisted programming by conversational direction.",
     "note": "Fast generation does not remove the need for judgment, debugging, security, or maintainability.",
@@ -563,7 +563,7 @@ export const terms: Term[] = [
     "word": "workflow",
     "part": "noun",
     "pron": "/ˈwərk-ˌflō/",
-    "definition": "A defined sequence of steps, tools, decisions, and handoffs that turns an input into a useful outcome; AI may automate some steps without replacing the workflow itself.",
+    "definition": "A defined sequence of steps, tools, decisions and handoffs that turns an input into a useful outcome; AI may automate some steps without replacing the workflow itself.",
     "example": "“The winning feature was the workflow around the model, not the model call.”",
     "origin": "A long-standing operations and software term.",
     "note": "If the workflow is unclear, adding an agent usually makes the confusion faster.",
@@ -1178,7 +1178,7 @@ export const terms: Term[] = [
     "word": "compute-optimal training",
     "part": "noun",
     "pron": "",
-    "definition": "Choosing model size, data quantity, and compute allocation to achieve strong performance for a fixed training budget.",
+    "definition": "Choosing model size, data quantity and compute allocation to achieve strong performance for a fixed training budget.",
     "example": "“The team used compute-optimal training while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in foundations and modern AI practice.",
     "note": "Use the term precisely; broad AI concepts are often conflated in casual discussion.",
@@ -1318,7 +1318,7 @@ export const terms: Term[] = [
     "word": "self-attention",
     "part": "noun",
     "pron": "",
-    "definition": "Attention in which queries, keys, and values come from the same sequence or set of representations.",
+    "definition": "Attention in which queries, keys and values come from the same sequence or set of representations.",
     "example": "“The team used self-attention while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in architectures and modern AI practice.",
     "note": "Architecture describes how a model is built, not necessarily how a finished product behaves.",
@@ -2203,7 +2203,7 @@ export const terms: Term[] = [
     "word": "context engineering",
     "part": "noun",
     "pron": "",
-    "definition": "Designing, selecting, ordering, and compressing the information supplied to a model so it can perform a task well.",
+    "definition": "Designing, selecting, ordering and compressing the information supplied to a model so it can perform a task well.",
     "example": "“The team used context engineering while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in language models & prompting and modern AI practice.",
     "note": "Prompting changes the model input and interaction pattern; it does not retrain the base model.",
@@ -2355,7 +2355,7 @@ export const terms: Term[] = [
     "word": "prompt library",
     "part": "noun",
     "pron": "",
-    "definition": "A maintained collection of reusable prompts, patterns, and examples.",
+    "definition": "A maintained collection of reusable prompts, patterns and examples.",
     "example": "“The team used prompt library while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in language models & prompting and modern AI practice.",
     "note": "Prompting changes the model input and interaction pattern; it does not retrain the base model.",
@@ -2371,7 +2371,7 @@ export const terms: Term[] = [
     "word": "prompt versioning",
     "part": "noun",
     "pron": "",
-    "definition": "Tracking changes to prompts so behavior can be compared, reproduced, and rolled back.",
+    "definition": "Tracking changes to prompts so behavior can be compared, reproduced and rolled back.",
     "example": "“The team used prompt versioning while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in language models & prompting and modern AI practice.",
     "note": "Prompting changes the model input and interaction pattern; it does not retrain the base model.",
@@ -3035,7 +3035,7 @@ export const terms: Term[] = [
     "word": "JSON schema",
     "part": "noun",
     "pron": "",
-    "definition": "A machine-readable description of allowed JSON structure, types, and required fields, often used to constrain model output.",
+    "definition": "A machine-readable description of allowed JSON structure, types and required fields, often used to constrain model output.",
     "example": "“The team used JSON schema while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in generation & decoding and modern AI practice.",
     "note": "Decoding controls how model probabilities become an actual output.",
@@ -4090,7 +4090,7 @@ export const terms: Term[] = [
     "definition": "Representing model weights or activations with lower-precision numbers to reduce memory and speed up inference.",
     "example": "“The team used quantization while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "post-training quantization",
       "model compression",
@@ -4108,7 +4108,7 @@ export const terms: Term[] = [
     "definition": "Quantizing an already trained model without retraining the full model from scratch.",
     "example": "“The team used post-training quantization while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "quantization-aware training",
       "quantization",
@@ -4126,7 +4126,7 @@ export const terms: Term[] = [
     "definition": "Training while simulating lower-precision arithmetic so the model adapts to later quantized inference.",
     "example": "“The team used quantization-aware training while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "INT8",
       "post-training quantization",
@@ -4144,7 +4144,7 @@ export const terms: Term[] = [
     "definition": "Eight-bit integer numeric precision commonly used for quantized inference.",
     "example": "“The team used INT8 while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "INT4",
       "quantization-aware training",
@@ -4162,7 +4162,7 @@ export const terms: Term[] = [
     "definition": "Four-bit integer numeric precision used for aggressive model compression and efficient inference.",
     "example": "“The team used INT4 while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "FP32",
       "INT8",
@@ -4180,7 +4180,7 @@ export const terms: Term[] = [
     "definition": "32-bit floating-point precision traditionally used for model training and numerical computation.",
     "example": "“The team used FP32 while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "FP16",
       "INT4",
@@ -4198,7 +4198,7 @@ export const terms: Term[] = [
     "definition": "16-bit floating-point precision used to reduce memory and accelerate supported training or inference.",
     "example": "“The team used FP16 while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "BF16",
       "FP32",
@@ -4216,7 +4216,7 @@ export const terms: Term[] = [
     "definition": "Brain floating point; a 16-bit format with an exponent range similar to FP32 and lower mantissa precision.",
     "example": "“The team used BF16 while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "FP8",
       "FP16",
@@ -4234,7 +4234,7 @@ export const terms: Term[] = [
     "definition": "Eight-bit floating-point formats used on newer accelerators for efficient training or inference.",
     "example": "“The team used FP8 while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "mixed precision",
       "BF16",
@@ -4250,7 +4250,7 @@ export const terms: Term[] = [
     "definition": "Using more than one numeric precision in the same training or inference workload to improve efficiency.",
     "example": "“The team used mixed precision while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "pruning",
       "FP8",
@@ -4266,7 +4266,7 @@ export const terms: Term[] = [
     "definition": "Removing weights, channels, heads, or other components judged unnecessary to reduce model size or compute.",
     "example": "“The team used pruning while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "sparsity",
       "mixed precision",
@@ -4282,7 +4282,7 @@ export const terms: Term[] = [
     "definition": "A condition where many weights, activations, or connections are zero or inactive.",
     "example": "“The team used sparsity while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "structured sparsity",
       "pruning",
@@ -4298,7 +4298,7 @@ export const terms: Term[] = [
     "definition": "Sparsity arranged in regular blocks or patterns that hardware can accelerate more easily.",
     "example": "“The team used structured sparsity while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "KV cache",
       "sparsity",
@@ -4314,7 +4314,7 @@ export const terms: Term[] = [
     "definition": "Stored attention keys and values from previous tokens so autoregressive generation does not recompute them every step.",
     "example": "“The team used KV cache while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "prefix cache",
       "structured sparsity",
@@ -4332,7 +4332,7 @@ export const terms: Term[] = [
     "definition": "Cached computation for a shared initial context reused across multiple requests.",
     "example": "“The team used prefix cache while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "continuous batching",
       "KV cache",
@@ -4350,7 +4350,7 @@ export const terms: Term[] = [
     "definition": "Dynamically adding and removing requests from inference batches as tokens are generated.",
     "example": "“The team used continuous batching while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "batch inference",
       "prefix cache",
@@ -4368,7 +4368,7 @@ export const terms: Term[] = [
     "definition": "Running multiple inputs together to improve accelerator utilization and throughput.",
     "example": "“The team used batch inference while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "model serving",
       "continuous batching",
@@ -4386,7 +4386,7 @@ export const terms: Term[] = [
     "definition": "Operating infrastructure that exposes trained models for live or batch inference.",
     "example": "“The team used model serving while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "inference server",
       "batch inference",
@@ -4401,10 +4401,10 @@ export const terms: Term[] = [
     "word": "inference server",
     "part": "noun",
     "pron": "",
-    "definition": "Software that loads models, schedules requests, manages batching, and returns model outputs.",
+    "definition": "Software that loads models, schedules requests, manages batching and returns model outputs.",
     "example": "“The team used inference server while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "model parallelism",
       "model serving",
@@ -4422,7 +4422,7 @@ export const terms: Term[] = [
     "definition": "Splitting a model across multiple devices because it does not fit or run efficiently on one device.",
     "example": "“The team used model parallelism while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "tensor parallelism",
       "inference server",
@@ -4438,7 +4438,7 @@ export const terms: Term[] = [
     "definition": "Splitting tensor operations within individual layers across multiple devices.",
     "example": "“The team used tensor parallelism while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "pipeline parallelism",
       "model parallelism",
@@ -4456,7 +4456,7 @@ export const terms: Term[] = [
     "definition": "Splitting groups of model layers across devices and passing microbatches through them like a pipeline.",
     "example": "“The team used pipeline parallelism while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "data parallelism",
       "tensor parallelism",
@@ -4474,7 +4474,7 @@ export const terms: Term[] = [
     "definition": "Replicating a model across devices while each replica processes different data and gradients are synchronized.",
     "example": "“The team used data parallelism while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "sharding",
       "pipeline parallelism",
@@ -4492,7 +4492,7 @@ export const terms: Term[] = [
     "definition": "Partitioning model parameters, optimizer state, data, or computation across multiple devices or machines.",
     "example": "“The team used sharding while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "FSDP",
       "data parallelism",
@@ -4505,10 +4505,10 @@ export const terms: Term[] = [
     "word": "FSDP",
     "part": "noun",
     "pron": "",
-    "definition": "Fully sharded data parallel; a strategy that shards parameters, gradients, and optimizer state across training workers.",
+    "definition": "Fully sharded data parallel; a strategy that shards parameters, gradients and optimizer state across training workers.",
     "example": "“The team used FSDP while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "ZeRO",
       "sharding",
@@ -4523,10 +4523,10 @@ export const terms: Term[] = [
     "word": "ZeRO",
     "part": "noun",
     "pron": "",
-    "definition": "A family of distributed-training techniques that partition optimizer state, gradients, and parameters to save memory.",
+    "definition": "A family of distributed-training techniques that partition optimizer state, gradients and parameters to save memory.",
     "example": "“The team used ZeRO while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "gradient checkpointing",
       "FSDP",
@@ -4544,7 +4544,7 @@ export const terms: Term[] = [
     "definition": "Saving memory by discarding some intermediate activations during the forward pass and recomputing them during backpropagation.",
     "example": "“The team used gradient checkpointing while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "FlashAttention",
       "ZeRO",
@@ -4562,7 +4562,7 @@ export const terms: Term[] = [
     "definition": "An attention implementation designed to reduce memory traffic and improve exact attention speed on GPUs.",
     "example": "“The team used FlashAttention while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "kernel fusion",
       "gradient checkpointing",
@@ -4580,7 +4580,7 @@ export const terms: Term[] = [
     "definition": "Combining multiple low-level operations into a single accelerator kernel to reduce overhead and memory movement.",
     "example": "“The team used kernel fusion while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "compilation",
       "FlashAttention",
@@ -4596,7 +4596,7 @@ export const terms: Term[] = [
     "definition": "Transforming a model computation graph into optimized low-level code for a target runtime or accelerator.",
     "example": "“The team used compilation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "graph optimization",
       "kernel fusion",
@@ -4614,7 +4614,7 @@ export const terms: Term[] = [
     "definition": "Rewriting a computation graph to remove redundant work, fuse operations, or improve execution efficiency.",
     "example": "“The team used graph optimization while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "offloading",
       "compilation",
@@ -4627,10 +4627,10 @@ export const terms: Term[] = [
     "word": "offloading",
     "part": "noun",
     "pron": "",
-    "definition": "Moving weights, activations, KV cache, or optimizer state between accelerator memory, system memory, and storage to fit larger workloads.",
+    "definition": "Moving weights, activations, KV cache, or optimizer state between accelerator memory, system memory and storage to fit larger workloads.",
     "example": "“The team used offloading while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "paged attention",
       "graph optimization",
@@ -4646,7 +4646,7 @@ export const terms: Term[] = [
     "definition": "Managing KV-cache memory in page-like blocks so inference servers can use accelerator memory more efficiently.",
     "example": "“The team used paged attention while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "speculative execution",
       "offloading",
@@ -4662,7 +4662,7 @@ export const terms: Term[] = [
     "definition": "Performing likely future computation early and keeping it only if later validation confirms it was useful.",
     "example": "“The team used speculative execution while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "model compression",
       "paged attention",
@@ -4678,7 +4678,7 @@ export const terms: Term[] = [
     "definition": "Reducing the storage or compute cost of a model through techniques such as quantization, pruning, or distillation.",
     "example": "“The team used model compression while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in inference & optimization and modern AI practice.",
-    "note": "Runtime techniques trade among speed, memory, cost, throughput, and sometimes quality.",
+    "note": "Runtime techniques trade among speed, memory, cost, throughput and sometimes quality.",
     "related": [
       "quantization",
       "speculative execution",
@@ -4694,7 +4694,7 @@ export const terms: Term[] = [
     "definition": "The component that searches a corpus and returns candidate documents or chunks for a query.",
     "example": "“The team used retriever while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "embedding",
       "retrieval",
@@ -4710,7 +4710,7 @@ export const terms: Term[] = [
     "definition": "A model that converts text, images, audio, or other data into vectors for similarity or retrieval tasks.",
     "example": "“The team used embedding model while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "vector",
       "embedding",
@@ -4728,7 +4728,7 @@ export const terms: Term[] = [
     "definition": "An ordered list of numbers used to represent a point, feature set, or learned embedding in a multidimensional space.",
     "example": "“The team used vector while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "vector search",
       "embedding model",
@@ -4744,7 +4744,7 @@ export const terms: Term[] = [
     "definition": "Searching for items with vectors close to a query vector under a similarity measure.",
     "example": "“The team used vector search while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "semantic search",
       "vector",
@@ -4762,7 +4762,7 @@ export const terms: Term[] = [
     "definition": "Search based on meaning and learned representations rather than only exact keyword overlap.",
     "example": "“The team used semantic search while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "lexical search",
       "vector search",
@@ -4775,10 +4775,10 @@ export const terms: Term[] = [
     "word": "lexical search",
     "part": "noun",
     "pron": "",
-    "definition": "Search based primarily on words, tokens, and term statistics rather than dense semantic embeddings.",
+    "definition": "Search based primarily on words, tokens and term statistics rather than dense semantic embeddings.",
     "example": "“The team used lexical search while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "BM25",
       "semantic search",
@@ -4793,10 +4793,10 @@ export const terms: Term[] = [
     "word": "BM25",
     "part": "noun",
     "pron": "",
-    "definition": "A classic lexical ranking function that scores documents using term frequency, inverse document frequency, and document length.",
+    "definition": "A classic lexical ranking function that scores documents using term frequency, inverse document frequency and document length.",
     "example": "“The team used BM25 while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "dense retrieval",
       "lexical search",
@@ -4812,7 +4812,7 @@ export const terms: Term[] = [
     "definition": "Retrieval based on dense learned vector representations.",
     "example": "“The team used dense retrieval while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "sparse retrieval",
       "BM25",
@@ -4830,7 +4830,7 @@ export const terms: Term[] = [
     "definition": "Retrieval based on sparse term or learned sparse-vector representations.",
     "example": "“The team used sparse retrieval while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "hybrid search",
       "dense retrieval",
@@ -4848,7 +4848,7 @@ export const terms: Term[] = [
     "definition": "Combining lexical and semantic retrieval signals to improve coverage and ranking.",
     "example": "“The team used hybrid search while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "reranker",
       "sparse retrieval",
@@ -4864,7 +4864,7 @@ export const terms: Term[] = [
     "definition": "A model or algorithm that reorders retrieved candidates using a more precise relevance score.",
     "example": "“The team used reranker while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "cross-encoder reranker",
       "hybrid search",
@@ -4882,7 +4882,7 @@ export const terms: Term[] = [
     "definition": "A reranker that jointly processes a query and candidate text to produce a relevance score.",
     "example": "“The team used cross-encoder reranker while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "bi-encoder",
       "reranker",
@@ -4900,7 +4900,7 @@ export const terms: Term[] = [
     "definition": "A model that encodes queries and documents separately so their vectors can be searched efficiently.",
     "example": "“The team used bi-encoder while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "chunk",
       "cross-encoder reranker",
@@ -4918,7 +4918,7 @@ export const terms: Term[] = [
     "definition": "A bounded piece of a larger document used as the unit of indexing, retrieval, or context assembly.",
     "example": "“The team used chunk while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "chunking",
       "bi-encoder",
@@ -4936,7 +4936,7 @@ export const terms: Term[] = [
     "definition": "Splitting documents into smaller units for indexing and retrieval.",
     "example": "“The team used chunking while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "chunk overlap",
       "chunk",
@@ -4952,7 +4952,7 @@ export const terms: Term[] = [
     "definition": "Repeating content between adjacent chunks so information near boundaries is less likely to be lost.",
     "example": "“The team used chunk overlap while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "metadata filtering",
       "chunking",
@@ -4968,7 +4968,7 @@ export const terms: Term[] = [
     "definition": "Restricting retrieval candidates using structured attributes such as date, author, customer, or document type.",
     "example": "“The team used metadata filtering while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "query rewriting",
       "chunk overlap",
@@ -4986,7 +4986,7 @@ export const terms: Term[] = [
     "definition": "Transforming a user query into a form that is more effective for retrieval.",
     "example": "“The team used query rewriting while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "query expansion",
       "metadata filtering",
@@ -5004,7 +5004,7 @@ export const terms: Term[] = [
     "definition": "Adding related terms, entities, or generated details to increase retrieval recall.",
     "example": "“The team used query expansion while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "HyDE",
       "query rewriting",
@@ -5020,7 +5020,7 @@ export const terms: Term[] = [
     "definition": "Hypothetical document embeddings; retrieving by embedding a model-generated hypothetical answer or document rather than the raw query.",
     "example": "“The team used HyDE while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "reciprocal rank fusion",
       "query expansion",
@@ -5038,7 +5038,7 @@ export const terms: Term[] = [
     "definition": "Combining several ranked result lists using scores based on each item's rank position.",
     "example": "“The team used reciprocal rank fusion while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "nearest neighbor",
       "HyDE",
@@ -5056,7 +5056,7 @@ export const terms: Term[] = [
     "definition": "The item or items closest to a query point under a chosen distance or similarity function.",
     "example": "“The team used nearest neighbor while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "approximate nearest neighbor",
       "reciprocal rank fusion",
@@ -5074,7 +5074,7 @@ export const terms: Term[] = [
     "definition": "Fast search methods that trade a small amount of exactness for much better retrieval speed at large scale.",
     "example": "“The team used approximate nearest neighbor while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "HNSW",
       "nearest neighbor",
@@ -5092,7 +5092,7 @@ export const terms: Term[] = [
     "definition": "Hierarchical navigable small world; a graph-based approximate nearest-neighbor index used for vector search.",
     "example": "“The team used HNSW while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "cosine similarity",
       "approximate nearest neighbor",
@@ -5110,7 +5110,7 @@ export const terms: Term[] = [
     "definition": "A similarity measure based on the angle between vectors rather than their raw magnitude.",
     "example": "“The team used cosine similarity while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "dot product",
       "HNSW",
@@ -5128,7 +5128,7 @@ export const terms: Term[] = [
     "definition": "A vector similarity operation that multiplies corresponding components and sums the results.",
     "example": "“The team used dot product while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "Euclidean distance",
       "cosine similarity",
@@ -5146,7 +5146,7 @@ export const terms: Term[] = [
     "definition": "Straight-line distance between vectors in a geometric space.",
     "example": "“The team used Euclidean distance while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "vector database",
       "dot product",
@@ -5164,7 +5164,7 @@ export const terms: Term[] = [
     "definition": "A storage and indexing layer for embeddings and their associated content or metadata.",
     "example": "“The team used vector store while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "document store",
       "vector database",
@@ -5182,7 +5182,7 @@ export const terms: Term[] = [
     "definition": "A system that stores original documents or chunks used by a retrieval pipeline.",
     "example": "“The team used document store while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "knowledge base",
       "vector store",
@@ -5200,7 +5200,7 @@ export const terms: Term[] = [
     "definition": "A maintained collection of facts, documents, or structured information used by people or AI systems.",
     "example": "“The team used knowledge base while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "knowledge graph",
       "document store",
@@ -5218,7 +5218,7 @@ export const terms: Term[] = [
     "definition": "A graph of entities and typed relationships that represents structured knowledge.",
     "example": "“The team used knowledge graph while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "Graph RAG",
       "knowledge base",
@@ -5234,7 +5234,7 @@ export const terms: Term[] = [
     "definition": "Retrieval-augmented generation that uses graph structure or graph-derived summaries to retrieve and organize evidence.",
     "example": "“The team used Graph RAG while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "grounded generation",
       "knowledge graph",
@@ -5252,7 +5252,7 @@ export const terms: Term[] = [
     "definition": "Generation constrained or informed by provided evidence, retrieved content, or trusted data.",
     "example": "“The team used grounded generation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "groundedness",
       "Graph RAG",
@@ -5270,7 +5270,7 @@ export const terms: Term[] = [
     "definition": "The degree to which an answer's claims are supported by supplied evidence or sources.",
     "example": "“The team used groundedness while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "citation",
       "grounded generation",
@@ -5288,7 +5288,7 @@ export const terms: Term[] = [
     "definition": "A reference connecting a claim or response to a source used as evidence.",
     "example": "“The team used citation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "source attribution",
       "groundedness",
@@ -5304,7 +5304,7 @@ export const terms: Term[] = [
     "definition": "Identifying which sources support a generated claim or answer.",
     "example": "“The team used source attribution while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "retrieval recall",
       "citation",
@@ -5322,7 +5322,7 @@ export const terms: Term[] = [
     "definition": "How much of the relevant evidence a retrieval system successfully includes among its candidates.",
     "example": "“The team used retrieval recall while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "retrieval precision",
       "source attribution",
@@ -5338,7 +5338,7 @@ export const terms: Term[] = [
     "definition": "How much of the retrieved material is actually relevant to the query.",
     "example": "“The team used retrieval precision while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in retrieval & knowledge and modern AI practice.",
-    "note": "Retrieval is only useful when the right evidence is found, ranked, and passed into context clearly.",
+    "note": "Retrieval is only useful when the right evidence is found, ranked and passed into context clearly.",
     "related": [
       "RAG",
       "retrieval recall",
@@ -5351,10 +5351,10 @@ export const terms: Term[] = [
     "word": "agent",
     "part": "noun",
     "pron": "",
-    "definition": "An AI system that can pursue a goal across multiple steps by choosing actions, using tools, and updating state.",
+    "definition": "An AI system that can pursue a goal across multiple steps by choosing actions, using tools and updating state.",
     "example": "“The team used agent while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "agentic",
       "artifact",
@@ -5372,7 +5372,7 @@ export const terms: Term[] = [
     "definition": "A workflow in which a model dynamically selects some actions, tools, or branches instead of following a fully fixed sequence.",
     "example": "“The team used agentic workflow while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "agent loop",
       "agentic",
@@ -5387,10 +5387,10 @@ export const terms: Term[] = [
     "word": "agent loop",
     "part": "noun",
     "pron": "",
-    "definition": "The recurring cycle of observe, decide, act, inspect results, and continue or stop.",
+    "definition": "The recurring cycle of observe, decide, act, inspect results and continue or stop.",
     "example": "“The team used agent loop while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "planner",
       "agentic workflow",
@@ -5408,7 +5408,7 @@ export const terms: Term[] = [
     "definition": "A component that decomposes a goal into steps or proposes a sequence of actions.",
     "example": "“The team used planner while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "executor",
       "agent loop",
@@ -5426,7 +5426,7 @@ export const terms: Term[] = [
     "definition": "A component that performs planned actions, tool calls, or code execution.",
     "example": "“The team used executor while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "orchestrator",
       "planner",
@@ -5441,10 +5441,10 @@ export const terms: Term[] = [
     "word": "orchestrator",
     "part": "noun",
     "pron": "",
-    "definition": "The control layer that coordinates models, tools, agents, retries, state, and handoffs.",
+    "definition": "The control layer that coordinates models, tools, agents, retries, state and handoffs.",
     "example": "“The team used orchestrator while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "router",
       "executor",
@@ -5462,7 +5462,7 @@ export const terms: Term[] = [
     "definition": "Transferring a task or conversation from one agent, model, or worker to another with the needed context.",
     "example": "“The team used handoff while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "subagent",
       "router",
@@ -5480,7 +5480,7 @@ export const terms: Term[] = [
     "definition": "A secondary agent delegated a bounded part of a larger task by another agent.",
     "example": "“The team used subagent while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "supervisor agent",
       "handoff",
@@ -5498,7 +5498,7 @@ export const terms: Term[] = [
     "definition": "An agent that coordinates, reviews, or delegates work to other agents.",
     "example": "“The team used supervisor agent while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "multi-agent system",
       "subagent",
@@ -5516,7 +5516,7 @@ export const terms: Term[] = [
     "definition": "A system in which multiple agents interact, specialize, delegate, or coordinate toward one or more goals.",
     "example": "“The team used multi-agent system while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "swarm",
       "supervisor agent",
@@ -5534,7 +5534,7 @@ export const terms: Term[] = [
     "definition": "An informal pattern where many agents cooperate through distributed roles or local coordination.",
     "example": "“The team used swarm while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "tool",
       "multi-agent system",
@@ -5552,7 +5552,7 @@ export const terms: Term[] = [
     "definition": "An external capability exposed to a model, such as search, code execution, a database query, or an API action.",
     "example": "“The team used tool while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "tool calling",
       "swarm",
@@ -5570,7 +5570,7 @@ export const terms: Term[] = [
     "definition": "Structured model output that requests execution of a named function with arguments.",
     "example": "“The team used function calling while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "tool schema",
       "tool calling",
@@ -5585,10 +5585,10 @@ export const terms: Term[] = [
     "word": "tool schema",
     "part": "noun",
     "pron": "",
-    "definition": "A machine-readable description of a tool's name, purpose, arguments, and result contract.",
+    "definition": "A machine-readable description of a tool's name, purpose, arguments and result contract.",
     "example": "“The team used tool schema while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "tool search",
       "function calling",
@@ -5606,7 +5606,7 @@ export const terms: Term[] = [
     "definition": "A mechanism that lets a model discover or load relevant tools on demand instead of receiving every full tool definition up front.",
     "example": "“The team used tool search while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "tool registry",
       "tool schema",
@@ -5622,7 +5622,7 @@ export const terms: Term[] = [
     "definition": "A catalog of tools available to an agent or application.",
     "example": "“The team used tool registry while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "connector",
       "tool search",
@@ -5640,7 +5640,7 @@ export const terms: Term[] = [
     "definition": "An integration that gives an AI application controlled access to an external service, account, or data source.",
     "example": "“The team used connector while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "computer use",
       "tool registry",
@@ -5653,10 +5653,10 @@ export const terms: Term[] = [
     "word": "computer use",
     "part": "noun",
     "pron": "",
-    "definition": "A capability where a model operates a graphical computer interface through actions such as clicks, typing, and scrolling.",
+    "definition": "A capability where a model operates a graphical computer interface through actions such as clicks, typing and scrolling.",
     "example": "“The team used computer use while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "browser agent",
       "connector",
@@ -5672,10 +5672,10 @@ export const terms: Term[] = [
     "word": "browser agent",
     "part": "noun",
     "pron": "",
-    "definition": "An agent specialized for navigating websites, reading pages, and completing browser-based tasks.",
+    "definition": "An agent specialized for navigating websites, reading pages and completing browser-based tasks.",
     "example": "“The team used browser agent while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "shell tool",
       "computer use",
@@ -5693,7 +5693,7 @@ export const terms: Term[] = [
     "definition": "A tool that lets an agent run command-line programs and scripts inside a controlled environment.",
     "example": "“The team used shell tool while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "code interpreter",
       "browser agent",
@@ -5708,10 +5708,10 @@ export const terms: Term[] = [
     "word": "code interpreter",
     "part": "noun",
     "pron": "",
-    "definition": "A tool that lets a model execute code, commonly for analysis, computation, and file manipulation.",
+    "definition": "A tool that lets a model execute code, commonly for analysis, computation and file manipulation.",
     "example": "“The team used code interpreter while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "sandbox",
       "shell tool",
@@ -5729,7 +5729,7 @@ export const terms: Term[] = [
     "definition": "An isolated execution environment that limits the resources, files, permissions, or network access available to generated code or agents.",
     "example": "“The team used sandbox while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "container",
       "code interpreter",
@@ -5744,10 +5744,10 @@ export const terms: Term[] = [
     "word": "container",
     "part": "noun",
     "pron": "",
-    "definition": "An isolated runtime environment packaging a filesystem, processes, and dependencies for reproducible execution.",
+    "definition": "An isolated runtime environment packaging a filesystem, processes and dependencies for reproducible execution.",
     "example": "“The team used container while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "agent harness",
       "sandbox",
@@ -5760,10 +5760,10 @@ export const terms: Term[] = [
     "word": "agent harness",
     "part": "noun",
     "pron": "",
-    "definition": "Infrastructure that manages an agent's execution loop, tools, state, permissions, environment, and task lifecycle.",
+    "definition": "Infrastructure that manages an agent's execution loop, tools, state, permissions, environment and task lifecycle.",
     "example": "“The team used agent harness while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "state",
       "container",
@@ -5781,7 +5781,7 @@ export const terms: Term[] = [
     "definition": "Persisted information that tracks the current condition of an agent, workflow, conversation, or task.",
     "example": "“The team used state while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "memory",
       "agent harness",
@@ -5799,7 +5799,7 @@ export const terms: Term[] = [
     "definition": "Information retained or retrieved so an AI system can use relevant past context beyond the immediate input.",
     "example": "“The team used memory while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "working memory",
       "state",
@@ -5817,7 +5817,7 @@ export const terms: Term[] = [
     "definition": "Short-lived information actively used during the current task or reasoning process.",
     "example": "“The team used working memory while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "long-term memory",
       "memory",
@@ -5835,7 +5835,7 @@ export const terms: Term[] = [
     "definition": "Information stored beyond the immediate context for later retrieval and use.",
     "example": "“The team used long-term memory while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "episodic memory",
       "working memory",
@@ -5853,7 +5853,7 @@ export const terms: Term[] = [
     "definition": "Memory organized around specific past events, interactions, or task episodes.",
     "example": "“The team used episodic memory while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "semantic memory",
       "long-term memory",
@@ -5869,7 +5869,7 @@ export const terms: Term[] = [
     "definition": "Memory organized around facts, concepts, or generalized knowledge rather than specific episodes.",
     "example": "“The team used semantic memory while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "checkpointing",
       "episodic memory",
@@ -5885,7 +5885,7 @@ export const terms: Term[] = [
     "definition": "Saving workflow or agent state so a long task can resume after interruption or failure.",
     "example": "“The team used checkpointing while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "retry",
       "semantic memory",
@@ -5903,7 +5903,7 @@ export const terms: Term[] = [
     "definition": "Repeating a failed model or tool operation, often with limits, delays, or modified inputs.",
     "example": "“The team used retry while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "backoff",
       "checkpointing",
@@ -5919,7 +5919,7 @@ export const terms: Term[] = [
     "definition": "Increasing the delay between retries to reduce overload or repeated failure.",
     "example": "“The team used backoff while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "idempotency",
       "retry",
@@ -5937,7 +5937,7 @@ export const terms: Term[] = [
     "definition": "A property where repeating the same operation has the same effect as performing it once, important for reliable agent actions.",
     "example": "“The team used idempotency while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "human in the loop",
       "backoff",
@@ -5955,7 +5955,7 @@ export const terms: Term[] = [
     "definition": "A design in which a person reviews, approves, edits, labels, or intervenes during AI operation.",
     "example": "“The team used human in the loop while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "human on the loop",
       "idempotency",
@@ -5973,7 +5973,7 @@ export const terms: Term[] = [
     "definition": "A design in which AI operates autonomously while a human supervises and can intervene when needed.",
     "example": "“The team used human on the loop while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "approval gate",
       "human in the loop",
@@ -5991,7 +5991,7 @@ export const terms: Term[] = [
     "definition": "A checkpoint requiring explicit authorization before an agent performs a sensitive or consequential action.",
     "example": "“The team used approval gate while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "observability",
       "human on the loop",
@@ -6006,10 +6006,10 @@ export const terms: Term[] = [
     "word": "observability",
     "part": "noun",
     "pron": "",
-    "definition": "The ability to inspect an AI system through logs, traces, metrics, events, and recorded state.",
+    "definition": "The ability to inspect an AI system through logs, traces, metrics, events and recorded state.",
     "example": "“The team used observability while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "trace",
       "approval gate",
@@ -6024,10 +6024,10 @@ export const terms: Term[] = [
     "word": "trace",
     "part": "noun",
     "pron": "",
-    "definition": "A structured record of model calls, tool calls, handoffs, and other events during one workflow execution.",
+    "definition": "A structured record of model calls, tool calls, handoffs and other events during one workflow execution.",
     "example": "“The team used trace while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "span",
       "observability",
@@ -6045,7 +6045,7 @@ export const terms: Term[] = [
     "definition": "A timed unit of work inside a trace, such as one model request or tool invocation.",
     "example": "“The team used span while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "telemetry",
       "trace",
@@ -6060,10 +6060,10 @@ export const terms: Term[] = [
     "word": "telemetry",
     "part": "noun",
     "pron": "",
-    "definition": "Operational data collected from a system, such as latency, errors, token usage, and tool events.",
+    "definition": "Operational data collected from a system, such as latency, errors, token usage and tool events.",
     "example": "“The team used telemetry while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "background task",
       "span",
@@ -6079,7 +6079,7 @@ export const terms: Term[] = [
     "definition": "A long-running operation executed asynchronously so the user or client does not need to keep one request open.",
     "example": "“The team used background task while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "MCP",
       "telemetry",
@@ -6097,7 +6097,7 @@ export const terms: Term[] = [
     "definition": "Model Context Protocol; an open protocol for connecting AI applications with external tools and contextual data.",
     "example": "“The team used MCP while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "MCP host",
       "background task",
@@ -6115,7 +6115,7 @@ export const terms: Term[] = [
     "definition": "The AI application that manages user interaction and connects to one or more MCP clients or servers.",
     "example": "“The team used MCP host while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "MCP client",
       "MCP",
@@ -6133,7 +6133,7 @@ export const terms: Term[] = [
     "definition": "The protocol component inside a host that maintains a connection to a particular MCP server.",
     "example": "“The team used MCP client while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "MCP server",
       "MCP host",
@@ -6148,10 +6148,10 @@ export const terms: Term[] = [
     "word": "MCP server",
     "part": "noun",
     "pron": "",
-    "definition": "A service that exposes MCP capabilities such as tools, resources, and prompts to compatible clients.",
+    "definition": "A service that exposes MCP capabilities such as tools, resources and prompts to compatible clients.",
     "example": "“The team used MCP server while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "MCP tool",
       "MCP client",
@@ -6169,7 +6169,7 @@ export const terms: Term[] = [
     "definition": "A model-controlled executable capability exposed by an MCP server.",
     "example": "“The team used MCP tool while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "MCP resource",
       "MCP server",
@@ -6187,7 +6187,7 @@ export const terms: Term[] = [
     "definition": "Application-controlled contextual data exposed by an MCP server for a client or model to read.",
     "example": "“The team used MCP resource while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "MCP prompt",
       "MCP tool",
@@ -6205,7 +6205,7 @@ export const terms: Term[] = [
     "definition": "A user-controlled prompt template exposed by an MCP server.",
     "example": "“The team used MCP prompt while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "roots",
       "MCP resource",
@@ -6223,7 +6223,7 @@ export const terms: Term[] = [
     "definition": "In MCP, filesystem or URI boundaries a client can expose so a server knows which locations are relevant or permitted.",
     "example": "“The team used roots while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "sampling",
       "MCP prompt",
@@ -6241,7 +6241,7 @@ export const terms: Term[] = [
     "definition": "In MCP, a mechanism for a server to request additional structured information from the user through the client.",
     "example": "“The team used elicitation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "capability negotiation",
       "sampling",
@@ -6259,7 +6259,7 @@ export const terms: Term[] = [
     "definition": "The process by which protocol participants announce and agree which optional features they support.",
     "example": "“The team used capability negotiation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "JSON-RPC",
       "elicitation",
@@ -6275,7 +6275,7 @@ export const terms: Term[] = [
     "definition": "A lightweight remote procedure call protocol using JSON messages, used as the base messaging format by MCP.",
     "example": "“The team used JSON-RPC while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "resource subscription",
       "capability negotiation",
@@ -6293,7 +6293,7 @@ export const terms: Term[] = [
     "definition": "A mechanism for receiving notifications when a resource changes.",
     "example": "“The team used resource subscription while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "progress notification",
       "JSON-RPC",
@@ -6311,7 +6311,7 @@ export const terms: Term[] = [
     "definition": "A message reporting partial completion or status for a longer-running protocol operation.",
     "example": "“The team used progress notification while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "cancellation",
       "resource subscription",
@@ -6329,7 +6329,7 @@ export const terms: Term[] = [
     "definition": "A protocol or workflow mechanism for requesting that ongoing work stop.",
     "example": "“The team used cancellation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "skill",
       "progress notification",
@@ -6345,7 +6345,7 @@ export const terms: Term[] = [
     "definition": "A reusable package of instructions, procedures, or domain methods that an agent can load to perform a class of tasks more reliably.",
     "example": "“The team used skill while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "artifact",
       "cancellation",
@@ -6363,7 +6363,7 @@ export const terms: Term[] = [
     "definition": "A durable output produced by an AI workflow, such as a document, spreadsheet, image, code patch, or report.",
     "example": "“The team used artifact while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in agents, tools & mcp and modern AI practice.",
-    "note": "Agent systems combine model decisions with tools, state, permissions, and control logic.",
+    "note": "Agent systems combine model decisions with tools, state, permissions and control logic.",
     "related": [
       "agent",
       "skill",
@@ -6586,7 +6586,7 @@ export const terms: Term[] = [
     "word": "confusion matrix",
     "part": "noun",
     "pron": "",
-    "definition": "A table counting predicted versus actual classes, exposing true positives, false positives, true negatives, and false negatives.",
+    "definition": "A table counting predicted versus actual classes, exposing true positives, false positives, true negatives and false negatives.",
     "example": "“The team used confusion matrix while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in evaluation & metrics and modern AI practice.",
     "note": "A metric is useful only when it reflects the behavior and failure modes users actually care about.",
@@ -6722,7 +6722,7 @@ export const terms: Term[] = [
     "word": "word error rate",
     "part": "noun",
     "pron": "",
-    "definition": "A speech-recognition metric based on substitutions, deletions, and insertions needed to match the reference transcript.",
+    "definition": "A speech-recognition metric based on substitutions, deletions and insertions needed to match the reference transcript.",
     "example": "“The team used word error rate while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in evaluation & metrics and modern AI practice.",
     "note": "A metric is useful only when it reflects the behavior and failure modes users actually care about.",
@@ -7075,7 +7075,7 @@ export const terms: Term[] = [
     "definition": "Research and engineering aimed at reducing harmful, unreliable, or uncontrollable AI behavior.",
     "example": "“The team used AI safety while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "guardrail",
       "alignment",
@@ -7093,7 +7093,7 @@ export const terms: Term[] = [
     "definition": "A set of rules describing allowed, disallowed, or required behavior for an AI system.",
     "example": "“The team used policy while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "content moderation",
       "guardrail",
@@ -7111,7 +7111,7 @@ export const terms: Term[] = [
     "definition": "Detecting or handling content that violates safety, legal, or platform rules.",
     "example": "“The team used content moderation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "refusal",
       "policy",
@@ -7129,7 +7129,7 @@ export const terms: Term[] = [
     "definition": "A response in which an AI system declines a request because it is unsafe, disallowed, or beyond permitted scope.",
     "example": "“The team used refusal while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "overrefusal",
       "content moderation",
@@ -7145,7 +7145,7 @@ export const terms: Term[] = [
     "definition": "When a safety system declines benign or allowed requests more often than intended.",
     "example": "“The team used overrefusal while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "jailbreak",
       "refusal",
@@ -7163,7 +7163,7 @@ export const terms: Term[] = [
     "definition": "A prompt or interaction designed to bypass an AI system's intended safety or instruction constraints.",
     "example": "“The team used jailbreak while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "prompt injection",
       "overrefusal",
@@ -7181,7 +7181,7 @@ export const terms: Term[] = [
     "definition": "Malicious or conflicting instructions placed in model-visible content to manipulate an AI system's behavior.",
     "example": "“The team used prompt injection while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "indirect prompt injection",
       "jailbreak",
@@ -7199,7 +7199,7 @@ export const terms: Term[] = [
     "definition": "Prompt injection hidden inside external content such as a webpage, document, email, or tool result rather than directly typed by the user.",
     "example": "“The team used indirect prompt injection while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "data exfiltration",
       "prompt injection",
@@ -7215,7 +7215,7 @@ export const terms: Term[] = [
     "definition": "Unauthorized extraction or disclosure of secrets, private data, credentials, or protected context.",
     "example": "“The team used data exfiltration while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "tool poisoning",
       "indirect prompt injection",
@@ -7233,7 +7233,7 @@ export const terms: Term[] = [
     "definition": "Manipulating tool descriptions, outputs, or connected data so an agent is induced to take unsafe or incorrect actions.",
     "example": "“The team used tool poisoning while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "adversarial example",
       "data exfiltration",
@@ -7249,7 +7249,7 @@ export const terms: Term[] = [
     "definition": "An input deliberately modified to cause a model to make a mistake while appearing similar to a normal input.",
     "example": "“The team used adversarial example while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "adversarial attack",
       "tool poisoning",
@@ -7267,7 +7267,7 @@ export const terms: Term[] = [
     "definition": "An attempt to exploit a model's weaknesses through crafted inputs, training manipulation, or system-level abuse.",
     "example": "“The team used adversarial attack while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "adversarial training",
       "adversarial example",
@@ -7283,7 +7283,7 @@ export const terms: Term[] = [
     "definition": "Training on adversarially perturbed examples to make a model more robust against similar attacks.",
     "example": "“The team used adversarial training while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "red teaming",
       "adversarial attack",
@@ -7299,7 +7299,7 @@ export const terms: Term[] = [
     "definition": "Structured attempts to discover harmful behaviors, security weaknesses, policy failures, or unexpected capabilities.",
     "example": "“The team used red teaming while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "safety eval",
       "adversarial training",
@@ -7317,7 +7317,7 @@ export const terms: Term[] = [
     "definition": "An evaluation focused on harmful capabilities, misuse, policy compliance, refusal quality, or robustness.",
     "example": "“The team used safety eval while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "reward hacking",
       "red teaming",
@@ -7335,7 +7335,7 @@ export const terms: Term[] = [
     "definition": "When an agent finds a way to maximize its measured reward without achieving the intended goal.",
     "example": "“The team used reward hacking while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "specification gaming",
       "safety eval",
@@ -7353,7 +7353,7 @@ export const terms: Term[] = [
     "definition": "Exploiting gaps between the literal objective and what designers actually intended.",
     "example": "“The team used specification gaming while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "goal misgeneralization",
       "reward hacking",
@@ -7371,7 +7371,7 @@ export const terms: Term[] = [
     "definition": "When a learned policy behaves according to an unintended goal in new situations despite good training performance.",
     "example": "“The team used goal misgeneralization while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "misalignment",
       "specification gaming",
@@ -7387,7 +7387,7 @@ export const terms: Term[] = [
     "definition": "Behavior that conflicts with intended objectives, constraints, or human preferences.",
     "example": "“The team used misalignment while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "corrigibility",
       "goal misgeneralization",
@@ -7403,7 +7403,7 @@ export const terms: Term[] = [
     "definition": "The desirable property that an AI system remains receptive to correction, shutdown, modification, or oversight.",
     "example": "“The team used corrigibility while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "scalable oversight",
       "misalignment",
@@ -7419,7 +7419,7 @@ export const terms: Term[] = [
     "definition": "Methods for supervising or evaluating AI systems even when direct human review of every step is too expensive or difficult.",
     "example": "“The team used scalable oversight while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "harmlessness",
       "corrigibility",
@@ -7435,7 +7435,7 @@ export const terms: Term[] = [
     "definition": "A safety objective emphasizing avoidance of harmful outputs or actions.",
     "example": "“The team used harmlessness while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "helpfulness",
       "scalable oversight",
@@ -7451,7 +7451,7 @@ export const terms: Term[] = [
     "definition": "An objective emphasizing useful, relevant assistance while respecting constraints.",
     "example": "“The team used helpfulness while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "honesty",
       "harmlessness",
@@ -7464,10 +7464,10 @@ export const terms: Term[] = [
     "word": "honesty",
     "part": "noun",
     "pron": "",
-    "definition": "An objective emphasizing truthful uncertainty, accurate claims, and avoidance of deception or fabrication.",
+    "definition": "An objective emphasizing truthful uncertainty, accurate claims and avoidance of deception or fabrication.",
     "example": "“The team used honesty while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "uncertainty",
       "helpfulness",
@@ -7483,7 +7483,7 @@ export const terms: Term[] = [
     "definition": "A representation or acknowledgement of limited confidence about a prediction, answer, or decision.",
     "example": "“The team used uncertainty while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "confidence",
       "honesty",
@@ -7501,7 +7501,7 @@ export const terms: Term[] = [
     "definition": "A score or expression indicating how strongly a model or system supports a prediction; it may be poorly calibrated.",
     "example": "“The team used confidence while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "toxicity",
       "uncertainty",
@@ -7519,7 +7519,7 @@ export const terms: Term[] = [
     "definition": "Content that is abusive, hateful, threatening, or otherwise harmful under a chosen definition.",
     "example": "“The team used toxicity while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "bias",
       "confidence",
@@ -7537,7 +7537,7 @@ export const terms: Term[] = [
     "definition": "A systematic tendency in model behavior, data, or evaluation that can produce skewed or unfair outcomes.",
     "example": "“The team used bias while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "fairness",
       "toxicity",
@@ -7555,7 +7555,7 @@ export const terms: Term[] = [
     "definition": "The study and design of systems intended to avoid unjustified performance or treatment disparities across people or groups.",
     "example": "“The team used fairness while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "demographic parity",
       "bias",
@@ -7573,7 +7573,7 @@ export const terms: Term[] = [
     "definition": "A fairness criterion requiring positive outcomes to occur at similar rates across demographic groups.",
     "example": "“The team used demographic parity while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "equalized odds",
       "fairness",
@@ -7591,7 +7591,7 @@ export const terms: Term[] = [
     "definition": "A fairness criterion requiring equal true-positive and false-positive rates across specified groups.",
     "example": "“The team used equalized odds while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "disparate impact",
       "demographic parity",
@@ -7607,7 +7607,7 @@ export const terms: Term[] = [
     "definition": "A pattern where a seemingly neutral process produces substantially different outcomes for protected or relevant groups.",
     "example": "“The team used disparate impact while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "privacy",
       "equalized odds",
@@ -7623,7 +7623,7 @@ export const terms: Term[] = [
     "definition": "Protection against inappropriate collection, exposure, inference, or use of personal or confidential information.",
     "example": "“The team used privacy while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "PII",
       "disparate impact",
@@ -7641,7 +7641,7 @@ export const terms: Term[] = [
     "definition": "Personally identifiable information; data that can identify or be linked to an individual.",
     "example": "“The team used PII while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "differential privacy",
       "privacy",
@@ -7659,7 +7659,7 @@ export const terms: Term[] = [
     "definition": "A mathematical privacy framework that limits how much the presence of one person's data can affect released results.",
     "example": "“The team used differential privacy while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "membership inference",
       "PII",
@@ -7677,7 +7677,7 @@ export const terms: Term[] = [
     "definition": "An attack that attempts to determine whether a particular example was included in a model's training data.",
     "example": "“The team used membership inference while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "model inversion",
       "differential privacy",
@@ -7693,7 +7693,7 @@ export const terms: Term[] = [
     "definition": "An attack that attempts to reconstruct sensitive attributes or training information from model access.",
     "example": "“The team used model inversion while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "model extraction",
       "membership inference",
@@ -7709,7 +7709,7 @@ export const terms: Term[] = [
     "definition": "Reconstructing or approximating a model's behavior or parameters through repeated queries or unauthorized copying.",
     "example": "“The team used model extraction while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "watermarking",
       "model inversion",
@@ -7727,7 +7727,7 @@ export const terms: Term[] = [
     "definition": "Embedding a detectable signal into generated content or model outputs to support identification or provenance.",
     "example": "“The team used watermarking while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "provenance",
       "model extraction",
@@ -7745,7 +7745,7 @@ export const terms: Term[] = [
     "definition": "Information describing where data or generated content came from and how it was produced.",
     "example": "“The team used provenance while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "synthetic media",
       "watermarking",
@@ -7760,10 +7760,10 @@ export const terms: Term[] = [
     "word": "synthetic media",
     "part": "noun",
     "pron": "",
-    "definition": "Media generated or substantially altered by algorithms, including text, images, audio, and video.",
+    "definition": "Media generated or substantially altered by algorithms, including text, images, audio and video.",
     "example": "“The team used synthetic media while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "deepfake",
       "provenance",
@@ -7781,7 +7781,7 @@ export const terms: Term[] = [
     "definition": "Synthetic or manipulated media that realistically depicts a person saying or doing something they did not actually say or do.",
     "example": "“The team used deepfake while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in safety, security & alignment and modern AI practice.",
-    "note": "Safety work balances capability with control, privacy, robustness, and human oversight.",
+    "note": "Safety work balances capability with control, privacy, robustness and human oversight.",
     "related": [
       "alignment",
       "synthetic media",
@@ -7830,7 +7830,7 @@ export const terms: Term[] = [
     "word": "mechanistic interpretability",
     "part": "noun",
     "pron": "",
-    "definition": "Studying model internals by identifying computational mechanisms, features, and circuits that produce behavior.",
+    "definition": "Studying model internals by identifying computational mechanisms, features and circuits that produce behavior.",
     "example": "“The team used mechanistic interpretability while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in interpretability and modern AI practice.",
     "note": "Interpretability methods provide evidence about model behavior; they are not perfect mind-reading.",
@@ -8143,7 +8143,7 @@ export const terms: Term[] = [
     "definition": "The field of enabling machines to analyze, understand, or generate visual information.",
     "example": "“The team used computer vision while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "image classification",
       "talking head",
@@ -8162,7 +8162,7 @@ export const terms: Term[] = [
     "definition": "Assigning one or more category labels to an image.",
     "example": "“The team used image classification while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "object detection",
       "computer vision",
@@ -8178,7 +8178,7 @@ export const terms: Term[] = [
     "definition": "Locating objects in an image and predicting their classes, usually with bounding boxes.",
     "example": "“The team used object detection while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "semantic segmentation",
       "image classification",
@@ -8194,7 +8194,7 @@ export const terms: Term[] = [
     "definition": "Assigning a semantic class label to every pixel in an image.",
     "example": "“The team used semantic segmentation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "instance segmentation",
       "object detection",
@@ -8210,7 +8210,7 @@ export const terms: Term[] = [
     "definition": "Separating individual object instances while also assigning pixel-level class labels.",
     "example": "“The team used instance segmentation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "panoptic segmentation",
       "semantic segmentation",
@@ -8226,7 +8226,7 @@ export const terms: Term[] = [
     "definition": "Combining semantic and instance segmentation into one complete scene labeling.",
     "example": "“The team used panoptic segmentation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "image captioning",
       "instance segmentation",
@@ -8242,7 +8242,7 @@ export const terms: Term[] = [
     "definition": "Generating a natural-language description of an image.",
     "example": "“The team used image captioning while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "visual question answering",
       "panoptic segmentation",
@@ -8258,7 +8258,7 @@ export const terms: Term[] = [
     "definition": "Answering natural-language questions about visual content.",
     "example": "“The team used visual question answering while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "optical character recognition",
       "image captioning",
@@ -8276,7 +8276,7 @@ export const terms: Term[] = [
     "definition": "Detecting and transcribing text from images or scanned documents.",
     "example": "“The team used optical character recognition while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "pose estimation",
       "visual question answering",
@@ -8294,7 +8294,7 @@ export const terms: Term[] = [
     "definition": "Predicting the positions of body joints, keypoints, or object landmarks in images or video.",
     "example": "“The team used pose estimation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "depth estimation",
       "optical character recognition",
@@ -8310,7 +8310,7 @@ export const terms: Term[] = [
     "definition": "Predicting distance from the camera for pixels or regions in an image.",
     "example": "“The team used depth estimation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "optical flow",
       "pose estimation",
@@ -8326,7 +8326,7 @@ export const terms: Term[] = [
     "definition": "Estimating apparent pixel motion between consecutive video frames.",
     "example": "“The team used optical flow while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "feature extractor",
       "depth estimation",
@@ -8342,7 +8342,7 @@ export const terms: Term[] = [
     "definition": "A model component that converts raw input into learned features for later prediction or retrieval.",
     "example": "“The team used feature extractor while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "CLIP",
       "optical flow",
@@ -8358,7 +8358,7 @@ export const terms: Term[] = [
     "definition": "A contrastive image-text model family that learns a shared representation space for images and text.",
     "example": "“The team used CLIP while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "contrastive learning",
       "feature extractor",
@@ -8376,7 +8376,7 @@ export const terms: Term[] = [
     "definition": "Learning representations by pulling related examples closer and pushing unrelated examples farther apart.",
     "example": "“The team used contrastive learning while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "image generation",
       "CLIP",
@@ -8392,7 +8392,7 @@ export const terms: Term[] = [
     "definition": "Producing new images from text, images, masks, layouts, or other conditioning inputs.",
     "example": "“The team used image generation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "text-to-image",
       "contrastive learning",
@@ -8408,7 +8408,7 @@ export const terms: Term[] = [
     "definition": "Generating an image conditioned primarily on a natural-language prompt.",
     "example": "“The team used text-to-image while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "image-to-image",
       "image generation",
@@ -8426,7 +8426,7 @@ export const terms: Term[] = [
     "definition": "Generating or transforming an image using another image as a major conditioning input.",
     "example": "“The team used image-to-image while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "inpainting",
       "text-to-image",
@@ -8444,7 +8444,7 @@ export const terms: Term[] = [
     "definition": "Generating content inside a masked or missing region of an image while preserving surrounding context.",
     "example": "“The team used inpainting while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "outpainting",
       "image-to-image",
@@ -8460,7 +8460,7 @@ export const terms: Term[] = [
     "definition": "Extending an image beyond its original borders by generating new surrounding content.",
     "example": "“The team used outpainting while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "super-resolution",
       "inpainting",
@@ -8476,7 +8476,7 @@ export const terms: Term[] = [
     "definition": "Generating a higher-resolution version of an image while attempting to preserve or plausibly reconstruct detail.",
     "example": "“The team used super-resolution while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "upscaling",
       "outpainting",
@@ -8494,7 +8494,7 @@ export const terms: Term[] = [
     "definition": "Increasing image resolution, often with learned reconstruction or enhancement methods.",
     "example": "“The team used upscaling while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "latent diffusion",
       "super-resolution",
@@ -8512,7 +8512,7 @@ export const terms: Term[] = [
     "definition": "A diffusion approach that performs much of the denoising process in a compressed latent space rather than directly in pixel space.",
     "example": "“The team used latent diffusion while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "denoising",
       "upscaling",
@@ -8530,7 +8530,7 @@ export const terms: Term[] = [
     "definition": "Predicting and removing noise from a corrupted signal; a central operation in diffusion generation.",
     "example": "“The team used denoising while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "noise schedule",
       "latent diffusion",
@@ -8548,7 +8548,7 @@ export const terms: Term[] = [
     "definition": "The rule controlling how noise levels change across diffusion timesteps.",
     "example": "“The team used noise schedule while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "sampler",
       "denoising",
@@ -8564,7 +8564,7 @@ export const terms: Term[] = [
     "definition": "The numerical procedure used to move from noise toward a generated sample in a diffusion model.",
     "example": "“The team used sampler while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "scheduler",
       "noise schedule",
@@ -8582,7 +8582,7 @@ export const terms: Term[] = [
     "definition": "A component that defines diffusion timesteps and update rules during denoising.",
     "example": "“The team used scheduler while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "classifier-free guidance",
       "sampler",
@@ -8600,7 +8600,7 @@ export const terms: Term[] = [
     "definition": "A diffusion guidance technique that strengthens conditioning by combining conditional and unconditional predictions.",
     "example": "“The team used classifier-free guidance while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "CFG scale",
       "scheduler",
@@ -8618,7 +8618,7 @@ export const terms: Term[] = [
     "definition": "A control specifying the strength of classifier-free guidance during diffusion generation.",
     "example": "“The team used CFG scale while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "negative prompt",
       "classifier-free guidance",
@@ -8636,7 +8636,7 @@ export const terms: Term[] = [
     "definition": "Text describing concepts a generation system should discourage from appearing in the output.",
     "example": "“The team used negative prompt while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "seed",
       "CFG scale",
@@ -8652,7 +8652,7 @@ export const terms: Term[] = [
     "definition": "A number used to initialize pseudorandom generation so a stochastic process can be reproduced more closely.",
     "example": "“The team used seed while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "prompt adherence",
       "negative prompt",
@@ -8670,7 +8670,7 @@ export const terms: Term[] = [
     "definition": "How closely generated media follows the semantic and compositional intent of the prompt.",
     "example": "“The team used prompt adherence while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "ControlNet",
       "seed",
@@ -8688,7 +8688,7 @@ export const terms: Term[] = [
     "definition": "A conditioning architecture that guides image generation using structural signals such as edges, depth, pose, or segmentation maps.",
     "example": "“The team used ControlNet while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "image editing model",
       "prompt adherence",
@@ -8706,7 +8706,7 @@ export const terms: Term[] = [
     "definition": "A generative model specialized for changing existing images from natural-language or structured edit instructions.",
     "example": "“The team used image editing model while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "video generation",
       "ControlNet",
@@ -8722,7 +8722,7 @@ export const terms: Term[] = [
     "definition": "Generating video frames, motion, scenes, or edits from text, images, video, or other conditioning.",
     "example": "“The team used video generation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "text-to-video",
       "image editing model",
@@ -8738,7 +8738,7 @@ export const terms: Term[] = [
     "definition": "Generating video conditioned primarily on text.",
     "example": "“The team used text-to-video while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "image-to-video",
       "video generation",
@@ -8756,7 +8756,7 @@ export const terms: Term[] = [
     "definition": "Generating motion and subsequent frames from a still image plus optional text guidance.",
     "example": "“The team used image-to-video while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "frame interpolation",
       "text-to-video",
@@ -8774,7 +8774,7 @@ export const terms: Term[] = [
     "definition": "Generating intermediate frames between existing video frames to increase frame rate or smooth motion.",
     "example": "“The team used frame interpolation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "lip sync",
       "image-to-video",
@@ -8790,7 +8790,7 @@ export const terms: Term[] = [
     "definition": "Aligning generated or edited mouth motion with a speech or audio track.",
     "example": "“The team used lip sync while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "talking head",
       "frame interpolation",
@@ -8808,7 +8808,7 @@ export const terms: Term[] = [
     "definition": "A generated or animated face-and-head video driven by audio, text, or another performance.",
     "example": "“The team used talking head while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in vision, image & video and modern AI practice.",
-    "note": "Visual AI spans recognition, understanding, editing, and generation rather than one single capability.",
+    "note": "Visual AI spans recognition, understanding, editing and generation rather than one single capability.",
     "related": [
       "computer vision",
       "lip sync",
@@ -8824,7 +8824,7 @@ export const terms: Term[] = [
     "definition": "Converting spoken audio into text.",
     "example": "“The team used automatic speech recognition while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "speech-to-text",
       "codec model",
@@ -8843,7 +8843,7 @@ export const terms: Term[] = [
     "definition": "Transcribing spoken language into written text.",
     "example": "“The team used speech-to-text while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "audio transcription",
       "automatic speech recognition",
@@ -8861,7 +8861,7 @@ export const terms: Term[] = [
     "definition": "Producing a text transcript from speech or other audio content.",
     "example": "“The team used audio transcription while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "text-to-speech",
       "speech-to-text",
@@ -8879,7 +8879,7 @@ export const terms: Term[] = [
     "definition": "Generating spoken audio from written text.",
     "example": "“The team used text-to-speech while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "speech synthesis",
       "audio transcription",
@@ -8897,7 +8897,7 @@ export const terms: Term[] = [
     "definition": "Artificial generation of spoken language.",
     "example": "“The team used speech synthesis while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "voice cloning",
       "text-to-speech",
@@ -8915,7 +8915,7 @@ export const terms: Term[] = [
     "definition": "Generating speech that imitates the vocal characteristics of a specific speaker from reference audio.",
     "example": "“The team used voice cloning while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "speaker identification",
       "speech synthesis",
@@ -8933,7 +8933,7 @@ export const terms: Term[] = [
     "definition": "Determining which known speaker produced a segment of audio.",
     "example": "“The team used speaker identification while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "speaker verification",
       "voice cloning",
@@ -8949,7 +8949,7 @@ export const terms: Term[] = [
     "definition": "Determining whether an audio sample matches a claimed speaker identity.",
     "example": "“The team used speaker verification while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "speaker diarization",
       "speaker identification",
@@ -8967,7 +8967,7 @@ export const terms: Term[] = [
     "definition": "Determining which speaker spoke when in a recording with multiple speakers.",
     "example": "“The team used speaker diarization while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "voice activity detection",
       "speaker verification",
@@ -8985,7 +8985,7 @@ export const terms: Term[] = [
     "definition": "Detecting time intervals that contain speech rather than silence or background noise.",
     "example": "“The team used voice activity detection while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "speech enhancement",
       "speaker diarization",
@@ -9003,7 +9003,7 @@ export const terms: Term[] = [
     "definition": "Reducing noise, reverberation, or distortion to make speech clearer.",
     "example": "“The team used speech enhancement while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "noise suppression",
       "voice activity detection",
@@ -9019,7 +9019,7 @@ export const terms: Term[] = [
     "definition": "Reducing unwanted background audio while preserving desired speech or sound.",
     "example": "“The team used noise suppression while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "audio generation",
       "speech enhancement",
@@ -9035,7 +9035,7 @@ export const terms: Term[] = [
     "definition": "Generating music, sound effects, speech, or other audio from text or conditioning signals.",
     "example": "“The team used audio generation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "text-to-audio",
       "noise suppression",
@@ -9051,7 +9051,7 @@ export const terms: Term[] = [
     "definition": "Generating general audio content from a text description.",
     "example": "“The team used text-to-audio while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "music generation",
       "audio generation",
@@ -9069,7 +9069,7 @@ export const terms: Term[] = [
     "definition": "Generating musical audio, symbolic music, or compositions using AI.",
     "example": "“The team used music generation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "source separation",
       "text-to-audio",
@@ -9085,7 +9085,7 @@ export const terms: Term[] = [
     "definition": "Separating a mixed audio recording into constituent sources such as vocals, drums, or speakers.",
     "example": "“The team used source separation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "speech translation",
       "music generation",
@@ -9103,7 +9103,7 @@ export const terms: Term[] = [
     "definition": "Translating spoken language into text or speech in another language.",
     "example": "“The team used speech translation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "phoneme",
       "source separation",
@@ -9119,7 +9119,7 @@ export const terms: Term[] = [
     "definition": "A basic unit of sound used to distinguish meaning in spoken language.",
     "example": "“The team used phoneme while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "mel spectrogram",
       "speech translation",
@@ -9135,7 +9135,7 @@ export const terms: Term[] = [
     "definition": "A time-frequency audio representation using a perceptual mel frequency scale.",
     "example": "“The team used mel spectrogram while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "codec model",
       "phoneme",
@@ -9153,7 +9153,7 @@ export const terms: Term[] = [
     "definition": "A neural model that compresses and reconstructs audio or video into discrete or continuous latent codes.",
     "example": "“The team used codec model while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in audio & speech and modern AI practice.",
-    "note": "Audio AI includes understanding, generation, identity, timing, and acoustic signal processing.",
+    "note": "Audio AI includes understanding, generation, identity, timing and acoustic signal processing.",
     "related": [
       "automatic speech recognition",
       "mel spectrogram",
@@ -9171,7 +9171,7 @@ export const terms: Term[] = [
     "definition": "A collection of examples used for training, validation, evaluation, retrieval, or analysis.",
     "example": "“The team used dataset while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "training set",
       "reproducibility",
@@ -9187,7 +9187,7 @@ export const terms: Term[] = [
     "definition": "The portion of a dataset used to fit model parameters.",
     "example": "“The team used training set while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "validation set",
       "dataset",
@@ -9205,7 +9205,7 @@ export const terms: Term[] = [
     "definition": "Data used during development to tune choices and monitor generalization without fitting final reported test metrics.",
     "example": "“The team used validation set while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "test set",
       "training set",
@@ -9223,7 +9223,7 @@ export const terms: Term[] = [
     "definition": "Data held out for final evaluation of model or system performance.",
     "example": "“The team used test set while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "label",
       "validation set",
@@ -9241,7 +9241,7 @@ export const terms: Term[] = [
     "definition": "A target value, category, annotation, or desired output associated with a training or evaluation example.",
     "example": "“The team used label while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "annotation",
       "test set",
@@ -9257,7 +9257,7 @@ export const terms: Term[] = [
     "definition": "Human- or machine-produced metadata, labels, spans, rankings, or notes attached to data.",
     "example": "“The team used annotation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "data cleaning",
       "label",
@@ -9273,7 +9273,7 @@ export const terms: Term[] = [
     "definition": "Detecting and correcting malformed, duplicated, low-quality, unsafe, or irrelevant data.",
     "example": "“The team used data cleaning while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "data preprocessing",
       "annotation",
@@ -9289,7 +9289,7 @@ export const terms: Term[] = [
     "definition": "Transforming raw data into a form suitable for training, evaluation, retrieval, or inference.",
     "example": "“The team used data preprocessing while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "data pipeline",
       "data cleaning",
@@ -9302,10 +9302,10 @@ export const terms: Term[] = [
     "word": "data pipeline",
     "part": "noun",
     "pron": "",
-    "definition": "Automated steps for collecting, transforming, validating, storing, and delivering data.",
+    "definition": "Automated steps for collecting, transforming, validating, storing and delivering data.",
     "example": "“The team used data pipeline while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "ETL",
       "data preprocessing",
@@ -9321,7 +9321,7 @@ export const terms: Term[] = [
     "definition": "Extract, transform, load; a common pattern for moving and preparing data.",
     "example": "“The team used ETL while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "data deduplication",
       "data pipeline",
@@ -9339,7 +9339,7 @@ export const terms: Term[] = [
     "definition": "Removing duplicate or near-duplicate examples from a dataset.",
     "example": "“The team used data deduplication while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "data filtering",
       "ETL",
@@ -9357,7 +9357,7 @@ export const terms: Term[] = [
     "definition": "Selecting or excluding examples according to quality, safety, language, domain, or other criteria.",
     "example": "“The team used data filtering while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "data mixture",
       "data deduplication",
@@ -9373,7 +9373,7 @@ export const terms: Term[] = [
     "definition": "The proportions and sources of different datasets combined for training.",
     "example": "“The team used data mixture while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "data quality",
       "data filtering",
@@ -9388,10 +9388,10 @@ export const terms: Term[] = [
     "word": "data quality",
     "part": "noun",
     "pron": "",
-    "definition": "The usefulness, correctness, coverage, cleanliness, and representativeness of data for a target purpose.",
+    "definition": "The usefulness, correctness, coverage, cleanliness and representativeness of data for a target purpose.",
     "example": "“The team used data quality while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "data curation",
       "data mixture",
@@ -9404,10 +9404,10 @@ export const terms: Term[] = [
     "word": "data curation",
     "part": "noun",
     "pron": "",
-    "definition": "Deliberately selecting, organizing, filtering, and documenting data for model development.",
+    "definition": "Deliberately selecting, organizing, filtering and documenting data for model development.",
     "example": "“The team used data curation while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "web-scale data",
       "data quality",
@@ -9423,7 +9423,7 @@ export const terms: Term[] = [
     "definition": "Very large datasets collected from broad internet sources, usually requiring significant filtering and deduplication.",
     "example": "“The team used web-scale data while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "synthetic data pipeline",
       "data curation",
@@ -9436,10 +9436,10 @@ export const terms: Term[] = [
     "word": "synthetic data pipeline",
     "part": "noun",
     "pron": "",
-    "definition": "A repeatable process for generating, filtering, validating, and using model-produced training data.",
+    "definition": "A repeatable process for generating, filtering, validating and using model-produced training data.",
     "example": "“The team used synthetic data pipeline while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "label noise",
       "web-scale data",
@@ -9455,7 +9455,7 @@ export const terms: Term[] = [
     "definition": "Incorrect, inconsistent, or ambiguous labels in supervised data.",
     "example": "“The team used label noise while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "class imbalance",
       "synthetic data pipeline",
@@ -9471,7 +9471,7 @@ export const terms: Term[] = [
     "definition": "A dataset condition where some target classes have far more examples than others.",
     "example": "“The team used class imbalance while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "data drift",
       "label noise",
@@ -9487,7 +9487,7 @@ export const terms: Term[] = [
     "definition": "Changes over time in input data distributions seen by a deployed system.",
     "example": "“The team used data drift while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "concept drift",
       "class imbalance",
@@ -9505,7 +9505,7 @@ export const terms: Term[] = [
     "definition": "Changes over time in the relationship between inputs and the target outcome.",
     "example": "“The team used concept drift while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "model drift",
       "data drift",
@@ -9523,7 +9523,7 @@ export const terms: Term[] = [
     "definition": "A broad operational term for degradation in deployed model behavior as data, users, or environments change.",
     "example": "“The team used model drift while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "MLOps",
       "concept drift",
@@ -9536,10 +9536,10 @@ export const terms: Term[] = [
     "word": "MLOps",
     "part": "noun",
     "pron": "",
-    "definition": "Practices and infrastructure for reliably training, deploying, monitoring, versioning, and operating machine-learning systems.",
+    "definition": "Practices and infrastructure for reliably training, deploying, monitoring, versioning and operating machine-learning systems.",
     "example": "“The team used MLOps while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "LLMOps",
       "model drift",
@@ -9554,10 +9554,10 @@ export const terms: Term[] = [
     "word": "LLMOps",
     "part": "noun",
     "pron": "",
-    "definition": "Operational practices specialized for building, evaluating, deploying, and monitoring language-model applications.",
+    "definition": "Operational practices specialized for building, evaluating, deploying and monitoring language-model applications.",
     "example": "“The team used LLMOps while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "model registry",
       "MLOps",
@@ -9572,10 +9572,10 @@ export const terms: Term[] = [
     "word": "model registry",
     "part": "noun",
     "pron": "",
-    "definition": "A system for tracking model versions, metadata, evaluation results, and deployment status.",
+    "definition": "A system for tracking model versions, metadata, evaluation results and deployment status.",
     "example": "“The team used model registry while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "experiment tracking",
       "LLMOps",
@@ -9588,10 +9588,10 @@ export const terms: Term[] = [
     "word": "experiment tracking",
     "part": "noun",
     "pron": "",
-    "definition": "Recording training runs, configurations, metrics, artifacts, and code versions so experiments can be compared and reproduced.",
+    "definition": "Recording training runs, configurations, metrics, artifacts and code versions so experiments can be compared and reproduced.",
     "example": "“The team used experiment tracking while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "model monitoring",
       "model registry",
@@ -9604,10 +9604,10 @@ export const terms: Term[] = [
     "word": "model monitoring",
     "part": "noun",
     "pron": "",
-    "definition": "Observing deployed model quality, latency, errors, drift, safety signals, and resource usage.",
+    "definition": "Observing deployed model quality, latency, errors, drift, safety signals and resource usage.",
     "example": "“The team used model monitoring while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "feature store",
       "experiment tracking",
@@ -9623,7 +9623,7 @@ export const terms: Term[] = [
     "definition": "A system for managing and serving reusable machine-learning features consistently across training and inference.",
     "example": "“The team used feature store while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "feature engineering",
       "model monitoring",
@@ -9639,7 +9639,7 @@ export const terms: Term[] = [
     "definition": "Designing input variables or transformations that make useful task information easier for a model to learn.",
     "example": "“The team used feature engineering while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "data lineage",
       "feature store",
@@ -9652,10 +9652,10 @@ export const terms: Term[] = [
     "word": "data lineage",
     "part": "noun",
     "pron": "",
-    "definition": "Records describing where data originated, how it was transformed, and where it was used.",
+    "definition": "Records describing where data originated, how it was transformed and where it was used.",
     "example": "“The team used data lineage while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "reproducibility",
       "feature engineering",
@@ -9670,10 +9670,10 @@ export const terms: Term[] = [
     "word": "reproducibility",
     "part": "noun",
     "pron": "",
-    "definition": "The ability to recreate an experiment or result from recorded data, code, configuration, seeds, and environment.",
+    "definition": "The ability to recreate an experiment or result from recorded data, code, configuration, seeds and environment.",
     "example": "“The team used reproducibility while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in data & mlops and modern AI practice.",
-    "note": "Data and operations determine whether a model can be trained, deployed, monitored, and improved reliably.",
+    "note": "Data and operations determine whether a model can be trained, deployed, monitored and improved reliably.",
     "related": [
       "dataset",
       "data lineage",
@@ -9776,7 +9776,7 @@ export const terms: Term[] = [
     "word": "VRAM",
     "part": "noun",
     "pron": "",
-    "definition": "Memory directly accessible to a graphics processor for weights, activations, and other computation.",
+    "definition": "Memory directly accessible to a graphics processor for weights, activations and other computation.",
     "example": "“The team used VRAM while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in hardware & systems and modern AI practice.",
     "note": "Systems terms describe the compute and memory machinery that makes modern AI practical.",
@@ -9994,7 +9994,7 @@ export const terms: Term[] = [
     "word": "collective communication",
     "part": "noun",
     "pron": "",
-    "definition": "Coordinated data movement operations such as all-reduce, all-gather, and reduce-scatter across distributed workers.",
+    "definition": "Coordinated data movement operations such as all-reduce, all-gather and reduce-scatter across distributed workers.",
     "example": "“The team used collective communication while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in hardware & systems and modern AI practice.",
     "note": "Systems terms describe the compute and memory machinery that makes modern AI practical.",
@@ -10166,7 +10166,7 @@ export const terms: Term[] = [
     "word": "datacenter",
     "part": "noun",
     "pron": "",
-    "definition": "A facility containing servers, networking, power, and cooling infrastructure used to run large-scale compute.",
+    "definition": "A facility containing servers, networking, power and cooling infrastructure used to run large-scale compute.",
     "example": "“The team used datacenter while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in hardware & systems and modern AI practice.",
     "note": "Systems terms describe the compute and memory machinery that makes modern AI practical.",
@@ -10218,7 +10218,7 @@ export const terms: Term[] = [
     "word": "agent-environment loop",
     "part": "noun",
     "pron": "",
-    "definition": "The reinforcement-learning cycle in which an agent observes state, takes an action, receives a reward, and moves to a new state.",
+    "definition": "The reinforcement-learning cycle in which an agent observes state, takes an action, receives a reward and moves to a new state.",
     "example": "“The team used agent-environment loop while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in reinforcement learning & classical ml and modern AI practice.",
     "note": "These concepts predate the current generative-AI wave and still underpin much of modern AI.",
@@ -10368,7 +10368,7 @@ export const terms: Term[] = [
     "word": "Markov decision process",
     "part": "noun",
     "pron": "",
-    "definition": "A formal model of sequential decision-making with states, actions, transition probabilities, and rewards.",
+    "definition": "A formal model of sequential decision-making with states, actions, transition probabilities and rewards.",
     "example": "“The team used Markov decision process while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in reinforcement learning & classical ml and modern AI practice.",
     "note": "These concepts predate the current generative-AI wave and still underpin much of modern AI.",
@@ -10725,7 +10725,7 @@ export const terms: Term[] = [
     "definition": "Describing a product or workflow designed around AI capabilities from the beginning rather than adding AI as a minor feature.",
     "example": "“The team used AI-native while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "AI-first",
       "latency budget",
@@ -10743,7 +10743,7 @@ export const terms: Term[] = [
     "definition": "A strategy or design approach that considers AI the primary mechanism for solving a product or workflow problem.",
     "example": "“The team used AI-first while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "copilot",
       "AI-native",
@@ -10761,7 +10761,7 @@ export const terms: Term[] = [
     "definition": "A product pattern where AI assists a human who remains actively responsible for direction and decisions.",
     "example": "“The team used copilot while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "AI assistant",
       "AI-first",
@@ -10779,7 +10779,7 @@ export const terms: Term[] = [
     "definition": "An AI system designed to help users through conversation, generation, retrieval, tools, or actions.",
     "example": "“The team used AI assistant while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "pair programmer",
       "copilot",
@@ -10797,7 +10797,7 @@ export const terms: Term[] = [
     "definition": "A coding partner role in which an AI helps write, review, explain, test, or debug software.",
     "example": "“The team used pair programmer while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "coding agent",
       "AI assistant",
@@ -10812,10 +10812,10 @@ export const terms: Term[] = [
     "word": "coding agent",
     "part": "noun",
     "pron": "",
-    "definition": "An agent specialized for reading code, editing files, running commands, testing, and iterating on software tasks.",
+    "definition": "An agent specialized for reading code, editing files, running commands, testing and iterating on software tasks.",
     "example": "“The team used coding agent while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "research agent",
       "pair programmer",
@@ -10830,10 +10830,10 @@ export const terms: Term[] = [
     "word": "research agent",
     "part": "noun",
     "pron": "",
-    "definition": "An agent specialized for searching, reading, comparing, synthesizing, and citing information.",
+    "definition": "An agent specialized for searching, reading, comparing, synthesizing and citing information.",
     "example": "“The team used research agent while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "voice agent",
       "coding agent",
@@ -10851,7 +10851,7 @@ export const terms: Term[] = [
     "definition": "An interactive agent that communicates primarily through spoken audio, often with real-time speech recognition and synthesis.",
     "example": "“The team used voice agent while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "multimodal agent",
       "research agent",
@@ -10867,7 +10867,7 @@ export const terms: Term[] = [
     "definition": "An agent that works across several modalities such as text, images, audio, files, or video.",
     "example": "“The team used multimodal agent while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "deep research",
       "voice agent",
@@ -10880,10 +10880,10 @@ export const terms: Term[] = [
     "word": "deep research",
     "part": "noun",
     "pron": "",
-    "definition": "A long-running agentic workflow that gathers, analyzes, and synthesizes information from many sources into a researched answer or report.",
+    "definition": "A long-running agentic workflow that gathers, analyzes and synthesizes information from many sources into a researched answer or report.",
     "example": "“The team used deep research while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "vibe coding",
       "multimodal agent",
@@ -10901,7 +10901,7 @@ export const terms: Term[] = [
     "definition": "A person who builds software primarily by directing AI coding systems in natural language and iterating on the results.",
     "example": "“The team used vibe coder while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "ship loop",
       "vibe coding",
@@ -10919,7 +10919,7 @@ export const terms: Term[] = [
     "definition": "Pejorative slang for low-effort, repetitive, or poorly curated content produced at scale with generative AI.",
     "example": "“The team used AI slop while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "AI spam",
       "prompt debt",
@@ -10937,7 +10937,7 @@ export const terms: Term[] = [
     "definition": "High-volume AI-generated content distributed with little relevance, quality control, or user value.",
     "example": "“The team used AI spam while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "model collapse",
       "AI slop",
@@ -10955,7 +10955,7 @@ export const terms: Term[] = [
     "definition": "Degradation that can occur when models are repeatedly trained on low-quality synthetic outputs or a narrowing data distribution.",
     "example": "“The team used model collapse while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "synthetic content",
       "AI spam",
@@ -10973,7 +10973,7 @@ export const terms: Term[] = [
     "definition": "Text, images, audio, video, or data generated partly or entirely by algorithms.",
     "example": "“The team used synthetic content while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "prompt-to-product",
       "model collapse",
@@ -10991,7 +10991,7 @@ export const terms: Term[] = [
     "definition": "An informal idea of moving from natural-language intent to a working software artifact through AI-assisted generation and iteration.",
     "example": "“The team used prompt-to-product while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "prototype-first",
       "synthetic content",
@@ -11007,7 +11007,7 @@ export const terms: Term[] = [
     "definition": "A workflow that uses fast AI generation to make a tangible prototype early, then improves correctness and architecture through feedback.",
     "example": "“The team used prototype-first while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "human review",
       "prompt-to-product",
@@ -11023,7 +11023,7 @@ export const terms: Term[] = [
     "definition": "A person inspecting or approving AI-generated content, decisions, or actions before they are accepted.",
     "example": "“The team used human review while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "verification",
       "prototype-first",
@@ -11041,7 +11041,7 @@ export const terms: Term[] = [
     "definition": "Checking AI output against tests, tools, sources, constraints, or independent evidence rather than trusting fluency alone.",
     "example": "“The team used verification while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "critique",
       "human review",
@@ -11059,7 +11059,7 @@ export const terms: Term[] = [
     "definition": "Structured analysis of weaknesses, errors, trade-offs, or improvement opportunities in an AI-generated result.",
     "example": "“The team used critique while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "taste",
       "verification",
@@ -11075,7 +11075,7 @@ export const terms: Term[] = [
     "definition": "Repeatedly refining prompts, code, data, tools, or outputs using feedback from prior attempts.",
     "example": "“The team used iteration while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "AI wrapper",
       "taste",
@@ -11091,7 +11091,7 @@ export const terms: Term[] = [
     "definition": "Informal, sometimes dismissive term for a product whose core value is largely a user experience or workflow built around an existing model API.",
     "example": "“The team used AI wrapper while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "model routing",
       "iteration",
@@ -11109,7 +11109,7 @@ export const terms: Term[] = [
     "definition": "Choosing among models dynamically according to task type, cost, latency, context length, or quality needs.",
     "example": "“The team used model routing while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "fallback model",
       "AI wrapper",
@@ -11127,7 +11127,7 @@ export const terms: Term[] = [
     "definition": "A secondary model used when the preferred model fails, is unavailable, or exceeds budget or latency constraints.",
     "example": "“The team used fallback model while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "local-first AI",
       "model routing",
@@ -11143,7 +11143,7 @@ export const terms: Term[] = [
     "definition": "A product approach that prioritizes on-device or user-controlled AI processing, often for privacy, latency, or offline use.",
     "example": "“The team used local-first AI while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "open weights",
       "fallback model",
@@ -11159,7 +11159,7 @@ export const terms: Term[] = [
     "definition": "A release model where trained model weights are publicly downloadable under specified license terms.",
     "example": "“The team used open weights while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "open-source AI",
       "local-first AI",
@@ -11177,7 +11177,7 @@ export const terms: Term[] = [
     "definition": "AI software released under open-source licenses; model weights, data, or training code may have separate licensing conditions.",
     "example": "“The team used open-source AI while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "closed model",
       "open weights",
@@ -11195,7 +11195,7 @@ export const terms: Term[] = [
     "definition": "A model whose weights are not publicly distributed and are typically accessed through a hosted product or API.",
     "example": "“The team used closed model while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "model API",
       "open-source AI",
@@ -11213,7 +11213,7 @@ export const terms: Term[] = [
     "definition": "A hosted interface for sending model inputs and receiving generated outputs or tool events.",
     "example": "“The team used model API while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "rate limit",
       "closed model",
@@ -11231,7 +11231,7 @@ export const terms: Term[] = [
     "definition": "A service constraint limiting how many requests, tokens, or operations can be used within a time window.",
     "example": "“The team used rate limit while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "usage tier",
       "model API",
@@ -11249,7 +11249,7 @@ export const terms: Term[] = [
     "definition": "A service level that controls available quotas, features, or throughput according to account status or spend.",
     "example": "“The team used usage tier while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "token budget",
       "rate limit",
@@ -11262,10 +11262,10 @@ export const terms: Term[] = [
     "word": "token budget",
     "part": "noun",
     "pron": "",
-    "definition": "A limit or planned allocation for input, output, and sometimes reasoning tokens within a workflow.",
+    "definition": "A limit or planned allocation for input, output and sometimes reasoning tokens within a workflow.",
     "example": "“The team used token budget while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "cost per token",
       "usage tier",
@@ -11283,7 +11283,7 @@ export const terms: Term[] = [
     "definition": "A pricing model where model usage cost is based partly on the number of processed input or output tokens.",
     "example": "“The team used cost per token while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "latency budget",
       "token budget",
@@ -11299,7 +11299,7 @@ export const terms: Term[] = [
     "definition": "The maximum response time a product can tolerate before user experience or workflow performance degrades.",
     "example": "“The team used latency budget while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in ai product, coding & culture and modern AI practice.",
-    "note": "These terms describe how people build with, talk about, and organize work around modern AI systems.",
+    "note": "These terms describe how people build with, talk about and organize work around modern AI systems.",
     "related": [
       "AI-native",
       "cost per token",
@@ -11312,10 +11312,10 @@ export const terms: Term[] = [
     "word": "responsible AI",
     "part": "noun",
     "pron": "",
-    "definition": "Practices for developing and using AI with attention to safety, fairness, privacy, transparency, accountability, and social impact.",
+    "definition": "Practices for developing and using AI with attention to safety, fairness, privacy, transparency, accountability and social impact.",
     "example": "“The team used responsible AI while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "AI governance",
       "human oversight",
@@ -11330,10 +11330,10 @@ export const terms: Term[] = [
     "word": "AI governance",
     "part": "noun",
     "pron": "",
-    "definition": "Policies, processes, roles, and controls used to manage AI development and use inside an organization.",
+    "definition": "Policies, processes, roles and controls used to manage AI development and use inside an organization.",
     "example": "“The team used AI governance while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "model governance",
       "responsible AI",
@@ -11348,10 +11348,10 @@ export const terms: Term[] = [
     "word": "model governance",
     "part": "noun",
     "pron": "",
-    "definition": "Processes for approving, documenting, monitoring, and controlling models throughout their lifecycle.",
+    "definition": "Processes for approving, documenting, monitoring and controlling models throughout their lifecycle.",
     "example": "“The team used model governance while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "risk assessment",
       "AI governance",
@@ -11364,10 +11364,10 @@ export const terms: Term[] = [
     "word": "risk assessment",
     "part": "noun",
     "pron": "",
-    "definition": "A structured process for identifying possible harms, estimating likelihood and severity, and planning mitigations.",
+    "definition": "A structured process for identifying possible harms, estimating likelihood and severity and planning mitigations.",
     "example": "“The team used risk assessment while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "impact assessment",
       "model governance",
@@ -11385,7 +11385,7 @@ export const terms: Term[] = [
     "definition": "A documented evaluation of how an AI system may affect people, organizations, rights, or environments.",
     "example": "“The team used impact assessment while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "algorithmic audit",
       "risk assessment",
@@ -11400,10 +11400,10 @@ export const terms: Term[] = [
     "word": "algorithmic audit",
     "part": "noun",
     "pron": "",
-    "definition": "A systematic review of an automated system's data, design, behavior, controls, and impacts.",
+    "definition": "A systematic review of an automated system's data, design, behavior, controls and impacts.",
     "example": "“The team used algorithmic audit while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "compliance",
       "impact assessment",
@@ -11418,10 +11418,10 @@ export const terms: Term[] = [
     "word": "compliance",
     "part": "noun",
     "pron": "",
-    "definition": "Meeting applicable laws, regulations, contractual requirements, policies, and standards.",
+    "definition": "Meeting applicable laws, regulations, contractual requirements, policies and standards.",
     "example": "“The team used compliance while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "accountability",
       "algorithmic audit",
@@ -11436,10 +11436,10 @@ export const terms: Term[] = [
     "word": "accountability",
     "part": "noun",
     "pron": "",
-    "definition": "Clear responsibility for decisions, controls, outcomes, and remediation associated with an AI system.",
+    "definition": "Clear responsibility for decisions, controls, outcomes and remediation associated with an AI system.",
     "example": "“The team used accountability while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "transparency",
       "compliance",
@@ -11455,7 +11455,7 @@ export const terms: Term[] = [
     "definition": "Providing understandable information about how an AI system is built, used, limited, or governed.",
     "example": "“The team used transparency while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "disclosure",
       "accountability",
@@ -11471,7 +11471,7 @@ export const terms: Term[] = [
     "definition": "Informing users when AI is being used or when content is generated or materially altered by AI.",
     "example": "“The team used disclosure while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "model card",
       "transparency",
@@ -11484,10 +11484,10 @@ export const terms: Term[] = [
     "word": "model card",
     "part": "noun",
     "pron": "",
-    "definition": "A document describing a model's intended use, evaluation, limitations, risks, and other relevant facts.",
+    "definition": "A document describing a model's intended use, evaluation, limitations, risks and other relevant facts.",
     "example": "“The team used model card while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "system card",
       "disclosure",
@@ -11500,10 +11500,10 @@ export const terms: Term[] = [
     "word": "system card",
     "part": "noun",
     "pron": "",
-    "definition": "A document describing a deployed AI system's capabilities, evaluations, safeguards, limitations, and risk considerations.",
+    "definition": "A document describing a deployed AI system's capabilities, evaluations, safeguards, limitations and risk considerations.",
     "example": "“The team used system card while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "dataset card",
       "model card",
@@ -11516,10 +11516,10 @@ export const terms: Term[] = [
     "word": "dataset card",
     "part": "noun",
     "pron": "",
-    "definition": "Documentation describing a dataset's composition, collection, intended use, limitations, and risks.",
+    "definition": "Documentation describing a dataset's composition, collection, intended use, limitations and risks.",
     "example": "“The team used dataset card while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "datasheet for datasets",
       "system card",
@@ -11532,10 +11532,10 @@ export const terms: Term[] = [
     "word": "datasheet for datasets",
     "part": "noun",
     "pron": "",
-    "definition": "A structured documentation practice for describing dataset motivation, composition, collection, preprocessing, and recommended uses.",
+    "definition": "A structured documentation practice for describing dataset motivation, composition, collection, preprocessing and recommended uses.",
     "example": "“The team used datasheet for datasets while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "acceptable use policy",
       "dataset card",
@@ -11553,7 +11553,7 @@ export const terms: Term[] = [
     "definition": "Rules describing permitted and prohibited uses of an AI product or service.",
     "example": "“The team used acceptable use policy while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "incident",
       "datasheet for datasets",
@@ -11571,7 +11571,7 @@ export const terms: Term[] = [
     "definition": "An event where an AI system causes, contributes to, or exposes a significant failure, harm, policy breach, or security issue.",
     "example": "“The team used incident while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "incident response",
       "acceptable use policy",
@@ -11586,10 +11586,10 @@ export const terms: Term[] = [
     "word": "incident response",
     "part": "noun",
     "pron": "",
-    "definition": "Processes for detecting, containing, investigating, communicating, and remediating AI-related incidents.",
+    "definition": "Processes for detecting, containing, investigating, communicating and remediating AI-related incidents.",
     "example": "“The team used incident response while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "model inventory",
       "incident",
@@ -11602,10 +11602,10 @@ export const terms: Term[] = [
     "word": "model inventory",
     "part": "noun",
     "pron": "",
-    "definition": "An organizational record of models, owners, use cases, risk levels, versions, and deployment status.",
+    "definition": "An organizational record of models, owners, use cases, risk levels, versions and deployment status.",
     "example": "“The team used model inventory while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "model lifecycle",
       "incident response",
@@ -11618,10 +11618,10 @@ export const terms: Term[] = [
     "word": "model lifecycle",
     "part": "noun",
     "pron": "",
-    "definition": "The stages through which a model moves from data and development to validation, deployment, monitoring, and retirement.",
+    "definition": "The stages through which a model moves from data and development to validation, deployment, monitoring and retirement.",
     "example": "“The team used model lifecycle while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "change management",
       "model inventory",
@@ -11634,10 +11634,10 @@ export const terms: Term[] = [
     "word": "change management",
     "part": "noun",
     "pron": "",
-    "definition": "Controlled processes for reviewing, testing, approving, and documenting changes to AI systems.",
+    "definition": "Controlled processes for reviewing, testing, approving and documenting changes to AI systems.",
     "example": "“The team used change management while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "audit trail",
       "model lifecycle",
@@ -11650,10 +11650,10 @@ export const terms: Term[] = [
     "word": "audit trail",
     "part": "noun",
     "pron": "",
-    "definition": "A record of important actions, versions, approvals, data access, and system events that supports accountability and investigation.",
+    "definition": "A record of important actions, versions, approvals, data access and system events that supports accountability and investigation.",
     "example": "“The team used audit trail while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "traceability",
       "change management",
@@ -11666,10 +11666,10 @@ export const terms: Term[] = [
     "word": "traceability",
     "part": "noun",
     "pron": "",
-    "definition": "The ability to connect outputs and decisions back to models, data, prompts, tools, versions, and responsible owners.",
+    "definition": "The ability to connect outputs and decisions back to models, data, prompts, tools, versions and responsible owners.",
     "example": "“The team used traceability while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "assurance",
       "audit trail",
@@ -11685,7 +11685,7 @@ export const terms: Term[] = [
     "definition": "Evidence-building activities intended to justify confidence that an AI system meets specified requirements.",
     "example": "“The team used assurance while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "safety case",
       "traceability",
@@ -11703,7 +11703,7 @@ export const terms: Term[] = [
     "definition": "A structured argument, supported by evidence, that a system is acceptably safe for a defined context.",
     "example": "“The team used safety case while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "redress",
       "assurance",
@@ -11721,7 +11721,7 @@ export const terms: Term[] = [
     "definition": "Mechanisms that let affected people challenge, correct, appeal, or seek remedy for AI-driven outcomes.",
     "example": "“The team used redress while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "human oversight",
       "safety case",
@@ -11737,7 +11737,7 @@ export const terms: Term[] = [
     "definition": "Processes that keep people meaningfully able to supervise, override, review, or stop AI systems.",
     "example": "“The team used human oversight while designing, building, or evaluating the AI system.”",
     "origin": "A standard term in governance & responsible ai and modern AI practice.",
-    "note": "Governance terms concern accountability, evidence, process, and acceptable use around AI systems.",
+    "note": "Governance terms concern accountability, evidence, process and acceptable use around AI systems.",
     "related": [
       "responsible AI",
       "redress",
@@ -12216,7 +12216,7 @@ export const terms: Term[] = [
     "word": "AI agent",
     "part": "noun",
     "pron": "",
-    "definition": "An AI system that can pursue a goal across multiple steps by reasoning, using tools, and updating state.",
+    "definition": "An AI system that can pursue a goal across multiple steps by reasoning, using tools and updating state.",
     "example": "“The team used AI agent while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in agents, tools & mcp and AI practice.",
     "note": "This is a foundational term worth distinguishing from nearby concepts in the same part of AI.",
@@ -12878,7 +12878,7 @@ export const terms: Term[] = [
     "word": "robotics",
     "part": "noun",
     "pron": "",
-    "definition": "The field of designing machines that sense, plan, and act in the physical world.",
+    "definition": "The field of designing machines that sense, plan and act in the physical world.",
     "example": "“The team used robotics while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in embodied ai & robotics and AI practice.",
     "note": "Embodied systems must connect perception and reasoning to actions that obey physical dynamics and safety constraints.",
@@ -13087,7 +13087,7 @@ export const terms: Term[] = [
     "word": "trajectory optimization",
     "part": "noun",
     "pron": "",
-    "definition": "Optimizing a robot or agent trajectory according to dynamics, constraints, and an objective.",
+    "definition": "Optimizing a robot or agent trajectory according to dynamics, constraints and an objective.",
     "example": "“The team used trajectory optimization while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in embodied ai & robotics and AI practice.",
     "note": "Embodied systems must connect perception and reasoning to actions that obey physical dynamics and safety constraints.",
@@ -13361,7 +13361,7 @@ export const terms: Term[] = [
     "word": "autonomous system",
     "part": "noun",
     "pron": "",
-    "definition": "A system capable of sensing, deciding, and acting with limited direct human control.",
+    "definition": "A system capable of sensing, deciding and acting with limited direct human control.",
     "example": "“The team used autonomous system while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in embodied ai & robotics and AI practice.",
     "note": "Embodied systems must connect perception and reasoning to actions that obey physical dynamics and safety constraints.",
@@ -13377,7 +13377,7 @@ export const terms: Term[] = [
     "word": "autonomous vehicle",
     "part": "noun",
     "pron": "",
-    "definition": "A vehicle that uses sensors, perception, planning, and control systems to drive with reduced human input.",
+    "definition": "A vehicle that uses sensors, perception, planning and control systems to drive with reduced human input.",
     "example": "“The team used autonomous vehicle while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in embodied ai & robotics and AI practice.",
     "note": "Embodied systems must connect perception and reasoning to actions that obey physical dynamics and safety constraints.",
@@ -13478,7 +13478,7 @@ export const terms: Term[] = [
     "definition": "Recovering three-dimensional scene geometry or structure from images, video, depth, or other sensor data.",
     "example": "“The team used 3D reconstruction while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13494,7 +13494,7 @@ export const terms: Term[] = [
     "definition": "Generating how a scene would look from a camera viewpoint not present in the original observations.",
     "example": "“The team used novel view synthesis while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13510,7 +13510,7 @@ export const terms: Term[] = [
     "definition": "A set of 3D points representing surfaces or geometry, often produced by depth sensors or reconstruction pipelines.",
     "example": "“The team used point cloud while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13526,7 +13526,7 @@ export const terms: Term[] = [
     "definition": "A rectangular region used to represent the location and extent of an object in an image or video.",
     "example": "“The team used bounding box while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13544,7 +13544,7 @@ export const terms: Term[] = [
     "definition": "Predicting important landmark coordinates such as joints, corners, or facial points.",
     "example": "“The team used keypoint detection while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13562,7 +13562,7 @@ export const terms: Term[] = [
     "definition": "Maintaining the identity and location of objects, people, or features across video frames.",
     "example": "“The team used tracking while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13580,7 +13580,7 @@ export const terms: Term[] = [
     "definition": "Tracking several object identities simultaneously across video frames.",
     "example": "“The team used multi-object tracking while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13598,7 +13598,7 @@ export const terms: Term[] = [
     "definition": "Predicting apparent motion vectors between image frames.",
     "example": "“The team used optical flow estimation while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13614,7 +13614,7 @@ export const terms: Term[] = [
     "definition": "Linking language phrases to specific regions, objects, or coordinates in visual content.",
     "example": "“The team used visual grounding while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13632,7 +13632,7 @@ export const terms: Term[] = [
     "definition": "Retrieving images from text queries or text from image queries using shared multimodal representations.",
     "example": "“The team used image-text retrieval while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13650,7 +13650,7 @@ export const terms: Term[] = [
     "definition": "Analyzing actions, events, objects, temporal structure, or meaning in video.",
     "example": "“The team used video understanding while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13666,7 +13666,7 @@ export const terms: Term[] = [
     "definition": "Classifying actions or activities shown in video or motion data.",
     "example": "“The team used action recognition while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13682,7 +13682,7 @@ export const terms: Term[] = [
     "definition": "Locating the time interval in a video or sequence that corresponds to a language description or event.",
     "example": "“The team used temporal grounding while designing, building, or evaluating the AI system.”",
     "origin": "A widely used term in vision, image & video and AI practice.",
-    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing, and generation.",
+    "note": "Visual AI spans recognition, grounding, geometry, temporal understanding, editing and generation.",
     "related": [
       "computer vision",
       "vision-language model",
@@ -13731,10 +13731,10 @@ export const terms: Term[] = [
     "word": "YOLO",
     "part": "noun",
     "pron": "/ˈyō-lō/",
-    "definition": "An opt-in high-autonomy mode in an agentic coding interface that lets a coding agent carry out a delegated task without pausing for per-step user approval, including reading and editing files, running commands, invoking tools, and iterating on results.",
+    "definition": "An opt-in high-autonomy mode in an agentic coding interface that lets a coding agent carry out a delegated task without pausing for per-step user approval, including reading and editing files, running commands, invoking tools and iterating on results.",
     "example": "“I handed the issue to the coding agent in YOLO mode, then reviewed the diff and test results when it finished.”",
     "origin": "Developer slang from “You Only Live Once,” repurposed by agentic coding tools for auto-approval and full-autonomy execution settings.",
-    "note": "YOLO changes the approval policy, not the agent’s judgment or correctness; depending on the tool, it may still stop for missing credentials, safety restrictions, or unresolved ambiguity. Use a trusted or isolated workspace and review the diff, commands, tests, and generated artifacts afterward; in computer vision, YOLO can also mean “You Only Look Once.”",
+    "note": "YOLO changes the approval policy, not the agent’s judgment or correctness; depending on the tool, it may still stop for missing credentials, safety restrictions, or unresolved ambiguity. Use a trusted or isolated workspace and review the diff, commands, tests and generated artifacts afterward; in computer vision, YOLO can also mean “You Only Look Once.”",
     "related": [
       "agentic",
       "coding agent",
@@ -13757,8 +13757,8 @@ export const terms: Term[] = [
 export const specialModes: SpecialModes = {
   'vibe coding': {
     plain: 'You describe what you want, let an AI write much of the code, then steer by testing and judging the result.',
-    technical: 'An AI-assisted development workflow in which natural-language intent drives code generation while a human closes the loop through inspection, testing, and iterative correction.',
-    vibe: 'You say “make it feel like this,” the model writes a lot of the code, and your job becomes taste, direction, and knowing when the vibes are lying.'
+    technical: 'An AI-assisted development workflow in which natural-language intent drives code generation while a human closes the loop through inspection, testing and iterative correction.',
+    vibe: 'You say “make it feel like this,” the model writes a lot of the code and your job becomes taste, direction and knowing when the vibes are lying.'
   },
   'hallucination': {
     plain: 'The AI gives you an answer that sounds right but is actually made up or wrong.',
@@ -13772,13 +13772,13 @@ export const specialModes: SpecialModes = {
   },
   'agentic': {
     plain: 'The AI does several steps and takes actions instead of only answering once.',
-    technical: 'A goal-directed system pattern in which a model selects intermediate actions, invokes tools, observes results, and continues across a multi-step loop.',
+    technical: 'A goal-directed system pattern in which a model selects intermediate actions, invokes tools, observes results and continues across a multi-step loop.',
     vibe: 'It stops being a chatbot and starts touching things.'
   },
   'YOLO': {
-    plain: 'You give the coding agent a task, and it keeps working—editing files, running commands, and checking its work—without stopping to ask about every action.',
-    technical: 'An execution and approval policy that automatically permits an agent’s tool calls and coding actions after the initial task handoff, removing interactive confirmation gates while leaving the agent’s capabilities, workspace boundaries, and correctness unchanged.',
-    vibe: 'Hand it the ticket, leave it the keyboard, and come back to inspect the diff—preferably in a disposable workspace.'
+    plain: 'You give the coding agent a task and it keeps working - editing files, running commands and checking its work - without stopping to ask about every action.',
+    technical: 'An execution and approval policy that automatically permits an agent’s tool calls and coding actions after the initial task handoff, removing interactive confirmation gates while leaving the agent’s capabilities, workspace boundaries and correctness unchanged.',
+    vibe: 'Hand it the ticket, leave it the keyboard and come back to inspect the diff - preferably in a disposable workspace.'
   },
   'context window': {
     plain: 'How much information the model can keep in front of it at one time.',
@@ -13832,19 +13832,19 @@ export const timeline: TimelineItem[] = [
   {
     year: '2022',
     title: 'Chat becomes mainstream',
-    body: 'Prompt, token, hallucination, and alignment move from research language into everyday product language.',
+    body: 'Prompt, token, hallucination and alignment move from research language into everyday product language.',
     term: 'prompt'
   },
   {
     year: '2023',
     title: 'Tool use',
-    body: 'Function calling, multimodal systems, and agent-like workflows become practical product patterns.',
+    body: 'Function calling, multimodal systems and agent-like workflows become practical product patterns.',
     term: 'tool calling'
   },
   {
     year: '2024',
     title: 'Grounded agents',
-    body: 'Retrieval, evals, workflows, and tools increasingly get designed as one system.',
+    body: 'Retrieval, evals, workflows and tools increasingly get designed as one system.',
     term: 'grounding'
   },
   {

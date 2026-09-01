@@ -17,8 +17,8 @@ function fallbackExplanations(term: Term): Record<ExplanationMode, string> {
       ? `A simple way to think about ${term.word}: ${example}`
       : `In everyday language, ${term.word} is the idea described by this entry.`,
     technical: related
-      ? `Technical lens — ${term.word}: ${term.definition} It is commonly discussed alongside ${related}.`
-      : `Technical lens — ${term.word}: ${term.definition}`,
+      ? `Technical lens - ${term.word}: ${term.definition} It is commonly discussed alongside ${related}.`
+      : `Technical lens - ${term.word}: ${term.definition}`,
     vibe: note && example
       ? `${term.word} in the build: ${note} Example: ${example}`
       : `${term.word} in the build: ${note || example || 'Use the term precisely and verify it in context.'}`
