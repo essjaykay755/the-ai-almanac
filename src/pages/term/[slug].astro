@@ -25,4 +25,5 @@ const { term } = Astro.props as Props;
   imagePath={getTermOgImagePath(term)}
   imageAlt={`${term.word} definition card from The AI Almanac`}
   ogType="article"
+  translationKey={term.word}
 />
