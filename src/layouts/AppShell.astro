@@ -70,6 +70,12 @@ const imageUrl = Astro.site
       href="https://fonts.googleapis.com/css2?family=Baskervville:ital@0;1&family=Cinzel:wght@500;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    <style is:global>
+      #root > astro-island {
+        display: contents;
+      }
+    </style>
   </head>
   <body>
     <script is:inline define:vars={{ rootPath, aboutPath }}>
@@ -86,7 +92,9 @@ const imageUrl = Astro.site
       }
     </script>
 
-    <ClientApp client:only="react" />
+    <div id="root">
+      <ClientApp client:only="react" />
+    </div>
 
     <script>
       import '../client/navigation';
