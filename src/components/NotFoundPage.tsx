@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Cover } from './Cover';
 import { MobileBar } from './MobileBar';
 import { Tabs } from './Tabs';
-import catalogPhotoUrl from '../assets/404-catalog-photo.webp';
+import catalogPhotoUrl from '../assets/404-catalog-photo.webp?url';
 import { getPublicPath } from '../utils/ogImage';
 
 const TOTAL_TERMS = 791;
