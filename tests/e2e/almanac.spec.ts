@@ -191,9 +191,9 @@ test.describe('desktop regression flows', () => {
     await expect(hindi).toHaveAttribute('data-language-remembered', 'true');
 
     await automatic.click();
+    await expect(page).toHaveURL(/\/term\/artificial-intelligence\/(?:#.*)?$/);
     await expect.poll(() => page.evaluate(() => localStorage.getItem('aiAlmanacLanguage'))).toBeNull();
     await expect.poll(() => page.evaluate(() => localStorage.getItem('aiAlmanacLanguageSuggestionDismissed'))).toBeNull();
-    await expect(page).toHaveURL(/\/term\/artificial-intelligence\/(?:#.*)?$/);
 
     await page.locator('.site-language-switcher summary').click();
     await expect(page.locator('[data-language-auto]')).toHaveAttribute('aria-current', 'true');
@@ -378,6 +378,13 @@ test.describe('mobile navigation', () => {
 
   test('clears a restored outer paper scroll offset on page restore', async ({ page }) => {
     await page.goto('/');
+    await expect(page.locator('#entry h1.word')).toBeVisible();
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise<void>((resolve) => requestAnimationFrame(() => {
+        requestAnimationFrame(() => resolve());
+      }));
+    });
 
     const inner = page.locator('.page-inner');
     await inner.evaluate((node) => {
