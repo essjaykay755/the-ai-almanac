@@ -115,7 +115,7 @@ const languageLinks = allLocaleCodes.map((code) => ({
     <main class="locale-shell">
       <section class="locale-page">
         <header class="locale-topbar">
-          <a class="locale-brand" href={withBase(locale === 'en' ? '' : `${locale}/`)}>The AI Almanac</a>
+          <a class="locale-brand" href={withBase(`${locale}/`)}>The AI Almanac</a>
           <details class="locale-language">
             <summary aria-label={meta.languageLabel}>{meta.shortName}</summary>
             <nav class="locale-language-menu" aria-label={meta.languageLabel}>
@@ -125,6 +125,8 @@ const languageLinks = allLocaleCodes.map((code) => ({
                   hreflang={link.meta.htmlLang}
                   lang={link.meta.htmlLang}
                   aria-current={link.code === locale ? 'true' : undefined}
+                  data-language-choice
+                  data-language-code={link.code}
                 >
                   <span>{link.meta.nativeName}</span>
                   <span>{link.meta.shortName}</span>
@@ -138,5 +140,21 @@ const languageLinks = allLocaleCodes.map((code) => ({
         </div>
       </section>
     </main>
+
+    <script>
+      const preferenceKey = 'aiAlmanacLanguage';
+      const dismissedKey = 'aiAlmanacLanguageSuggestionDismissed';
+
+      for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-language-choice]')) {
+        link.addEventListener('click', () => {
+          const code = link.dataset.languageCode;
+          if (!code) return;
+          try {
+            localStorage.setItem(preferenceKey, code);
+            localStorage.removeItem(dismissedKey);
+          } catch {}
+        });
+      }
+    </script>
   </body>
 </html>
