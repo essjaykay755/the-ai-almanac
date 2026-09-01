@@ -1,5 +1,7 @@
 import { StrictMode, Suspense } from 'react';
 import App from '../App';
+import { isStrictAlmanacAppPath } from '../i18n/appPath';
+import { NotFoundPage } from './NotFoundPage';
 
 const appLoader = (
   <div className="app-loading" role="status" aria-live="polite" aria-label="Loading The AI Almanac">
@@ -11,10 +13,15 @@ const appLoader = (
 );
 
 export function ClientApp() {
+  const pathname = typeof window === 'undefined' ? '/' : window.location.pathname;
+  const content = isStrictAlmanacAppPath(pathname, import.meta.env.BASE_URL || '/')
+    ? <App />
+    : <NotFoundPage />;
+
   return (
     <StrictMode>
       <Suspense fallback={appLoader}>
-        <App />
+        {content}
       </Suspense>
     </StrictMode>
   );

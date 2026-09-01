@@ -53,10 +53,9 @@ export function resolveAutoLocale(country: string | null, browserLanguages: read
   // India stays English unless the browser itself prefers Hindi.
   if (region === 'IN') return browserLocale === 'hi' ? 'hi' : null;
 
-  // Browser language is the primary signal. Country is a fallback only.
-  if (browserLocale) return browserLocale;
+  // Country is the primary automatic signal. Browser language is the fallback.
   if (region && countryDefaultLocale[region]) return countryDefaultLocale[region] || null;
-  return null;
+  return browserLocale;
 }
 
 function getBrowserLanguages(): string[] {
@@ -69,11 +68,6 @@ function getLanguageLink(locale: string): HTMLAnchorElement | null {
   return document.querySelector<HTMLAnchorElement>(`[data-language-code="${locale}"]`);
 }
 
-function getLanguageName(locale: AutoLocale): string {
-  const link = getLanguageLink(locale);
-  return link?.querySelector('span')?.textContent?.trim() || locale.toUpperCase();
-}
-
 function rememberLanguageChoice(locale: string): void {
   try {
     localStorage.setItem(PREFERENCE_KEY, locale);
@@ -83,20 +77,6 @@ function rememberLanguageChoice(locale: string): void {
 function getSavedLanguage(): string | null {
   try {
     return localStorage.getItem(PREFERENCE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function rememberDismissedLocale(locale: AutoLocale): void {
-  try {
-    localStorage.setItem(DISMISSAL_KEY, locale);
-  } catch {}
-}
-
-function getDismissedLocale(): string | null {
-  try {
-    return localStorage.getItem(DISMISSAL_KEY);
   } catch {
     return null;
   }
@@ -132,6 +112,17 @@ function syncLanguagePreferenceState(): void {
   });
 }
 
+function closeLanguageMenus(): void {
+  document.querySelectorAll('details.site-language-switcher').forEach((details) => {
+    details.removeAttribute('open');
+  });
+}
+
+function navigateToLocale(locale: AutoLocale): void {
+  const link = getLanguageLink(locale);
+  if (link) window.location.assign(link.href);
+}
+
 let controlsBound = false;
 
 function bindLanguageControls(): void {
@@ -155,27 +146,31 @@ function bindLanguageControls(): void {
 
     clearLanguagePreferenceMemory();
     syncLanguagePreferenceState();
-    document.querySelector<HTMLElement>('[data-language-suggestion]')?.remove();
-    document.querySelectorAll('details.site-language-switcher').forEach((details) => {
-      details.removeAttribute('open');
-    });
+    closeLanguageMenus();
 
-    if (document.documentElement.lang === 'en') {
-      void initializeLanguagePreference();
+    if (document.documentElement.lang !== 'en') {
+      const englishLink = getLanguageLink('en');
+      if (englishLink) window.location.assign(englishLink.href);
+      return;
     }
+
+    void initializeLanguagePreference();
   });
 }
 
-function whenLanguageMenuReady(callback: () => void): void {
-  if (document.querySelector('[data-language-code]')) {
-    callback();
-    return;
-  }
+function addedLanguageMenu(node: Node): boolean {
+  if (!(node instanceof Element)) return false;
+  return node.matches('.site-language-switcher') || Boolean(node.querySelector('.site-language-switcher'));
+}
 
-  const observer = new MutationObserver(() => {
-    if (!document.querySelector('[data-language-code]')) return;
-    observer.disconnect();
-    callback();
+function observeLanguageMenus(callback: () => void): void {
+  if (document.querySelector('.site-language-switcher')) callback();
+
+  const observer = new MutationObserver((mutations) => {
+    const hasNewMenu = mutations.some((mutation) =>
+      Array.from(mutation.addedNodes).some(addedLanguageMenu)
+    );
+    if (hasNewMenu) callback();
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
@@ -195,118 +190,30 @@ async function getIpCountry(): Promise<string | null> {
   }
 }
 
-function getCountryName(country: string): string {
-  try {
-    return new Intl.DisplayNames(['en'], { type: 'region' }).of(country) || country;
-  } catch {
-    return country;
-  }
-}
-
-function countrySupportsLocale(country: string | null, locale: AutoLocale): boolean {
-  if (!country) return false;
-  const region = country.trim().toUpperCase();
-  if (region === 'IN') return locale === 'hi';
-  return countryDefaultLocale[region] === locale;
-}
-
-function buildSuggestionMessage(
-  locale: AutoLocale,
-  country: string | null,
-  isSavedPreference: boolean
-): string {
-  const languageName = getLanguageName(locale);
-
-  if (isSavedPreference) return `Continue in ${languageName}?`;
-
-  if (countrySupportsLocale(country, locale) && country) {
-    return `Visiting from ${getCountryName(country)}? The AI Almanac is available in ${languageName}.`;
-  }
-
-  return `Your browser prefers ${languageName}. The AI Almanac is available in ${languageName}.`;
-}
-
-function showLanguageSuggestion(
-  locale: AutoLocale,
-  country: string | null,
-  isSavedPreference: boolean
-): void {
-  const host = document.querySelector<HTMLElement>('[data-language-suggestion-host]');
-  const link = getLanguageLink(locale);
-  if (!host || !link || host.querySelector('[data-language-suggestion]')) return;
-
-  const languageName = getLanguageName(locale);
-  const card = document.createElement('aside');
-  card.className = 'site-language-suggestion';
-  card.dataset.languageSuggestion = locale;
-  card.setAttribute('role', 'status');
-  card.setAttribute('aria-live', 'polite');
-
-  const closeButton = document.createElement('button');
-  closeButton.type = 'button';
-  closeButton.className = 'site-language-suggestion-close';
-  closeButton.setAttribute('aria-label', 'Dismiss language suggestion');
-  closeButton.textContent = '×';
-
-  const message = document.createElement('p');
-  message.textContent = buildSuggestionMessage(locale, country, isSavedPreference);
-
-  const actions = document.createElement('div');
-  actions.className = 'site-language-suggestion-actions';
-
-  const switchButton = document.createElement('button');
-  switchButton.type = 'button';
-  switchButton.className = 'site-language-suggestion-primary';
-  switchButton.textContent = `Switch to ${languageName}`;
-
-  const stayButton = document.createElement('button');
-  stayButton.type = 'button';
-  stayButton.className = 'site-language-suggestion-secondary';
-  stayButton.textContent = 'Stay in English';
-
-  const dismiss = (): void => {
-    rememberDismissedLocale(locale);
-    card.remove();
-  };
-
-  closeButton.addEventListener('click', dismiss);
-  stayButton.addEventListener('click', () => {
-    rememberLanguageChoice('en');
-    dismiss();
-    syncLanguagePreferenceState();
-  });
-  switchButton.addEventListener('click', () => {
-    rememberLanguageChoice(locale);
-    clearDismissedLocale();
-    syncLanguagePreferenceState();
-    window.location.assign(link.href);
-  });
-
-  actions.append(switchButton, stayButton);
-  card.append(closeButton, message, actions);
-  host.append(card);
-}
-
 async function initializeLanguagePreference(): Promise<void> {
   if (document.documentElement.lang !== 'en') return;
 
   const savedLanguage = getSavedLanguage();
   if (savedLanguage === 'en') return;
 
-  const country = await getIpCountry();
-  const savedLocale = supportedLocales.includes(savedLanguage as AutoLocale)
-    ? savedLanguage as AutoLocale
-    : null;
-  const locale = savedLocale || resolveAutoLocale(country, getBrowserLanguages());
+  if (supportedLocales.includes(savedLanguage as AutoLocale)) {
+    navigateToLocale(savedLanguage as AutoLocale);
+    return;
+  }
 
-  if (!locale || getDismissedLocale() === locale) return;
-  showLanguageSuggestion(locale, country, savedLocale === locale);
+  const country = await getIpCountry();
+  const locale = resolveAutoLocale(country, getBrowserLanguages());
+  if (locale) navigateToLocale(locale);
 }
 
 function bootLanguagePreference(): void {
   bindLanguageControls();
-  whenLanguageMenuReady(() => {
+
+  let initialized = false;
+  observeLanguageMenus(() => {
     syncLanguagePreferenceState();
+    if (initialized) return;
+    initialized = true;
     void initializeLanguagePreference();
   });
 }

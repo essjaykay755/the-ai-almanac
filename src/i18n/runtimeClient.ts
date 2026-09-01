@@ -148,7 +148,8 @@ function localizePage(page: Element, locale: LocalizedLocale): void {
   const entry = entries.find((item) => item.key.toLowerCase() === rawWord || item.word.toLowerCase() === rawWord);
 
   if (entry) {
-    setText(word, entry.word);
+    // AI vocabulary is commonly used in English. Keep the canonical term while localizing its explanation.
+    setText(word, entry.key);
     const dictionarySelected = page.querySelector('#mode-tab-dictionary')?.getAttribute('aria-selected') === 'true';
     if (dictionarySelected) setText(page.querySelector('.definition'), entry.definition);
 
@@ -234,12 +235,6 @@ function localizePage(page: Element, locale: LocalizedLocale): void {
     if (statusSpans[0]) setText(statusSpans[0], strings.tryIdea);
     setText(empty.querySelector('.suggestion-clear'), strings.clearSearch);
   }
-
-  page.querySelectorAll('.suggestion strong').forEach((suggestionWord) => {
-    const raw = suggestionWord.textContent?.trim().toLowerCase() || '';
-    const translated = entries.find((item) => item.key.toLowerCase() === raw);
-    if (translated) setText(suggestionWord, translated.word);
-  });
 }
 
 export function startLocalizedDomSync(locale: SupportedLocale): () => void {
