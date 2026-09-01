@@ -9,6 +9,7 @@ import {
   getLocalizedTermPath,
   localizedLocales
 } from '../src/i18n/catalog.ts';
+import { resolveAutoLocale } from '../src/client/languagePreference.ts';
 
 const term = (word: string, definition: string, aliases: string[] = []): Term => ({
   word,
@@ -58,6 +59,45 @@ test('multilingual starter exposes six locales with ten translated entries each'
     getLocalizedTermPath('hi', 'artificial intelligence'),
     'hi/term/kritrim-buddhimatta/'
   );
+  assert.equal(
+    getLocalizedTermPath('pt', 'context window'),
+    'pt/term/janela-de-contexto/'
+  );
+});
+
+test('localized routes use the same React app while keeping English bootstrap isolated', () => {
+  const localizedHome = readFileSync(new URL('../src/pages/[lang]/index.astro', import.meta.url), 'utf8');
+  const localizedTerm = readFileSync(new URL('../src/pages/[lang]/term/[slug].astro', import.meta.url), 'utf8');
+  const shell = readFileSync(new URL('../src/layouts/AppShell.astro', import.meta.url), 'utf8');
+  const englishClient = readFileSync(new URL('../src/components/ClientApp.tsx', import.meta.url), 'utf8');
+  const localizedClient = readFileSync(new URL('../src/components/LocalizedClientApp.tsx', import.meta.url), 'utf8');
+
+  assert.match(localizedHome, /import AppShell from '..\/..\/layouts\/AppShell\.astro'/);
+  assert.match(localizedTerm, /import AppShell from '..\/..\/..\/layouts\/AppShell\.astro'/);
+  assert.match(shell, /<ClientApp client:only="react" \/>/);
+  assert.match(shell, /<LocalizedClientApp locale=\{localizedLocale\} initialTermKey=\{translationKey\} client:only="react" \/>/);
+  assert.match(englishClient, /import App from '..\/App'/);
+  assert.doesNotMatch(englishClient, /runtimeClient/);
+  assert.match(localizedClient, /import App from '..\/App'/);
+  assert.match(localizedClient, /prepareLocalizedRuntime/);
+  assert.doesNotMatch(localizedHome, /locale-term-card/);
+});
+
+test('language detection suggests supported languages and protects the India default', () => {
+  assert.equal(resolveAutoLocale('BR', ['en-US']), 'pt');
+  assert.equal(resolveAutoLocale('ES', ['en-US']), 'es');
+  assert.equal(resolveAutoLocale('DE', ['en-US']), 'de');
+  assert.equal(resolveAutoLocale('BR', ['fr-FR', 'en-US']), 'fr');
+  assert.equal(resolveAutoLocale('IN', ['en-IN']), null);
+  assert.equal(resolveAutoLocale('IN', ['hi-IN', 'en-IN']), 'hi');
+  assert.equal(resolveAutoLocale(null, ['fr-FR']), 'fr');
+
+  const source = readFileSync(new URL('../src/client/languagePreference.ts', import.meta.url), 'utf8');
+  const endpoint = readFileSync(new URL('../api/locale.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /window\.location\.replace/);
+  assert.match(source, /showLanguageSuggestion/);
+  assert.match(source, /Stay in English/);
+  assert.match(endpoint, /x-vercel-ip-country/);
 });
 
 test('sound effects default to off until the user opts in', () => {

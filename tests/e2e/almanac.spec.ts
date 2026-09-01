@@ -87,6 +87,125 @@ test.describe('desktop regression flows', () => {
     await page.getByRole('dialog', { name: 'Save this entry' }).getByRole('button', { name: 'Download PNG' }).click();
     await expect(page.locator('#stamp')).toHaveText('ENTRY SAVE FAILED');
   });
+
+  test('manual language switching keeps the same translated term and the same app UI', async ({ page }) => {
+    await page.goto('/term/context-window/');
+    await page.locator('.site-language-switcher summary').click();
+    await page.locator('[data-language-code="pt"]').click();
+
+    await expect(page).toHaveURL(/\/pt\/term\/janela-de-contexto\/(?:#.*)?$/);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
+    await expect(page.locator('#entry h1.word')).toHaveText('janela de contexto');
+    await expect(page.locator('#page')).toBeVisible();
+    await expect(page.locator('#search')).toBeVisible();
+  });
+
+  test('direct localized term routes use the full Almanac interface', async ({ page }) => {
+    await page.goto('/hi/term/kritrim-buddhimatta/');
+
+    await expect(page.locator('html')).toHaveAttribute('lang', 'hi');
+    await expect(page.locator('#entry h1.word')).toHaveText('कृत्रिम बुद्धिमत्ता');
+    await expect(page.locator('#page')).toBeVisible();
+    await expect(page.locator('#bookmarkBtn')).toBeVisible();
+    await expect(page.locator('.site-language-switcher summary')).toContainText('HI');
+  });
+});
+
+test.describe('language suggestions', () => {
+  test.describe('Brazil', () => {
+    test.use({ locale: 'pt-BR', timezoneId: 'America/Sao_Paulo' });
+
+    test('suggests Portuguese without changing the page until confirmed', async ({ page }) => {
+      await page.route('**/api/locale', (route) => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ country: 'BR' })
+      }));
+
+      const localeResponse = page.waitForResponse((response) => response.url().endsWith('/api/locale'));
+      await page.goto('/term/context-window/');
+      await localeResponse;
+
+      await expect(page).toHaveURL(/\/term\/context-window\/(?:#.*)?$/);
+      await expect(page.locator('#entry h1.word')).toHaveText('context window');
+
+      const suggestion = page.locator('[data-language-suggestion]');
+      await expect(suggestion).toBeVisible();
+      await expect(suggestion).toContainText('Brazil');
+      await expect(suggestion).toContainText('Português');
+
+      await suggestion.getByRole('button', { name: 'Switch to Português' }).click();
+      await expect(page).toHaveURL(/\/pt\/term\/janela-de-contexto\/(?:#.*)?$/);
+      await expect(page.locator('#entry h1.word')).toHaveText('janela de contexto');
+    });
+  });
+
+  test.describe('India with English browser', () => {
+    test.use({ locale: 'en-IN', timezoneId: 'Asia/Kolkata' });
+
+    test('keeps English without suggesting Hindi from country alone', async ({ page }) => {
+      await page.route('**/api/locale', (route) => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ country: 'IN' })
+      }));
+
+      const localeResponse = page.waitForResponse((response) => response.url().endsWith('/api/locale'));
+      await page.goto('/');
+      await localeResponse;
+
+      await expect(page).toHaveURL(/\/$/);
+      await expect(page.locator('#entry h1.word')).toHaveText('artificial intelligence');
+      await expect(page.locator('[data-language-suggestion]')).toHaveCount(0);
+    });
+  });
+
+  test.describe('India with Hindi browser', () => {
+    test.use({ locale: 'hi-IN', timezoneId: 'Asia/Kolkata' });
+
+    test('offers Hindi but stays English until the user chooses it', async ({ page }) => {
+      await page.route('**/api/locale', (route) => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ country: 'IN' })
+      }));
+
+      const localeResponse = page.waitForResponse((response) => response.url().endsWith('/api/locale'));
+      await page.goto('/');
+      await localeResponse;
+
+      await expect(page).toHaveURL(/\/$/);
+      await expect(page.locator('#entry h1.word')).toHaveText('artificial intelligence');
+
+      const suggestion = page.locator('[data-language-suggestion]');
+      await expect(suggestion).toBeVisible();
+      await expect(suggestion).toContainText('India');
+      await expect(suggestion).toContainText('हिन्दी');
+
+      await suggestion.getByRole('button', { name: 'Stay in English' }).click();
+      await expect(suggestion).toHaveCount(0);
+      await expect(page).toHaveURL(/\/$/);
+      await expect.poll(() => page.evaluate(() => localStorage.getItem('aiAlmanacLanguage'))).toBe('en');
+    });
+  });
+
+  test('a saved locale offers continuity without redirecting', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('aiAlmanacLanguage', 'pt');
+    });
+    await page.route('**/api/locale', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ country: 'US' })
+    }));
+
+    await page.goto('/');
+
+    await expect(page).toHaveURL(/\/$/);
+    const suggestion = page.locator('[data-language-suggestion]');
+    await expect(suggestion).toBeVisible();
+    await expect(suggestion).toContainText('Continue in Português?');
+  });
 });
 
 test.describe('reduced motion', () => {
