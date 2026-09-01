@@ -60,16 +60,14 @@ jobs:
             echo "Astro status: \`$astro_status\`"
             echo "Main status: \`$main_status\`"
             echo
-            echo '#### Astro branch failures'
+            echo '#### Astro branch output'
             echo '```text'
-            grep -E '^[[:space:]]+[0-9]+\)' /tmp/astro-e2e.log || true
-            tail -n 12 /tmp/astro-e2e.log
+            tail -n 100 /tmp/astro-e2e.log
             echo '```'
             echo
-            echo '#### Main baseline failures'
+            echo '#### Main baseline output'
             echo '```text'
-            grep -E '^[[:space:]]+[0-9]+\)' /tmp/main-e2e.log || true
-            tail -n 12 /tmp/main-e2e.log
+            tail -n 60 /tmp/main-e2e.log
             echo '```'
           } > /tmp/e2e-report.md
 
