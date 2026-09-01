@@ -19,12 +19,14 @@ const {
   description,
   canonicalPath = '',
   imagePath = 'og-image.svg',
-  imageAlt = 'The AI Almanac — an evolving field guide to artificial intelligence.',
+  imageAlt = 'The AI Almanac - an evolving field guide to artificial intelligence.',
   ogType = 'website'
 } = Astro.props;
 
 const base = import.meta.env.BASE_URL || '/';
 const withBase = (path: string) => `${base}${path.replace(/^\/+/, '')}`;
+const rootPath = withBase('');
+const aboutPath = withBase('about/');
 const canonicalUrl = Astro.site
   ? new URL(withBase(canonicalPath), Astro.site).toString()
   : withBase(canonicalPath);
@@ -70,6 +72,20 @@ const imageUrl = Astro.site
     />
   </head>
   <body>
+    <script is:inline define:vars={{ rootPath, aboutPath }}>
+      const normalizedPath = window.location.pathname.endsWith('/')
+        ? window.location.pathname
+        : `${window.location.pathname}/`;
+
+      if (normalizedPath === aboutPath && !window.location.hash) {
+        window.history.replaceState(
+          window.history.state,
+          '',
+          `${rootPath}${window.location.search}#about`
+        );
+      }
+    </script>
+
     <ClientApp client:only="react" />
 
     <script>
