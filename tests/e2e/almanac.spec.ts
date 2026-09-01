@@ -191,9 +191,9 @@ test.describe('desktop regression flows', () => {
     await expect(hindi).toHaveAttribute('data-language-remembered', 'true');
 
     await automatic.click();
+    await expect(page).toHaveURL(/\/term\/artificial-intelligence\/(?:#.*)?$/);
     await expect.poll(() => page.evaluate(() => localStorage.getItem('aiAlmanacLanguage'))).toBeNull();
     await expect.poll(() => page.evaluate(() => localStorage.getItem('aiAlmanacLanguageSuggestionDismissed'))).toBeNull();
-    await expect(page).toHaveURL(/\/term\/artificial-intelligence\/(?:#.*)?$/);
 
     await page.locator('.site-language-switcher summary').click();
     await expect(page.locator('[data-language-auto]')).toHaveAttribute('aria-current', 'true');
