@@ -58,6 +58,21 @@ test('multilingual starter exposes six locales with ten translated entries each'
     getLocalizedTermPath('hi', 'artificial intelligence'),
     'hi/term/kritrim-buddhimatta/'
   );
+  assert.equal(
+    getLocalizedTermPath('pt', 'context window'),
+    'pt/term/janela-de-contexto/'
+  );
+});
+
+test('language suggestions never force a redirect and protect the India default', () => {
+  const source = readFileSync(new URL('../src/client/languagePreference.ts', import.meta.url), 'utf8');
+  const shell = readFileSync(new URL('../src/layouts/AppShell.astro', import.meta.url), 'utf8');
+
+  assert.match(source, /if \(region === 'IN'\) return browserLocale === 'hi' \? 'hi' : null;/);
+  assert.doesNotMatch(source, /window\.location\.(?:assign|replace)/);
+  assert.doesNotMatch(source, /window\.location\s*=/);
+  assert.match(shell, /data-language-suggestion/);
+  assert.match(shell, /data-language-code=\{link\.code\}/);
 });
 
 test('sound effects default to off until the user opts in', () => {
