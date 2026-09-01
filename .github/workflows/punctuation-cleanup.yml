@@ -1,0 +1,89 @@
+name: Normalize punctuation style
+
+on:
+  push:
+    branches:
+      - punctuation-cleanup
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out cleanup branch
+        uses: actions/checkout@v4
+        with:
+          ref: punctuation-cleanup
+
+      - name: Replace disallowed punctuation
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const { execFileSync } = require('node:child_process');
+          const path = require('node:path');
+
+          const allowedExtensions = new Set([
+            '.astro', '.css', '.html', '.js', '.json', '.md', '.mjs', '.svg',
+            '.ts', '.tsx', '.txt', '.yaml', '.yml'
+          ]);
+          const skipped = new Set(['package-lock.json']);
+          const files = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' })
+            .split('\0')
+            .filter(Boolean)
+            .filter((file) => !skipped.has(file))
+            .filter((file) => allowedExtensions.has(path.extname(file).toLowerCase()) || file === 'README');
+
+          let emDashCount = 0;
+          let commaAndCount = 0;
+          const changed = [];
+
+          for (const file of files) {
+            let input = fs.readFileSync(file, 'utf8');
+            const emMatches = input.match(/—|&mdash;|&#8212;|&#x2014;/gi);
+            const commaMatches = input.match(/, and\b/g);
+            emDashCount += emMatches?.length ?? 0;
+            commaAndCount += commaMatches?.length ?? 0;
+
+            let output = input
+              .replace(/\s*—\s*/g, ' - ')
+              .replace(/&mdash;|&#8212;|&#x2014;/gi, '-')
+              .replace(/, and\b/g, ' and');
+
+            if (output !== input) {
+              fs.writeFileSync(file, output);
+              changed.push(file);
+            }
+          }
+
+          console.log(`Replaced ${emDashCount} em dash forms.`);
+          console.log(`Removed ${commaAndCount} commas immediately before "and".`);
+          console.log(`Changed ${changed.length} files.`);
+          for (const file of changed) console.log(file);
+
+          const remaining = [];
+          for (const file of files) {
+            const text = fs.readFileSync(file, 'utf8');
+            if (/—|&mdash;|&#8212;|&#x2014;/i.test(text) || /, and\b/.test(text)) {
+              remaining.push(file);
+            }
+          }
+          if (remaining.length) {
+            console.error('Punctuation cleanup left matches in:', remaining.join(', '));
+            process.exit(1);
+          }
+          NODE
+
+      - name: Commit punctuation cleanup
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m 'style: remove em dashes and comma-before-and phrasing [skip ci]'
+          git push
