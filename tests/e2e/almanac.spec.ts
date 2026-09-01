@@ -378,6 +378,13 @@ test.describe('mobile navigation', () => {
 
   test('clears a restored outer paper scroll offset on page restore', async ({ page }) => {
     await page.goto('/');
+    await expect(page.locator('#entry h1.word')).toBeVisible();
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise<void>((resolve) => requestAnimationFrame(() => {
+        requestAnimationFrame(() => resolve());
+      }));
+    });
 
     const inner = page.locator('.page-inner');
     await inner.evaluate((node) => {
