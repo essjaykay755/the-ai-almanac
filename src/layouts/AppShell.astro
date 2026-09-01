@@ -1,5 +1,12 @@
 ---
 import ClientApp from '../components/ClientApp';
+import {
+  allLocaleCodes,
+  getHomeAlternateLinks,
+  getLanguageSwitchPath,
+  getTermAlternateLinks,
+  localeMeta
+} from '../i18n/catalog';
 import '../index.css';
 import '../coverTransition.css';
 import '../loading.css';
@@ -12,6 +19,7 @@ interface Props {
   imagePath?: string;
   imageAlt?: string;
   ogType?: 'website' | 'article';
+  translationKey?: string;
 }
 
 const {
@@ -20,19 +28,31 @@ const {
   canonicalPath = '',
   imagePath = 'og-image.svg',
   imageAlt = 'The AI Almanac - an evolving field guide to artificial intelligence.',
-  ogType = 'website'
+  ogType = 'website',
+  translationKey
 } = Astro.props;
 
 const base = import.meta.env.BASE_URL || '/';
 const withBase = (path: string) => `${base}${path.replace(/^\/+/, '')}`;
+const absoluteUrl = (path: string) => Astro.site
+  ? new URL(withBase(path), Astro.site).toString()
+  : withBase(path);
 const rootPath = withBase('');
 const aboutPath = withBase('about/');
-const canonicalUrl = Astro.site
-  ? new URL(withBase(canonicalPath), Astro.site).toString()
-  : withBase(canonicalPath);
-const imageUrl = Astro.site
-  ? new URL(withBase(imagePath), Astro.site).toString()
-  : withBase(imagePath);
+const canonicalUrl = absoluteUrl(canonicalPath);
+const imageUrl = absoluteUrl(imagePath);
+const isHome = canonicalPath === '';
+const alternateLinks = isHome
+  ? getHomeAlternateLinks()
+  : translationKey
+    ? getTermAlternateLinks(translationKey)
+    : [];
+const xDefault = alternateLinks.find((link) => link.locale === 'en');
+const languageLinks = allLocaleCodes.map((code) => ({
+  code,
+  meta: localeMeta[code],
+  href: withBase(getLanguageSwitchPath(code, translationKey))
+}));
 ---
 
 <!doctype html>
@@ -47,11 +67,21 @@ const imageUrl = Astro.site
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
 
+    {alternateLinks.map((link) => (
+      <link
+        rel="alternate"
+        hreflang={localeMeta[link.locale].htmlLang}
+        href={absoluteUrl(link.path)}
+      />
+    ))}
+    {xDefault && <link rel="alternate" hreflang="x-default" href={absoluteUrl(xDefault.path)} />}
+
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content="The AI Almanac" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:image" content={imageUrl} />
     <meta property="og:image:alt" content={imageAlt} />
     <meta property="og:image:type" content="image/svg+xml" />
@@ -75,6 +105,71 @@ const imageUrl = Astro.site
       #root > astro-island {
         display: contents;
       }
+
+      .site-language-switcher {
+        position: fixed;
+        right: 14px;
+        bottom: 14px;
+        z-index: 10020;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+
+      .site-language-switcher summary {
+        list-style: none;
+        cursor: pointer;
+        min-width: 42px;
+        padding: 8px 9px;
+        border: 1px solid rgba(238, 222, 194, .55);
+        background: rgba(35, 27, 21, .92);
+        color: #f1e5cf;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-align: center;
+        box-shadow: 0 5px 18px rgba(0, 0, 0, .24);
+      }
+
+      .site-language-switcher summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .site-language-menu {
+        position: absolute;
+        right: 0;
+        bottom: calc(100% + 7px);
+        width: 178px;
+        padding: 7px;
+        border: 1px solid rgba(92, 69, 48, .55);
+        background: #efe3cd;
+        color: #2c2118;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, .28);
+      }
+
+      .site-language-menu a {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 8px 9px;
+        color: inherit;
+        text-decoration: none;
+        font-size: 12px;
+      }
+
+      .site-language-menu a:hover,
+      .site-language-menu a:focus-visible {
+        background: rgba(80, 59, 40, .1);
+      }
+
+      .site-language-menu a[aria-current='true'] {
+        font-weight: 700;
+      }
+
+      @media (max-width: 640px) {
+        .site-language-switcher {
+          right: 8px;
+          bottom: 8px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -95,6 +190,23 @@ const imageUrl = Astro.site
     <div id="root">
       <ClientApp client:only="react" />
     </div>
+
+    <details class="site-language-switcher">
+      <summary aria-label="Language">EN</summary>
+      <nav class="site-language-menu" aria-label="Language">
+        {languageLinks.map((link) => (
+          <a
+            href={link.href}
+            hreflang={link.meta.htmlLang}
+            lang={link.meta.htmlLang}
+            aria-current={link.code === 'en' ? 'true' : undefined}
+          >
+            <span>{link.meta.nativeName}</span>
+            <span>{link.meta.shortName}</span>
+          </a>
+        ))}
+      </nav>
+    </details>
 
     <script>
       import '../client/navigation';

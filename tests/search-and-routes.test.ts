@@ -4,6 +4,11 @@ import { readFileSync } from 'node:fs';
 import type { Term } from '../src/types/almanac.ts';
 import { createSearchIndex, findBestMatch, searchTerms } from '../src/utils/search.ts';
 import { getTermRoutePath, slugifyTerm } from '../src/utils/ogImage.ts';
+import {
+  getLocalizedEntries,
+  getLocalizedTermPath,
+  localizedLocales
+} from '../src/i18n/catalog.ts';
 
 const term = (word: string, definition: string, aliases: string[] = []): Term => ({
   word,
@@ -38,6 +43,21 @@ test('search includes aliases and preserves an intentional no-match state', () =
 test('term routes remain stable and crawlable', () => {
   assert.equal(slugifyTerm('Vision + Language # Action'), 'vision-language-sharp-action');
   assert.equal(getTermRoutePath({ word: 'context window' }), 'term/context-window/');
+});
+
+test('multilingual starter exposes six locales with ten translated entries each', () => {
+  assert.deepEqual(localizedLocales, ['es', 'pt', 'it', 'fr', 'de', 'hi']);
+  for (const locale of localizedLocales) {
+    assert.equal(getLocalizedEntries(locale).length, 10);
+  }
+  assert.equal(
+    getLocalizedTermPath('es', 'artificial intelligence'),
+    'es/term/inteligencia-artificial/'
+  );
+  assert.equal(
+    getLocalizedTermPath('hi', 'artificial intelligence'),
+    'hi/term/kritrim-buddhimatta/'
+  );
 });
 
 test('sound effects default to off until the user opts in', () => {
