@@ -1,3 +1,5 @@
+import { getLocaleFromPathname, type SupportedLocale } from '../i18n/catalog.ts';
+
 const PREFERENCE_KEY = 'aiAlmanacLanguage';
 const DISMISSAL_KEY = 'aiAlmanacLanguageSuggestionDismissed';
 
@@ -68,6 +70,10 @@ function getLanguageLink(locale: string): HTMLAnchorElement | null {
   return document.querySelector<HTMLAnchorElement>(`[data-language-code="${locale}"]`);
 }
 
+function getCurrentLocale(): SupportedLocale {
+  return getLocaleFromPathname(window.location.pathname, import.meta.env.BASE_URL || '/');
+}
+
 function rememberLanguageChoice(locale: string): void {
   try {
     localStorage.setItem(PREFERENCE_KEY, locale);
@@ -120,7 +126,32 @@ function closeLanguageMenus(): void {
 
 function navigateToLocale(locale: AutoLocale): void {
   const link = getLanguageLink(locale);
-  if (link) window.location.assign(link.href);
+  if (!link) return;
+
+  const next = new URL(link.href, window.location.href);
+  const current = new URL(window.location.href);
+  if (
+    next.origin === current.origin &&
+    next.pathname === current.pathname &&
+    next.search === current.search
+  ) return;
+
+  window.location.assign(next.href);
+}
+
+function navigateToEnglish(): void {
+  const link = getLanguageLink('en');
+  if (!link) return;
+
+  const next = new URL(link.href, window.location.href);
+  const current = new URL(window.location.href);
+  if (
+    next.origin === current.origin &&
+    next.pathname === current.pathname &&
+    next.search === current.search
+  ) return;
+
+  window.location.assign(next.href);
 }
 
 let controlsBound = false;
@@ -155,13 +186,7 @@ function bindLanguageControls(): void {
     syncLanguagePreferenceState();
     closeLanguageMenus();
 
-    if (document.documentElement.lang !== 'en') {
-      const englishLink = getLanguageLink('en');
-      if (englishLink) window.location.assign(englishLink.href);
-      return;
-    }
-
-    void initializeLanguagePreference();
+    void initializeLanguagePreference(true);
   });
 }
 
@@ -197,9 +222,10 @@ async function getIpCountry(): Promise<string | null> {
   }
 }
 
-async function initializeLanguagePreference(): Promise<void> {
+async function initializeLanguagePreference(allowLocalizedPage = false): Promise<void> {
   const requestId = ++languagePreferenceRequestId;
-  if (document.documentElement.lang !== 'en') return;
+  const currentLocale = getCurrentLocale();
+  if (!allowLocalizedPage && (currentLocale !== 'en' || document.documentElement.lang !== 'en')) return;
 
   const savedLanguage = getSavedLanguage();
   if (savedLanguage === 'en') return;
@@ -215,11 +241,16 @@ async function initializeLanguagePreference(): Promise<void> {
   // A manual choice may have been made while the country lookup was pending.
   // Let the link navigation finish instead of overriding it with stale detection.
   const latestSavedLanguage = getSavedLanguage();
-  if (latestSavedLanguage || document.documentElement.lang !== 'en') return;
+  if (latestSavedLanguage || (!allowLocalizedPage && document.documentElement.lang !== 'en')) return;
 
   const locale = resolveAutoLocale(country, getBrowserLanguages());
   if (requestId !== languagePreferenceRequestId) return;
-  if (locale) navigateToLocale(locale);
+  if (locale) {
+    if (locale !== getCurrentLocale()) navigateToLocale(locale);
+    return;
+  }
+
+  if (allowLocalizedPage && getCurrentLocale() !== 'en') navigateToEnglish();
 }
 
 function bootLanguagePreference(): void {
