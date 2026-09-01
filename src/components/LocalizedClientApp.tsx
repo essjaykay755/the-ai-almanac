@@ -1,7 +1,9 @@
 import { StrictMode, Suspense, useLayoutEffect } from 'react';
 import App from '../App';
+import { isStrictAlmanacAppPath } from '../i18n/appPath';
 import { prepareLocalizedRuntime, startLocalizedDomSync } from '../i18n/runtimeClient';
 import type { LocalizedLocale } from '../i18n/catalog';
+import { NotFoundPage } from './NotFoundPage';
 
 interface LocalizedClientAppProps {
   locale: LocalizedLocale;
@@ -22,10 +24,15 @@ export function LocalizedClientApp({ locale, initialTermKey }: LocalizedClientAp
 
   useLayoutEffect(() => startLocalizedDomSync(locale), [locale]);
 
+  const pathname = typeof window === 'undefined' ? '/' : window.location.pathname;
+  const content = isStrictAlmanacAppPath(pathname, import.meta.env.BASE_URL || '/')
+    ? <App />
+    : <NotFoundPage />;
+
   return (
     <StrictMode>
       <Suspense fallback={appLoader}>
-        <App />
+        {content}
       </Suspense>
     </StrictMode>
   );
