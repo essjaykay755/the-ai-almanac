@@ -119,7 +119,7 @@ test.describe('desktop regression flows', () => {
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'hi');
     await expect(page.locator('#entry h1.word')).toHaveText('artificial intelligence');
-    await expect(page.locator('#entry .definition')).toContainText('मशीनों और सॉफ्टवेयर');
+    await expect(page.locator('#entry .definition')).toContainText('मशीनों या सॉफ्टवेयर');
     await expect(page).toHaveTitle('artificial intelligence - The AI Almanac');
     await expect(page.locator('#page')).toBeVisible();
     await expect(page.locator('#bookmarkBtn')).toBeVisible();
@@ -128,8 +128,10 @@ test.describe('desktop regression flows', () => {
 
   test('language menu clears remembered choices and returns to automatic mode', async ({ page }) => {
     await page.addInitScript(() => {
-      localStorage.setItem('aiAlmanacLanguage', 'hi');
-      localStorage.setItem('aiAlmanacLanguageSuggestionDismissed', 'hi');
+      if (window.location.pathname === '/hi/') {
+        localStorage.setItem('aiAlmanacLanguage', 'hi');
+        localStorage.setItem('aiAlmanacLanguageSuggestionDismissed', 'hi');
+      }
     });
 
     await page.goto('/hi/');
@@ -206,9 +208,9 @@ test.describe('automatic language selection', () => {
       await page.goto('/');
       await localeResponse;
 
-      await expect(page).toHaveURL(/\/hi\/(?:#.*)?$/);
+      await expect(page).toHaveURL(/\/hi\/term\/kritrim-buddhimatta\/(?:#.*)?$/);
       await expect(page.locator('#entry h1.word')).toHaveText('artificial intelligence');
-      await expect(page.locator('#entry .definition')).toContainText('मशीनों और सॉफ्टवेयर');
+      await expect(page.locator('#entry .definition')).toContainText('मशीनों या सॉफ्टवेयर');
     });
   });
 
@@ -219,7 +221,7 @@ test.describe('automatic language selection', () => {
 
     await page.goto('/');
 
-    await expect(page).toHaveURL(/\/pt\/(?:#.*)?$/);
+    await expect(page).toHaveURL(/\/pt\/term\/inteligencia-artificial\/(?:#.*)?$/);
     await expect(page.locator('#entry h1.word')).toHaveText('artificial intelligence');
   });
 });
