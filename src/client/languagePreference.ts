@@ -110,8 +110,10 @@ function getCandidateLocale(locales: Intl.Locale[], region: string | null): Supp
   // India deliberately stays English unless the browser explicitly prefers Hindi.
   if (region === 'IN') return browserLocale === 'hi' ? 'hi' : null;
 
-  if (browserLocale) return browserLocale;
-  return region ? regionDefaultLocale[region] || null : null;
+  // When we recognize the country, keep the suggestion aligned with that country.
+  // Browser language remains the fallback when the region is unknown.
+  const regionalLocale = region ? regionDefaultLocale[region] || null : null;
+  return regionalLocale || browserLocale;
 }
 
 function getLanguageHref(locale: string): string | null {
@@ -192,5 +194,17 @@ function initializeSuggestion(): void {
   if (candidate) showSuggestion(candidate, region, false);
 }
 
-bindLanguageLinks();
-initializeSuggestion();
+function bootLanguagePreference(): void {
+  try {
+    bindLanguageLinks();
+    initializeSuggestion();
+  } catch (error) {
+    console.warn('Language suggestion unavailable.', error);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootLanguagePreference, { once: true });
+} else {
+  queueMicrotask(bootLanguagePreference);
+}
