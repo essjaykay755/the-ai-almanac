@@ -65,14 +65,21 @@ test('multilingual starter exposes six locales with ten translated entries each'
   );
 });
 
-test('localized routes use the same React app shell as English', () => {
+test('localized routes use the same React app while keeping English bootstrap isolated', () => {
   const localizedHome = readFileSync(new URL('../src/pages/[lang]/index.astro', import.meta.url), 'utf8');
   const localizedTerm = readFileSync(new URL('../src/pages/[lang]/term/[slug].astro', import.meta.url), 'utf8');
   const shell = readFileSync(new URL('../src/layouts/AppShell.astro', import.meta.url), 'utf8');
+  const englishClient = readFileSync(new URL('../src/components/ClientApp.tsx', import.meta.url), 'utf8');
+  const localizedClient = readFileSync(new URL('../src/components/LocalizedClientApp.tsx', import.meta.url), 'utf8');
 
   assert.match(localizedHome, /import AppShell from '..\/..\/layouts\/AppShell\.astro'/);
   assert.match(localizedTerm, /import AppShell from '..\/..\/..\/layouts\/AppShell\.astro'/);
-  assert.match(shell, /<ClientApp locale=\{locale\} initialTermKey=\{translationKey\} client:only="react" \/>/);
+  assert.match(shell, /<ClientApp client:only="react" \/>/);
+  assert.match(shell, /<LocalizedClientApp locale=\{localizedLocale\} initialTermKey=\{translationKey\} client:only="react" \/>/);
+  assert.match(englishClient, /import App from '..\/App'/);
+  assert.doesNotMatch(englishClient, /runtimeClient/);
+  assert.match(localizedClient, /import App from '..\/App'/);
+  assert.match(localizedClient, /prepareLocalizedRuntime/);
   assert.doesNotMatch(localizedHome, /locale-term-card/);
 });
 
