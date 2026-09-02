@@ -26,6 +26,16 @@ const BASE_TUTORIAL_STEPS: readonly TutorialStep[] = [
     placement: 'right'
   },
   {
+    id: 'language',
+    title: 'Choose your language',
+    body: 'Use Language to choose an edition manually or return to Automatic. Automatic uses your IP country when available, India stays in English and your manual choice is remembered.',
+    target: '.site-language-switcher summary',
+    mobileTarget: '#mobileSidebar .site-language-switcher summary',
+    fallbackTarget: '#coverNav',
+    region: 'sidebar',
+    placement: 'right'
+  },
+  {
     id: 'sidebar',
     title: 'Your navigation shelf',
     body: 'Use the sidebar to search, browse the complete index, revisit bookmarks and history, open the timeline, manage collections, find a surprise term, save an entry, or read About.',
