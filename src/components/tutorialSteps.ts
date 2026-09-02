@@ -1,3 +1,5 @@
+import { localizeTutorialStep } from '../i18n/tutorialLocale';
+
 export type TutorialPlacement = 'auto' | 'top' | 'right' | 'bottom' | 'left';
 export type TutorialRegion = 'sidebar' | 'page';
 
@@ -12,7 +14,7 @@ export interface TutorialStep {
   placement?: TutorialPlacement;
 }
 
-export const TUTORIAL_STEPS: readonly TutorialStep[] = [
+const BASE_TUTORIAL_STEPS: readonly TutorialStep[] = [
   {
     id: 'replay',
     title: 'A guide you can replay',
@@ -115,3 +117,5 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     placement: 'top'
   }
 ];
+
+export const TUTORIAL_STEPS: readonly TutorialStep[] = BASE_TUTORIAL_STEPS.map((step) => localizeTutorialStep(step));
