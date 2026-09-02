@@ -1,6 +1,7 @@
 import React from 'react';
 import type { TimelineItem, Term, TermSelectionTarget } from '../../types/almanac';
 import { useDialogFocus } from '../../hooks/useDialogFocus';
+import { getOverlayStrings } from '../../i18n/overlayLocale';
 
 interface TimelineOverlayProps {
   isOpen: boolean;
@@ -17,11 +18,12 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
   onClose,
   onSelectTerm
 }) => {
+  const strings = getOverlayStrings();
   const dialogRef = useDialogFocus(isOpen, onClose);
   if (!isOpen) return null;
 
   return (
-    <div className="overlay" id="timelineOverlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="overlay" id="timelineOverlay" onClick={(event) => event.target === event.currentTarget && onClose()}>
       <section
         ref={dialogRef}
         className="insert timeline-insert"
@@ -32,10 +34,10 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
       >
         <div className="timeline-head">
           <div>
-            <small>The AI Almanac · timeline</small>
-            <h2 id="timelineTitle">How the terms developed</h2>
+            <small>The AI Almanac · {strings.timelineEyebrow}</small>
+            <h2 id="timelineTitle">{strings.timelineTitle}</h2>
           </div>
-          <button className="close" type="button" onClick={onClose} aria-label="Close timeline">
+          <button className="close" type="button" onClick={onClose} aria-label={`${strings.close} ${strings.timelineEyebrow}`}>
             ×
           </button>
         </div>
@@ -51,14 +53,14 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
                 <button
                   type="button"
                   onClick={() => {
-                    const t = termsByWord[item.term.toLowerCase()];
-                    if (t) {
-                      onSelectTerm(t);
+                    const term = termsByWord[item.term.toLowerCase()];
+                    if (term) {
+                      onSelectTerm(term);
                       onClose();
                     }
                   }}
                 >
-                  Open this term →
+                  {strings.openThisTerm} →
                 </button>
               </article>
             ))}
