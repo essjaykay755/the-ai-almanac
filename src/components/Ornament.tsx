@@ -1,5 +1,5 @@
 import React from 'react';
-import ornamentUrl from '../assets/1542594957.svg';
+import ornamentUrl from '../assets/1542594957.svg?url';
 
 interface OrnamentProps {
   className?: string;
