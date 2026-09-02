@@ -7,6 +7,7 @@ type TutorialCopy = Record<string, { title: string; body: string }>;
 const copy: Partial<Record<SupportedLocale, TutorialCopy>> = {
   es: {
     replay: { title: 'Una guía que puedes repetir', body: 'Puedes volver a este recorrido cuando necesites un repaso. El resto del Almanac permanece intacto mientras la guía está abierta.' },
+    language: { title: 'Elige tu idioma', body: 'Usa Idioma para elegir una edición manualmente o volver a Automático. Automático usa tu país según la IP cuando está disponible, India permanece en inglés y tu elección manual se recuerda.' },
     sidebar: { title: 'Tu estantería de navegación', body: 'Usa la barra lateral para buscar, explorar el índice completo, volver a marcadores e historial, abrir la cronología, gestionar colecciones, descubrir un término, guardar una entrada o leer Acerca de.' },
     search: { title: 'Pregunta o busca', body: 'Escribe un término o describe una idea con lenguaje natural. Las sugerencias aparecen al escribir y ⌘ K o Ctrl K enfoca la búsqueda desde cualquier lugar.' },
     entry: { title: 'Lee la entrada actual', body: 'Cada página incluye la definición, un ejemplo, el origen del término y cómo aparece en la práctica.' },
@@ -20,6 +21,7 @@ const copy: Partial<Record<SupportedLocale, TutorialCopy>> = {
   },
   pt: {
     replay: { title: 'Um guia que você pode repetir', body: 'Volte a este passo a passo sempre que precisar relembrar. O restante do Almanac permanece intacto enquanto o guia estiver aberto.' },
+    language: { title: 'Escolha seu idioma', body: 'Use Idioma para escolher uma edição manualmente ou voltar para Automático. O modo Automático usa seu país pelo IP quando disponível, a Índia permanece em inglês e sua escolha manual é lembrada.' },
     sidebar: { title: 'Sua estante de navegação', body: 'Use a barra lateral para pesquisar, abrir o índice completo, rever favoritos e histórico, acessar a linha do tempo, gerenciar coleções, descobrir um termo, salvar uma entrada ou abrir Sobre.' },
     search: { title: 'Pergunte ou pesquise', body: 'Digite um termo ou descreva uma ideia em linguagem natural. As sugestões aparecem enquanto você digita e ⌘ K ou Ctrl K leva o foco para a pesquisa.' },
     entry: { title: 'Leia a entrada atual', body: 'Cada página mostra a definição, um exemplo, a origem do termo e como ele aparece na prática.' },
@@ -33,6 +35,7 @@ const copy: Partial<Record<SupportedLocale, TutorialCopy>> = {
   },
   it: {
     replay: { title: 'Una guida che puoi ripetere', body: 'Puoi tornare a questa guida ogni volta che ti serve un ripasso. Il resto dell’Almanac rimane invariato mentre la guida è aperta.' },
+    language: { title: 'Scegli la lingua', body: 'Usa Lingua per scegliere manualmente un’edizione o tornare ad Automatico. Automatico usa il paese rilevato dall’IP quando disponibile, l’India resta in inglese e la scelta manuale viene ricordata.' },
     sidebar: { title: 'Il tuo scaffale di navigazione', body: 'Usa la barra laterale per cercare, esplorare l’indice completo, rivedere segnalibri e cronologia, aprire la cronologia temporale, gestire raccolte, scoprire un termine, salvare una voce o leggere Informazioni.' },
     search: { title: 'Chiedi o cerca', body: 'Digita un termine o descrivi un’idea in linguaggio naturale. I suggerimenti appaiono mentre scrivi e ⌘ K o Ctrl K porta il focus alla ricerca.' },
     entry: { title: 'Leggi la voce corrente', body: 'Ogni pagina mostra la definizione, un esempio, l’origine del termine e come viene usato in pratica.' },
@@ -46,6 +49,7 @@ const copy: Partial<Record<SupportedLocale, TutorialCopy>> = {
   },
   fr: {
     replay: { title: 'Un guide que vous pouvez relancer', body: 'Revenez à ce parcours dès que vous avez besoin d’un rappel. Le reste de l’Almanac reste intact pendant que le guide est ouvert.' },
+    language: { title: 'Choisissez votre langue', body: 'Utilisez Langue pour choisir une édition manuellement ou revenir à Automatique. Automatique utilise votre pays détecté par IP quand il est disponible, l’Inde reste en anglais et votre choix manuel est mémorisé.' },
     sidebar: { title: 'Votre étagère de navigation', body: 'Utilisez la barre latérale pour rechercher, parcourir l’index complet, revoir favoris et historique, ouvrir la chronologie, gérer les collections, découvrir un terme, enregistrer une entrée ou lire À propos.' },
     search: { title: 'Demandez ou recherchez', body: 'Saisissez un terme ou décrivez une idée en langage naturel. Les suggestions apparaissent pendant la saisie et ⌘ K ou Ctrl K place le focus sur la recherche.' },
     entry: { title: 'Lisez l’entrée actuelle', body: 'Chaque page donne la définition, un exemple, l’origine du terme et son usage en pratique.' },
@@ -59,6 +63,7 @@ const copy: Partial<Record<SupportedLocale, TutorialCopy>> = {
   },
   de: {
     replay: { title: 'Eine Anleitung zum erneuten Abspielen', body: 'Du kannst jederzeit zu dieser Einführung zurückkehren. Der restliche Almanac bleibt unverändert, während die Anleitung geöffnet ist.' },
+    language: { title: 'Sprache auswählen', body: 'Nutze Sprache, um eine Ausgabe manuell auszuwählen oder zu Automatisch zurückzukehren. Automatisch verwendet dein per IP erkanntes Land, Indien bleibt auf Englisch und deine manuelle Auswahl wird gespeichert.' },
     sidebar: { title: 'Deine Navigationsleiste', body: 'Nutze die Seitenleiste für Suche, vollständigen Index, Lesezeichen und Verlauf, Zeitleiste, Sammlungen, zufällige Begriffe, Speichern und die Über-Seite.' },
     search: { title: 'Fragen oder suchen', body: 'Gib einen Begriff ein oder beschreibe eine Idee in natürlicher Sprache. Vorschläge erscheinen während der Eingabe und ⌘ K oder Strg K fokussiert die Suche.' },
     entry: { title: 'Aktuellen Eintrag lesen', body: 'Jede Seite zeigt Definition, Beispiel, Herkunft des Begriffs und seine Verwendung in der Praxis.' },
@@ -72,6 +77,7 @@ const copy: Partial<Record<SupportedLocale, TutorialCopy>> = {
   },
   hi: {
     replay: { title: 'इस गाइड को फिर से चला सकते हैं', body: 'जब भी दोबारा समझना हो, इस walkthrough पर वापस आएँ। गाइड खुला रहने पर बाकी Almanac वैसा ही रहता है।' },
+    language: { title: 'अपनी भाषा चुनें', body: 'Language से कोई edition खुद चुनें या Automatic पर वापस जाएँ। Automatic उपलब्ध होने पर IP country का उपयोग करता है, India में English ही रहती है और आपकी manual choice याद रखी जाती है।' },
     sidebar: { title: 'आपकी navigation shelf', body: 'Sidebar से search करें, पूरा index देखें, bookmarks और history खोलें, timeline देखें, collections manage करें, कोई नया term खोजें, entry सहेजें या परिचय पढ़ें।' },
     search: { title: 'पूछें या खोजें', body: 'कोई term लिखें या अपनी बात सामान्य भाषा में बताएँ। टाइप करते समय suggestions दिखेंगे और ⌘ K या Ctrl K कहीं से भी search पर focus करता है।' },
     entry: { title: 'मौजूदा entry पढ़ें', body: 'हर page पर definition, example, term की origin और उसका practical use दिया गया है।' },
