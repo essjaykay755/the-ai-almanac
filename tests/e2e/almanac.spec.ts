@@ -44,7 +44,7 @@ test.describe('desktop regression flows', () => {
 
     const indexSearch = page.getByLabel('Filter the complete index');
     await indexSearch.fill('retrieval');
-    await expect(page.locator('#indexSummary')).toContainText(/45 of 791 entries/i);
+    await expect(page.locator('#indexSummary')).toContainText(/45 \/ 791 entries/i);
     await expect(page.locator('.index-term')).toHaveCount(45);
 
     const categoryFilter = page.getByLabel('Filter by category');
@@ -67,7 +67,7 @@ test.describe('desktop regression flows', () => {
     const dialog = page.getByRole('dialog', { name: 'Compare terms' });
     await expect(dialog).toBeVisible();
     await expect(page.locator('.compare-card')).toHaveCount(2);
-    await expect(page.getByRole('button', { name: 'Close comparison' })).toBeFocused();
+    await expect(page.getByRole('button', { name: 'Close Compare terms' })).toBeFocused();
 
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -98,9 +98,10 @@ test.describe('desktop regression flows', () => {
     await expect(page.locator('#page')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Page not found' })).toHaveCount(0);
     await expect(page.locator('.site-language-switcher summary')).toContainText('ES');
+    await expect(page.locator('#navSearch')).toContainText('Preguntar / Buscar');
   });
 
-  test('manual language switching keeps the English AI term and localizes its explanation', async ({ page }) => {
+  test('manual language switching keeps the English AI term and localizes the full entry card', async ({ page }) => {
     await page.goto('/term/context-window/');
     await page.locator('.site-language-switcher summary').click();
     await page.locator('[data-language-code="pt"]').click();
@@ -109,28 +110,33 @@ test.describe('desktop regression flows', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
     await expect(page.locator('#entry h1.word')).toHaveText('context window');
     await expect(page.locator('#entry .definition')).toContainText('Quantidade máxima de informação');
-    await expect(page.locator('#page')).toBeVisible();
-    await expect(page.locator('#search')).toBeVisible();
+    await expect(page.locator('#entry .example')).toContainText('context window');
+    await expect(page.locator('.lower-grid section').first()).toContainText('A forma em inglês');
+    await expect(page.locator('#navSearch')).toContainText('Perguntar / Pesquisar');
+
+    await page.locator('#mode-tab-plain').click();
+    await expect(page.locator('#entry .definition')).toContainText('Em termos simples:');
+    await page.locator('#mode-tab-technical').click();
+    await expect(page.locator('#entry .definition')).toContainText('Em termos técnicos:');
+    await page.locator('#mode-tab-vibe').click();
+    await expect(page.locator('#entry .definition')).toContainText('Para um vibe coder:');
+
+    await page.getByRole('button', { name: /^Índice completo/ }).click();
+    await expect(page.getByRole('dialog', { name: 'Todos os termos catalogados' })).toBeVisible();
+    await page.keyboard.press('Escape');
+
     await expect.poll(() => page.evaluate(() => localStorage.getItem('aiAlmanacLanguage'))).toBe('pt');
   });
 
   test('manual language selection wins over a pending automatic detection', async ({ page }) => {
     let releaseLocale = () => {};
-    const localeGate = new Promise<void>((resolve) => {
-      releaseLocale = resolve;
-    });
+    const localeGate = new Promise<void>((resolve) => { releaseLocale = resolve; });
     let releaseGerman = () => {};
-    const germanGate = new Promise<void>((resolve) => {
-      releaseGerman = resolve;
-    });
+    const germanGate = new Promise<void>((resolve) => { releaseGerman = resolve; });
 
     await page.route('**/api/locale', async (route) => {
       await localeGate;
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ country: 'BR' })
-      });
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ country: 'BR' }) });
     });
     await page.route('**/de/term/kuenstliche-intelligenz/', async (route) => {
       await germanGate;
@@ -161,16 +167,25 @@ test.describe('desktop regression flows', () => {
     await expect(page).toHaveURL(/\/de\/term\/kuenstliche-intelligenz\/(?:#.*)?$/);
   });
 
-  test('direct localized term routes keep the English headword with a native definition', async ({ page }) => {
+  test('direct localized term routes keep the English headword with native content without geo override', async ({ page }) => {
+    let localeRequests = 0;
+    await page.route('**/api/locale', (route) => {
+      localeRequests += 1;
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ country: 'BR' }) });
+    });
+
     await page.goto('/hi/term/kritrim-buddhimatta/');
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'hi');
     await expect(page.locator('#entry h1.word')).toHaveText('artificial intelligence');
     await expect(page.locator('#entry .definition')).toContainText('मशीनों या सॉफ्टवेयर');
+    await expect(page.locator('#entry .example')).toContainText('artificial intelligence');
     await expect(page).toHaveTitle('artificial intelligence - The AI Almanac');
     await expect(page.locator('#page')).toBeVisible();
     await expect(page.locator('#bookmarkBtn')).toBeVisible();
     await expect(page.locator('.site-language-switcher summary')).toContainText('HI');
+    await expect(page.locator('#navSearch')).toContainText('पूछें / खोजें');
+    expect(localeRequests).toBe(0);
   });
 
   test('language menu clears remembered choices and returns to automatic mode', async ({ page }) => {
@@ -180,6 +195,12 @@ test.describe('desktop regression flows', () => {
         localStorage.setItem('aiAlmanacLanguageSuggestionDismissed', 'hi');
       }
     });
+
+    await page.route('**/api/locale', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ country: 'IN' })
+    }));
 
     await page.goto('/hi/');
     await page.locator('.site-language-switcher summary').click();
@@ -209,11 +230,7 @@ test.describe('desktop regression flows', () => {
 
     await page.route('**/api/locale', (route) => {
       localeRequests += 1;
-      return route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ country: 'BR' })
-      });
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ country: 'BR' }) });
     });
 
     await page.goto('/de/term/kuenstliche-intelligenz/');
@@ -221,7 +238,8 @@ test.describe('desktop regression flows', () => {
     await page.locator('[data-language-auto]').click({ noWaitAfter: true });
 
     await expect(page).toHaveURL(/\/pt\/term\/inteligencia-artificial\/(?:#.*)?$/);
-    await page.waitForTimeout(1500);
+    await expect(page.locator('[data-language-suggestion="pt"]')).toBeVisible();
+    await page.waitForTimeout(1000);
 
     await expect(page).toHaveURL(/\/pt\/term\/inteligencia-artificial\/(?:#.*)?$/);
     expect(localeRequests).toBe(1);
@@ -233,7 +251,7 @@ test.describe('automatic language selection', () => {
   test.describe('Brazil', () => {
     test.use({ locale: 'fr-FR', timezoneId: 'America/Sao_Paulo' });
 
-    test('uses IP country before browser language and preserves the current term', async ({ page }) => {
+    test('uses IP country before browser language, preserves the term and shows confirmation', async ({ page }) => {
       await page.route('**/api/locale', (route) => route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -247,13 +265,35 @@ test.describe('automatic language selection', () => {
       await expect(page).toHaveURL(/\/pt\/term\/janela-de-contexto\/(?:#.*)?$/);
       await expect(page.locator('#entry h1.word')).toHaveText('context window');
       await expect(page.locator('#entry .definition')).toContainText('Quantidade máxima de informação');
+      const notice = page.locator('[data-language-suggestion="pt"]');
+      await expect(notice).toBeVisible();
+      await expect(notice).toContainText('Brazil');
+      await expect(page.getByRole('button', { name: 'Keep Português' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Use English' })).toBeVisible();
+    });
+
+    test('can return to English from the automatic switch notice without bouncing back', async ({ page }) => {
+      await page.route('**/api/locale', (route) => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ country: 'BR' })
+      }));
+
+      await page.goto('/term/context-window/');
+      await expect(page).toHaveURL(/\/pt\/term\/janela-de-contexto\/(?:#.*)?$/);
+      await page.getByRole('button', { name: 'Use English' }).click();
+
+      await expect(page).toHaveURL(/\/term\/context-window\/(?:#.*)?$/);
+      await expect.poll(() => page.evaluate(() => localStorage.getItem('aiAlmanacLanguage'))).toBe('en');
+      await page.waitForTimeout(750);
+      await expect(page).toHaveURL(/\/term\/context-window\/(?:#.*)?$/);
     });
   });
 
   test.describe('India with English browser', () => {
     test.use({ locale: 'en-IN', timezoneId: 'Asia/Kolkata' });
 
-    test('keeps English when the browser does not prefer Hindi', async ({ page }) => {
+    test('keeps English', async ({ page }) => {
       await page.route('**/api/locale', (route) => route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -266,13 +306,14 @@ test.describe('automatic language selection', () => {
 
       await expect(page).toHaveURL(/\/$/);
       await expect(page.locator('#entry h1.word')).toHaveText('artificial intelligence');
+      await expect(page.locator('[data-language-suggestion]')).toHaveCount(0);
     });
   });
 
   test.describe('India with Hindi browser', () => {
     test.use({ locale: 'hi-IN', timezoneId: 'Asia/Kolkata' });
 
-    test('automatically switches to Hindi when the browser prefers Hindi', async ({ page }) => {
+    test('still keeps English because India is excluded from automatic switching', async ({ page }) => {
       await page.route('**/api/locale', (route) => route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -283,9 +324,9 @@ test.describe('automatic language selection', () => {
       await page.goto('/');
       await localeResponse;
 
-      await expect(page).toHaveURL(/\/hi\/term\/kritrim-buddhimatta\/(?:#.*)?$/);
+      await expect(page).toHaveURL(/\/$/);
       await expect(page.locator('#entry h1.word')).toHaveText('artificial intelligence');
-      await expect(page.locator('#entry .definition')).toContainText('मशीनों या सॉफ्टवेयर');
+      await expect(page.locator('[data-language-suggestion]')).toHaveCount(0);
     });
   });
 
@@ -298,6 +339,7 @@ test.describe('automatic language selection', () => {
 
     await expect(page).toHaveURL(/\/pt\/term\/inteligencia-artificial\/(?:#.*)?$/);
     await expect(page.locator('#entry h1.word')).toHaveText('artificial intelligence');
+    await expect(page.locator('[data-language-suggestion]')).toHaveCount(0);
   });
 });
 
