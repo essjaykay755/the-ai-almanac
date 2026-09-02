@@ -1,4 +1,5 @@
 import '../pageTurnStability';
+import { getLocaleFromPathname } from '../i18n/catalog';
 import { getPublicPath, getTermRoutePath } from '../utils/ogImage';
 
 const publicBase = import.meta.env.BASE_URL || '/';
@@ -23,6 +24,11 @@ function getLegacyTermPath(): string | null {
 }
 
 function normalizeLegacyTermUrl(): boolean {
+  // Localized editions use #term internally to resolve canonical English keys.
+  // Rewriting that bootstrap hash to an English /term/ path changes the active
+  // locale underneath React and makes localized UI briefly fall back to English.
+  if (getLocaleFromPathname(window.location.pathname, publicBase) !== 'en') return false;
+
   const cleanPath = getLegacyTermPath();
   if (!cleanPath) return false;
 
@@ -71,7 +77,9 @@ if (isAboutPath(window.location.pathname) && !window.location.hash) {
   lastLocation = window.location.href;
 }
 
-// Preserve old #term= links while keeping the visible URL crawlable.
+// Preserve old #term= links while keeping the visible English URL crawlable.
+// Localized editions keep their localized pathname and use the hash only as an
+// internal canonical-key bridge for the React app.
 normalizeLegacyTermUrl();
 lastLocation = window.location.href;
 
