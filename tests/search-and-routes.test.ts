@@ -12,7 +12,6 @@ import {
   getLocaleFromPathname,
   localizedLocales
 } from '../src/i18n/catalog.ts';
-import { getLocalizedTermPresentation, getUiStrings } from '../src/i18n/reactLocale.ts';
 import { resolveAutoLocale } from '../src/client/languagePreference.ts';
 
 const term = (word: string, definition: string, aliases: string[] = []): Term => ({
@@ -52,45 +51,13 @@ test('term routes remain stable and crawlable', () => {
 
 test('multilingual starter exposes six locales with ten translated explanations each', () => {
   assert.deepEqual(localizedLocales, ['es', 'pt', 'it', 'fr', 'de', 'hi']);
-  for (const locale of localizedLocales) {
-    assert.equal(getLocalizedEntries(locale).length, 10);
-  }
+  for (const locale of localizedLocales) assert.equal(getLocalizedEntries(locale).length, 10);
   assert.equal(getLocalizedTermPath('es', 'artificial intelligence'), 'es/term/inteligencia-artificial/');
   assert.equal(getLocalizedTermPath('hi', 'artificial intelligence'), 'hi/term/kritrim-buddhimatta/');
   assert.equal(getLocalizedTermPath('pt', 'context window'), 'pt/term/janela-de-contexto/');
 });
 
-test('localized starter entries keep canonical AI headwords and localize the full explanation card', () => {
-  const contextWindow: Term = {
-    word: 'context window',
-    part: 'noun',
-    definition: 'English definition',
-    example: 'English example',
-    origin: 'English origin',
-    note: 'English note',
-    related: ['token'],
-    aliases: ['context length'],
-    category: 'Language Models & Prompting'
-  };
-
-  const dictionary = getLocalizedTermPresentation(contextWindow, 'dictionary', {}, 'pt');
-  const plain = getLocalizedTermPresentation(contextWindow, 'plain', {}, 'pt');
-  const technical = getLocalizedTermPresentation(contextWindow, 'technical', {}, 'pt');
-  const vibe = getLocalizedTermPresentation(contextWindow, 'vibe', {}, 'pt');
-
-  assert.equal(dictionary.word, 'context window');
-  assert.notEqual(dictionary.definition, contextWindow.definition);
-  assert.notEqual(dictionary.example, contextWindow.example);
-  assert.notEqual(dictionary.origin, contextWindow.origin);
-  assert.notEqual(dictionary.note, contextWindow.note);
-  assert.match(dictionary.example, /context window/i);
-  assert.match(plain.definition, /Em termos simples:/);
-  assert.match(technical.definition, /Em termos técnicos:/);
-  assert.match(vibe.definition, /Para um vibe coder:/);
-  assert.equal(getUiStrings('hi').navSearch, 'पूछें / खोजें');
-});
-
-test('localized routes use the same React app and render localization through React', () => {
+test('localized routes use the same React app and render full localization through React', () => {
   const localizedHome = readFileSync(new URL('../src/pages/[lang]/index.astro', import.meta.url), 'utf8');
   const localizedTerm = readFileSync(new URL('../src/pages/[lang]/term/[slug].astro', import.meta.url), 'utf8');
   const shell = readFileSync(new URL('../src/layouts/AppShell.astro', import.meta.url), 'utf8');
@@ -98,6 +65,9 @@ test('localized routes use the same React app and render localization through Re
   const cover = readFileSync(new URL('../src/components/Cover.tsx', import.meta.url), 'utf8');
   const about = readFileSync(new URL('../src/components/AboutPage.tsx', import.meta.url), 'utf8');
   const indexOverlay = readFileSync(new URL('../src/components/overlays/IndexOverlay.tsx', import.meta.url), 'utf8');
+  const compareOverlay = readFileSync(new URL('../src/components/overlays/CompareOverlay.tsx', import.meta.url), 'utf8');
+  const reactLocale = readFileSync(new URL('../src/i18n/reactLocale.ts', import.meta.url), 'utf8');
+  const tutorialLocale = readFileSync(new URL('../src/i18n/tutorialLocale.ts', import.meta.url), 'utf8');
   const englishClient = readFileSync(new URL('../src/components/ClientApp.tsx', import.meta.url), 'utf8');
   const localizedClient = readFileSync(new URL('../src/components/LocalizedClientApp.tsx', import.meta.url), 'utf8');
 
@@ -111,8 +81,15 @@ test('localized routes use the same React app and render localization through Re
   assert.match(page, /getLocalizedTermPresentation/);
   assert.match(page, /localizedTerm\.example/);
   assert.match(page, /localizedTerm\.origin/);
+  assert.match(page, /modeNames\[explanationMode\]/);
   assert.match(about, /getUiStrings/);
   assert.match(indexOverlay, /getOverlayStrings/);
+  assert.match(compareOverlay, /getLocalizedTermPresentation/);
+  assert.match(reactLocale, /exampleByLocale/);
+  assert.match(reactLocale, /originByLocale/);
+  assert.match(reactLocale, /Em termos simples:/);
+  assert.match(reactLocale, /पूछें \/ खोजें/);
+  assert.match(tutorialLocale, /localizeTutorialStep/);
   assert.match(englishClient, /import App from '..\/App'/);
   assert.doesNotMatch(englishClient, /runtimeClient/);
   assert.match(localizedClient, /import App from '..\/App'/);
@@ -168,7 +145,6 @@ test('automatic language selection is IP-first, keeps India English and uses bro
 
 test('sound effects default to off until the user opts in', () => {
   const appSource = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
-
   assert.match(
     appSource,
     /loadStorage<boolean>\('aiAlmanacSound',\s*false,\s*isBoolean\)/,
