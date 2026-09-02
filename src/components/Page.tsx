@@ -2,8 +2,13 @@ import React, { useDeferredValue, useMemo, useState, useEffect, useRef } from 'r
 import type { Term, ExplanationMode, CrossRefInfo, SpecialModes, TermSelectionTarget } from '../types/almanac';
 import { searchTerms, type SearchIndex } from '../utils/search';
 import { getPronunciation } from '../utils/pronunciation';
-import { getExplanationForTerm } from '../utils/explanations';
 import { APP_VERSION } from '../version';
+import {
+  getLocalizedTermPresentation,
+  getModeLabels,
+  getRuntimeLocale,
+  getUiStrings
+} from '../i18n/reactLocale';
 
 interface PageProps {
   currentTerm: Term;
@@ -33,13 +38,6 @@ interface PageProps {
   onCopyLink: () => void;
   onSpeak: () => void;
 }
-
-const modeNames: Record<ExplanationMode, string> = {
-  dictionary: 'Dictionary',
-  plain: 'Plain English',
-  technical: 'Technical',
-  vibe: 'Vibe Coder'
-};
 
 const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
   {
@@ -75,6 +73,10 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState(0);
   const searchShellRef = useRef<HTMLDivElement>(null);
+  const locale = getRuntimeLocale();
+  const strings = getUiStrings(locale);
+  const modeNames = getModeLabels(locale);
+  const localizedTerm = getLocalizedTermPresentation(currentTerm, explanationMode, specialModes, locale);
 
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const suggestions = useMemo(
@@ -82,10 +84,9 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
     [deferredSearchQuery, searchIndex]
   );
 
-  // Close suggestions when clicking outside
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (searchShellRef.current && !searchShellRef.current.contains(e.target as Node)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchShellRef.current && !searchShellRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
       }
     };
@@ -93,18 +94,18 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowDown' && suggestions.length > 0) {
-      e.preventDefault();
-      setSelectedSuggestion((prev) => (prev + 1) % suggestions.length);
-    } else if (e.key === 'ArrowUp' && suggestions.length > 0) {
-      e.preventDefault();
-      setSelectedSuggestion((prev) => (prev - 1 + suggestions.length) % suggestions.length);
-    } else if (e.key === 'Escape') {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowDown' && suggestions.length > 0) {
+      event.preventDefault();
+      setSelectedSuggestion((previous) => (previous + 1) % suggestions.length);
+    } else if (event.key === 'ArrowUp' && suggestions.length > 0) {
+      event.preventDefault();
+      setSelectedSuggestion((previous) => (previous - 1 + suggestions.length) % suggestions.length);
+    } else if (event.key === 'Escape') {
       setShowSuggestions(false);
       searchRef.current?.blur();
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
       if (suggestions.length > 0) {
         const picked = suggestions[selectedSuggestion] || suggestions[0];
         onSelectTerm(picked.term, { fromSearch: true });
@@ -130,17 +131,15 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
   };
 
   const refs = getRefs(currentTerm);
-  const explanationText = getExplanationForTerm(currentTerm, explanationMode, specialModes);
-  // Each glossary entry is one real page in the alphabetical book order.
   const pageNumber = termIndex + 1;
-  const pageCounter = `Page ${pageNumber}`;
+  const pageCounter = `${strings.page} ${pageNumber}`;
 
   return (
     <article className="page" id="page" ref={ref}>
       <div className="page-inner" id="pageInner">
         <header className={`topline${isMobileSearchOpen ? ' mobile-search-open' : ''}`}>
           <div className="edition" id="editionLabel">
-            Field edition · v{APP_VERSION} · {totalTerms} terms
+            {strings.fieldEdition} · v{APP_VERSION} · {totalTerms} {strings.terms}
           </div>
 
           <div className="search-shell" ref={searchShellRef}>
@@ -153,16 +152,16 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                 ref={searchRef}
                 id="search"
                 autoComplete="off"
-                placeholder="Ask The AI Almanac or search a term…"
-                aria-label="Search The AI Almanac"
+                placeholder={strings.searchPlaceholder}
+                aria-label={strings.searchLabel}
                 role="combobox"
                 aria-expanded={Boolean(showSuggestions && searchQuery.trim())}
                 aria-controls="suggestions"
                 aria-autocomplete="list"
                 aria-activedescendant={suggestions[selectedSuggestion] ? `suggestion-${selectedSuggestion}` : undefined}
                 value={searchQuery}
-                onChange={(e) => {
-                  const value = e.target.value;
+                onChange={(event) => {
+                  const value = event.target.value;
                   setSelectedSuggestion(0);
                   setShowSuggestions(Boolean(value.trim()));
                   onSearchChange(value);
@@ -180,20 +179,16 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                 className="suggestions"
                 id="suggestions"
                 role={suggestions.length > 0 ? 'listbox' : undefined}
-                aria-label={suggestions.length > 0 ? 'Search suggestions' : undefined}
+                aria-label={suggestions.length > 0 ? strings.searchSuggestions : undefined}
               >
                 {suggestions.length === 0 ? (
                   <div className="suggestion-empty">
                     <p role="status">
-                      <strong>No exact match</strong>
-                      <span>Try the idea behind your question:</span>
+                      <strong>{strings.noExactMatch}</strong>
+                      <span>{strings.tryIdea}</span>
                     </p>
                     <div className="suggestion-examples">
-                      {[
-                        'What makes AI invent answers?',
-                        'How much can a model remember?',
-                        'What is RAG?'
-                      ].map((example) => (
+                      {strings.searchExamples.map((example) => (
                         <button
                           key={example}
                           className="suggestion-example"
@@ -205,18 +200,18 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                       ))}
                     </div>
                     <button className="suggestion-clear" type="button" onClick={() => onSearchChange('')}>
-                      Clear search
+                      {strings.clearSearch}
                     </button>
                   </div>
                 ) : (
-                  suggestions.map((item, idx) => (
+                  suggestions.map((item, index) => (
                     <button
                       key={item.term.word}
-                      id={`suggestion-${idx}`}
+                      id={`suggestion-${index}`}
                       type="button"
-                      className={`suggestion ${idx === selectedSuggestion ? 'active' : ''}`}
+                      className={`suggestion ${index === selectedSuggestion ? 'active' : ''}`}
                       role="option"
-                      aria-selected={idx === selectedSuggestion}
+                      aria-selected={index === selectedSuggestion}
                       onClick={() => {
                         onSelectTerm(item.term, { fromSearch: true });
                         setShowSuggestions(false);
@@ -228,7 +223,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
                         <br />
                         <small>{item.term.part}</small>
                       </span>
-                      <small>{item.score < 0 ? 'suggested' : item.score < 2 ? 'entry' : 'related'}</small>
+                      <small>{item.score < 0 ? strings.suggested : item.score < 2 ? strings.entry : strings.related}</small>
                     </button>
                   ))
                 )}
@@ -236,9 +231,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
             )}
           </div>
 
-          <div className="folio-top" id="folioTop">
-            {pageCounter}
-          </div>
+          <div className="folio-top" id="folioTop">{pageCounter}</div>
         </header>
 
         <div className="page-layout">
@@ -247,26 +240,29 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
               className={`bookmark-btn ${isBookmarked ? 'saved' : ''}`}
               id="bookmarkBtn"
               onClick={onToggleBookmark}
-              aria-label={`${isBookmarked ? 'Remove bookmark' : 'Bookmark'} ${currentTerm.word}`}
-              title={isBookmarked ? 'Remove bookmark' : 'Bookmark this entry'}
+              aria-label={`${isBookmarked ? strings.removeBookmark : strings.bookmark} ${localizedTerm.word}`}
+              title={isBookmarked ? strings.removeBookmark : strings.bookmarkEntry}
             >
               <svg className="bookmark-svg" viewBox="0 0 24 34" fill="none">
-                <path
-                  d="M3 0H21V30L12 23L3 30V0Z"
-                  className="bookmark-ribbon-path"
-                />
+                <path d="M3 0H21V30L12 23L3 30V0Z" className="bookmark-ribbon-path" />
               </svg>
               <span className="bookmark-star">{isBookmarked ? '★' : '☆'}</span>
             </button>
 
             <div className="headword-line">
-              <h1 className="word">{currentTerm.word}</h1>
-              <span className="part">{currentTerm.part}</span>
+              <h1 className="word">{localizedTerm.word}</h1>
+              <span className="part">{localizedTerm.part}</span>
             </div>
 
             <div className="pronounce-row">
               <span className="pronounce-text">{getPronunciation(currentTerm.word, currentTerm.pron)}</span>
-              <button className="speak" id="speakBtn" onClick={onSpeak} aria-label={`Pronounce ${currentTerm.word}`} title={`Pronounce ${currentTerm.word}`}>
+              <button
+                className="speak"
+                id="speakBtn"
+                onClick={onSpeak}
+                aria-label={`${strings.pronounce} ${localizedTerm.word}`}
+                title={`${strings.pronounce} ${localizedTerm.word}`}
+              >
                 <svg viewBox="0 0 24 24">
                   <path d="M5 10v4h4l5 4V6l-5 4H5z" />
                   <path d="M17 9c1 1 1.5 2 1.5 3S18 14 17 15M19 6.5c2 1.6 3 3.5 3 5.5s-1 3.9-3 5.5" />
@@ -274,19 +270,19 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
               </button>
             </div>
 
-            <div className="mode-switch" id="modeSwitch" role="tablist" aria-label="Explanation mode">
-              {(Object.keys(modeNames) as ExplanationMode[]).map((m) => (
+            <div className="mode-switch" id="modeSwitch" role="tablist" aria-label={strings.explanationMode}>
+              {(Object.keys(modeNames) as ExplanationMode[]).map((mode) => (
                 <button
-                  key={m}
+                  key={mode}
                   type="button"
-                  id={`mode-tab-${m}`}
+                  id={`mode-tab-${mode}`}
                   role="tab"
-                  aria-selected={explanationMode === m}
+                  aria-selected={explanationMode === mode}
                   aria-controls="definitionContent"
-                  className={`mode-btn ${explanationMode === m ? 'active' : ''}`}
-                  onClick={() => onChangeMode(m)}
+                  className={`mode-btn ${explanationMode === mode ? 'active' : ''}`}
+                  onClick={() => onChangeMode(mode)}
                 >
-                  {modeNames[m]}
+                  {modeNames[mode]}
                 </button>
               ))}
             </div>
@@ -300,53 +296,36 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
             >
               <span className="sense-num">1.</span>
               <div className="definition-mode">{modeNames[explanationMode]}</div>
-              <p className={`definition ${fromSearchQuestion ? 'search-hit' : ''}`}>{explanationText}</p>
-              <p className="example">{currentTerm.example || ''}</p>
+              <p className={`definition ${fromSearchQuestion ? 'search-hit' : ''}`}>{localizedTerm.definition}</p>
+              <p className="example">{localizedTerm.example}</p>
             </div>
 
             <div className="lower-grid">
               <section>
-                <h3 className="kicker">Origin</h3>
-                <p>{currentTerm.origin}</p>
+                <h3 className="kicker">{strings.origin}</h3>
+                <p>{localizedTerm.origin}</p>
               </section>
               <section>
-                <h3 className="kicker">In practice</h3>
-                <p>{currentTerm.note}</p>
+                <h3 className="kicker">{strings.inPractice}</h3>
+                <p>{localizedTerm.note}</p>
               </section>
             </div>
 
             <div className="entry-actions" id="entryActions">
-              <button className="text-action" onClick={onOpenPicker} id="addCollection">
-                + add to collection
-              </button>
-              <button className="text-action" onClick={onOpenClip} id="clipEntry">
-                save entry
-              </button>
-              <button className="text-action" onClick={onCopyLink} id="copyDeepLink">
-                copy link
-              </button>
-              <button className="text-action" onClick={onOpenTimeline} id="openChronology">
-                timeline
-              </button>
+              <button className="text-action" onClick={onOpenPicker} id="addCollection">{strings.addCollection}</button>
+              <button className="text-action" onClick={onOpenClip} id="clipEntry">{strings.saveEntry}</button>
+              <button className="text-action" onClick={onCopyLink} id="copyDeepLink">{strings.copyLink}</button>
+              <button className="text-action" onClick={onOpenTimeline} id="openChronology">{strings.navTimeline}</button>
             </div>
 
             <div className="thread" id="thread">
               <div className="thread-head">
-                <span className="thread-title">Recent terms</span>
-                <button className="thread-clear" onClick={onClearTrail} id="clearThread">
-                  Clear list
-                </button>
+                <span className="thread-title">{strings.recentTerms}</span>
+                <button className="thread-clear" onClick={onClearTrail} id="clearThread">{strings.clearList}</button>
               </div>
               <div className="trail" id="trail">
-                {trail.slice(-10).map((word, idx) => (
-                  <button
-                    key={`${word}-${idx}`}
-                    onClick={() => {
-                      onSelectTerm({ word }, { addTrail: false });
-                    }}
-                  >
-                    {word}
-                  </button>
+                {trail.slice(-10).map((word, index) => (
+                  <button key={`${word}-${index}`} onClick={() => onSelectTerm({ word }, { addTrail: false })}>{word}</button>
                 ))}
               </div>
             </div>
@@ -355,29 +334,25 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
           <aside className="margin" id="margin">
             {refs.see.length > 0 && (
               <section className="margin-section">
-                <h3>See also</h3>
+                <h3>{strings.seeAlso}</h3>
                 <div className="xref">
-                  {refs.see.map((r) => (
-                    <button key={r} onClick={() => onSelectTerm({ word: r })}>
-                      {r}
-                    </button>
-                  ))}
+                  {refs.see.map((related) => <button key={related} onClick={() => onSelectTerm({ word: related })}>{related}</button>)}
                 </div>
               </section>
             )}
 
             {refs.compare.length > 0 && (
               <section className="margin-section">
-                <h3>Compare</h3>
+                <h3>{strings.compare}</h3>
                 <div className="xref">
-                  {refs.compare.map((r) => (
+                  {refs.compare.map((related) => (
                     <button
-                      key={r}
+                      key={related}
                       type="button"
-                      aria-label={`Compare ${currentTerm.word} with ${r}`}
-                      onClick={() => onCompareTerm({ word: r })}
+                      aria-label={`${strings.compare} ${localizedTerm.word} / ${related}`}
+                      onClick={() => onCompareTerm({ word: related })}
                     >
-                      {r}
+                      {related}
                     </button>
                   ))}
                 </div>
@@ -386,29 +361,21 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
 
             {refs.confused.length > 0 && (
               <section className="margin-section">
-                <h3>Often confused with</h3>
+                <h3>{strings.confused}</h3>
                 <div className="xref">
-                  {refs.confused.map((r) => (
-                    <button key={r} onClick={() => onSelectTerm({ word: r })}>
-                      {r}
-                    </button>
-                  ))}
+                  {refs.confused.map((related) => <button key={related} onClick={() => onSelectTerm({ word: related })}>{related}</button>)}
                 </div>
               </section>
             )}
 
             <section className="margin-section">
-              <h3>Filed under</h3>
-              <p>{currentTerm.category || 'AI Concepts'}</p>
+              <h3>{strings.filedUnder}</h3>
+              <p>{localizedTerm.category || strings.aiConcepts}</p>
             </section>
 
             <aside className={`margin-note ${fromSearchQuestion ? 'search-note' : ''}`}>
-              <strong>{fromSearchQuestion ? 'The Almanac suggests' : 'Marginalia'}</strong>
-              <p>
-                {fromSearchQuestion
-                  ? `“${fromSearchQuestion}” points most closely to this entry.`
-                  : currentTerm.note}
-              </p>
+              <strong>{fromSearchQuestion ? strings.almanacSuggests : strings.marginalia}</strong>
+              <p>{fromSearchQuestion ? strings.searchPointsToEntry(fromSearchQuestion) : localizedTerm.note}</p>
             </aside>
           </aside>
         </div>
@@ -418,24 +385,22 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
             type="button"
             className="footer-nav footer-prev left"
             onClick={onPrevTerm}
-            title="Previous definition (Left arrow or P)"
-            aria-label="Previous definition"
+            title={strings.previous}
+            aria-label={strings.previous}
             id="prevDefBtn"
           >
-            <span className="nav-arrow">←</span> Previous
+            <span className="nav-arrow">←</span> {strings.previous}
           </button>
-          <span className="center" id="pageNumber">
-            {pageCounter}
-          </span>
+          <span className="center" id="pageNumber">{pageCounter}</span>
           <button
             type="button"
             className="footer-nav footer-next right"
             onClick={onNextTerm}
-            title="Next definition (Right arrow or N)"
-            aria-label="Next definition"
+            title={strings.next}
+            aria-label={strings.next}
             id="nextDefBtn"
           >
-            Next <span className="nav-arrow">→</span>
+            {strings.next} <span className="nav-arrow">→</span>
           </button>
         </footer>
       </div>
