@@ -12,6 +12,7 @@ import {
   getLocaleFromPathname,
   localizedLocales
 } from '../src/i18n/catalog.ts';
+import { getLocalizedTermPresentation, getUiStrings } from '../src/i18n/reactLocale.ts';
 import { resolveAutoLocale } from '../src/client/languagePreference.ts';
 
 const term = (word: string, definition: string, aliases: string[] = []): Term => ({
@@ -54,28 +55,51 @@ test('multilingual starter exposes six locales with ten translated explanations 
   for (const locale of localizedLocales) {
     assert.equal(getLocalizedEntries(locale).length, 10);
   }
-  assert.equal(
-    getLocalizedTermPath('es', 'artificial intelligence'),
-    'es/term/inteligencia-artificial/'
-  );
-  assert.equal(
-    getLocalizedTermPath('hi', 'artificial intelligence'),
-    'hi/term/kritrim-buddhimatta/'
-  );
-  assert.equal(
-    getLocalizedTermPath('pt', 'context window'),
-    'pt/term/janela-de-contexto/'
-  );
+  assert.equal(getLocalizedTermPath('es', 'artificial intelligence'), 'es/term/inteligencia-artificial/');
+  assert.equal(getLocalizedTermPath('hi', 'artificial intelligence'), 'hi/term/kritrim-buddhimatta/');
+  assert.equal(getLocalizedTermPath('pt', 'context window'), 'pt/term/janela-de-contexto/');
 });
 
-test('localized routes use the same React app while keeping English bootstrap isolated', () => {
+test('localized starter entries keep canonical AI headwords and localize the full explanation card', () => {
+  const contextWindow: Term = {
+    word: 'context window',
+    part: 'noun',
+    definition: 'English definition',
+    example: 'English example',
+    origin: 'English origin',
+    note: 'English note',
+    related: ['token'],
+    aliases: ['context length'],
+    category: 'Language Models & Prompting'
+  };
+
+  const dictionary = getLocalizedTermPresentation(contextWindow, 'dictionary', {}, 'pt');
+  const plain = getLocalizedTermPresentation(contextWindow, 'plain', {}, 'pt');
+  const technical = getLocalizedTermPresentation(contextWindow, 'technical', {}, 'pt');
+  const vibe = getLocalizedTermPresentation(contextWindow, 'vibe', {}, 'pt');
+
+  assert.equal(dictionary.word, 'context window');
+  assert.notEqual(dictionary.definition, contextWindow.definition);
+  assert.notEqual(dictionary.example, contextWindow.example);
+  assert.notEqual(dictionary.origin, contextWindow.origin);
+  assert.notEqual(dictionary.note, contextWindow.note);
+  assert.match(dictionary.example, /context window/i);
+  assert.match(plain.definition, /Em termos simples:/);
+  assert.match(technical.definition, /Em termos técnicos:/);
+  assert.match(vibe.definition, /Para um vibe coder:/);
+  assert.equal(getUiStrings('hi').navSearch, 'पूछें / खोजें');
+});
+
+test('localized routes use the same React app and render localization through React', () => {
   const localizedHome = readFileSync(new URL('../src/pages/[lang]/index.astro', import.meta.url), 'utf8');
   const localizedTerm = readFileSync(new URL('../src/pages/[lang]/term/[slug].astro', import.meta.url), 'utf8');
   const shell = readFileSync(new URL('../src/layouts/AppShell.astro', import.meta.url), 'utf8');
+  const page = readFileSync(new URL('../src/components/Page.tsx', import.meta.url), 'utf8');
   const cover = readFileSync(new URL('../src/components/Cover.tsx', import.meta.url), 'utf8');
+  const about = readFileSync(new URL('../src/components/AboutPage.tsx', import.meta.url), 'utf8');
+  const indexOverlay = readFileSync(new URL('../src/components/overlays/IndexOverlay.tsx', import.meta.url), 'utf8');
   const englishClient = readFileSync(new URL('../src/components/ClientApp.tsx', import.meta.url), 'utf8');
   const localizedClient = readFileSync(new URL('../src/components/LocalizedClientApp.tsx', import.meta.url), 'utf8');
-  const localizedRuntime = readFileSync(new URL('../src/i18n/runtimeClient.ts', import.meta.url), 'utf8');
 
   assert.match(localizedHome, /import AppShell from '..\/..\/layouts\/AppShell\.astro'/);
   assert.match(localizedTerm, /import AppShell from '..\/..\/..\/layouts\/AppShell\.astro'/);
@@ -83,12 +107,16 @@ test('localized routes use the same React app while keeping English bootstrap is
   assert.match(shell, /<ClientApp client:only="react" \/>/);
   assert.match(shell, /<LocalizedClientApp locale=\{localizedLocale\} initialTermKey=\{translationKey\} client:only="react" \/>/);
   assert.match(cover, /<LanguageSwitcher termKey=\{termKey\} \/>/);
+  assert.match(cover, /getUiStrings/);
+  assert.match(page, /getLocalizedTermPresentation/);
+  assert.match(page, /localizedTerm\.example/);
+  assert.match(page, /localizedTerm\.origin/);
+  assert.match(about, /getUiStrings/);
+  assert.match(indexOverlay, /getOverlayStrings/);
   assert.match(englishClient, /import App from '..\/App'/);
   assert.doesNotMatch(englishClient, /runtimeClient/);
   assert.match(localizedClient, /import App from '..\/App'/);
   assert.match(localizedClient, /prepareLocalizedRuntime/);
-  assert.match(localizedRuntime, /setText\(word, entry\.key\)/);
-  assert.match(localizedRuntime, /setText\(page\.querySelector\('\.definition'\), entry\.definition\)/);
   assert.doesNotMatch(localizedHome, /locale-term-card/);
 });
 
@@ -108,13 +136,14 @@ test('strict app routes reject extra path segments', () => {
   assert.equal(getLanguageSwitchPath('en', 'context window'), 'term/context-window/');
 });
 
-test('automatic language selection uses country first and protects the India default', () => {
+test('automatic language selection is IP-first, keeps India English and uses browser only without IP', () => {
   assert.equal(resolveAutoLocale('BR', ['en-US']), 'pt');
   assert.equal(resolveAutoLocale('ES', ['en-US']), 'es');
   assert.equal(resolveAutoLocale('DE', ['en-US']), 'de');
   assert.equal(resolveAutoLocale('BR', ['fr-FR', 'en-US']), 'pt');
   assert.equal(resolveAutoLocale('IN', ['en-IN']), null);
-  assert.equal(resolveAutoLocale('IN', ['hi-IN', 'en-IN']), 'hi');
+  assert.equal(resolveAutoLocale('IN', ['hi-IN', 'en-IN']), null);
+  assert.equal(resolveAutoLocale('US', ['fr-FR']), null);
   assert.equal(resolveAutoLocale(null, ['fr-FR']), 'fr');
 
   const source = readFileSync(new URL('../src/client/languagePreference.ts', import.meta.url), 'utf8');
@@ -123,6 +152,11 @@ test('automatic language selection uses country first and protects the India def
   const endpoint = readFileSync(new URL('../api/locale.js', import.meta.url), 'utf8');
   assert.match(source, /window\.location\.assign/);
   assert.match(source, /observeLanguageMenus/);
+  assert.match(source, /AUTO_SWITCH_SESSION_KEY/);
+  assert.match(source, /showAutomaticSwitchBanner/);
+  assert.match(source, /Keep \$\{languageName\}/);
+  assert.match(source, /Use English/);
+  assert.match(source, /sessionStorage/);
   assert.match(source, /localStorage\.removeItem\(PREFERENCE_KEY\)/);
   assert.match(source, /localStorage\.removeItem\(DISMISSAL_KEY\)/);
   assert.match(source, /syncLanguagePreferenceState/);
