@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Term, TermSelectionTarget } from '../../types/almanac';
 import { useDialogFocus } from '../../hooks/useDialogFocus';
+import { getOverlayStrings } from '../../i18n/overlayLocale';
 
 interface ListOverlayProps {
   isOpen: boolean;
@@ -19,17 +20,17 @@ export const ListOverlay: React.FC<ListOverlayProps> = ({
   onClose,
   onSelectTerm
 }) => {
+  const strings = getOverlayStrings();
   const dialogRef = useDialogFocus(isOpen, onClose);
   if (!isOpen) return null;
 
   const isBookmarks = kind === 'bookmarks';
-  const title = isBookmarks ? 'Bookmarks' : 'Reading history';
-  const eyebrow = isBookmarks
-    ? 'The AI Almanac · saved entries'
-    : 'The AI Almanac · recently opened';
+  const title = isBookmarks ? strings.bookmarks : strings.readingHistory;
+  const eyebrow = `The AI Almanac · ${isBookmarks ? strings.savedEntries : strings.recentlyOpened}`;
+  const emptyMessage = isBookmarks ? strings.noBookmarks : strings.noHistory;
 
   return (
-    <div className="overlay" id="listOverlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="overlay" id="listOverlay" onClick={(event) => event.target === event.currentTarget && onClose()}>
       <section
         ref={dialogRef}
         className="insert"
@@ -43,34 +44,34 @@ export const ListOverlay: React.FC<ListOverlayProps> = ({
             <small id="listEyebrow">{eyebrow}</small>
             <h2 id="listTitle">{title}</h2>
           </div>
-          <button className="close" type="button" onClick={onClose} aria-label={`Close ${title}`}>
+          <button className="close" type="button" onClick={onClose} aria-label={`${strings.close} ${title}`}>
             ×
           </button>
         </div>
 
         <div className="list" id="listContent">
           {words.length === 0 ? (
-            <div className="empty-state">No bookmarks yet.</div>
+            <div className="empty-state">{emptyMessage}</div>
           ) : (
             words.map((word) => {
-              const t = termsByWord[word.toLowerCase()];
-              if (!t) return null;
+              const term = termsByWord[word.toLowerCase()];
+              if (!term) return null;
               return (
                 <button
-                  key={t.word}
+                  key={term.word}
                   className="list-row"
                   type="button"
                   onClick={() => {
-                    onSelectTerm(t);
+                    onSelectTerm(term);
                     onClose();
                   }}
                 >
-                  <span className="list-letter">{t.word[0].toUpperCase()}</span>
+                  <span className="list-letter">{term.word[0].toUpperCase()}</span>
                   <span>
-                    <strong>{t.word}</strong>
-                    <span>{t.part}</span>
+                    <strong>{term.word}</strong>
+                    <span>{term.part}</span>
                   </span>
-                  <span>open →</span>
+                  <span>{strings.open} →</span>
                 </button>
               );
             })
