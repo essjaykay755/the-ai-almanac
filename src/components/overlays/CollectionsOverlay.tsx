@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Term, TermSelectionTarget } from '../../types/almanac';
 import { useDialogFocus } from '../../hooks/useDialogFocus';
+import { getOverlayStrings } from '../../i18n/overlayLocale';
 
 interface CollectionsOverlayProps {
   isOpen: boolean;
@@ -25,10 +26,9 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
   onDeleteCollection,
   onRemoveFromCollection
 }) => {
+  const strings = getOverlayStrings();
   const collectionNames = Object.keys(collections);
-  const [selectedCollection, setSelectedCollection] = useState<string>(
-    collectionNames[0] || 'Vibe coder essentials'
-  );
+  const [selectedCollection, setSelectedCollection] = useState<string>(collectionNames[0] || 'Vibe coder essentials');
   const [newCollectionName, setNewCollectionName] = useState('');
   const [editingCollection, setEditingCollection] = useState<string | null>(null);
   const [editedCollectionName, setEditedCollectionName] = useState('');
@@ -48,8 +48,8 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
     setPendingDeleteCollection(null);
   };
 
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreate = (event: React.FormEvent) => {
+    event.preventDefault();
     const trimmed = newCollectionName.trim();
     if (trimmed && onCreateCollection(trimmed)) {
       setSelectedCollection(trimmed);
@@ -70,10 +70,9 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
     setEditedCollectionName('');
   };
 
-  const handleRename = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRename = (event: React.FormEvent) => {
+    event.preventDefault();
     if (!currentCollectionName) return;
-
     const trimmed = editedCollectionName.trim();
     if (trimmed && onRenameCollection(currentCollectionName, trimmed)) {
       setSelectedCollection(trimmed);
@@ -81,19 +80,8 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
     }
   };
 
-  const handleDelete = () => {
-    if (!currentCollectionName) return;
-
-    setPendingDeleteCollection(currentCollectionName);
-  };
-
-  const cancelDelete = () => {
-    setPendingDeleteCollection(null);
-  };
-
   const confirmDelete = () => {
     if (!pendingDeleteCollection) return;
-
     const nextCollection = collectionNames.find((name) => name !== pendingDeleteCollection) || '';
     onDeleteCollection(pendingDeleteCollection);
     setSelectedCollection(nextCollection);
@@ -102,7 +90,7 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
   };
 
   return (
-    <div className="overlay" id="collectionsOverlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="overlay" id="collectionsOverlay" onClick={(event) => event.target === event.currentTarget && onClose()}>
       <section
         ref={dialogRef}
         className="insert"
@@ -113,12 +101,10 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
       >
         <div className="insert-head">
           <div>
-            <small>The AI Almanac · reading lists</small>
-            <h2 id="collectionsTitle">Collections</h2>
+            <small>The AI Almanac · {strings.readingLists}</small>
+            <h2 id="collectionsTitle">{strings.collections}</h2>
           </div>
-          <button className="close" type="button" onClick={onClose} aria-label="Close collections">
-            ×
-          </button>
+          <button className="close" type="button" onClick={onClose} aria-label={`${strings.close} ${strings.collections}`}>×</button>
         </div>
 
         <div className="collections-layout">
@@ -138,14 +124,12 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
             <form onSubmit={handleCreate} className="collection-new">
               <input
                 id="inlineCollectionName"
-                placeholder="New collection"
+                placeholder={strings.newCollection}
                 maxLength={36}
                 value={newCollectionName}
-                onChange={(e) => setNewCollectionName(e.target.value)}
+                onChange={(event) => setNewCollectionName(event.target.value)}
               />
-              <button type="submit" className="mini-btn" id="inlineCreateCollection">
-                +
-              </button>
+              <button type="submit" className="mini-btn" id="inlineCreateCollection">+</button>
             </form>
           </aside>
 
@@ -156,93 +140,73 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
                   <form onSubmit={handleRename} className="collection-rename-form">
                     <input
                       id="editCollectionName"
-                      aria-label="Collection name"
+                      aria-label={strings.collectionName}
                       maxLength={36}
                       value={editedCollectionName}
-                      onChange={(e) => setEditedCollectionName(e.target.value)}
+                      onChange={(event) => setEditedCollectionName(event.target.value)}
                       autoFocus
                     />
-                    <button type="submit" className="mini-btn">
-                      Save
-                    </button>
-                    <button type="button" className="mini-btn" onClick={cancelRename}>
-                      Cancel
-                    </button>
+                    <button type="submit" className="mini-btn">{strings.save}</button>
+                    <button type="button" className="mini-btn" onClick={cancelRename}>{strings.cancel}</button>
                   </form>
                 ) : (
                   <>
                     <div>
-                      <small>Collection · {currentItems.length} entries</small>
+                      <small>{strings.collection} · {currentItems.length} {strings.collectionEntries}</small>
                       <h3>{currentCollectionName}</h3>
                     </div>
                     {pendingDeleteCollection === currentCollectionName ? (
                       <div className="collection-delete-confirm" role="alert">
-                        <span>Delete this collection?</span>
-                        <button type="button" className="mini-btn" onClick={cancelDelete}>
-                          Cancel
-                        </button>
-                        <button type="button" className="mini-btn collection-confirm-delete" onClick={confirmDelete}>
-                          Delete
-                        </button>
+                        <span>{strings.deleteCollectionQuestion}</span>
+                        <button type="button" className="mini-btn" onClick={() => setPendingDeleteCollection(null)}>{strings.cancel}</button>
+                        <button type="button" className="mini-btn collection-confirm-delete" onClick={confirmDelete}>{strings.delete}</button>
                       </div>
                     ) : (
                       <div className="collection-actions">
-                        <button type="button" className="mini-btn" onClick={beginRename}>
-                          Rename
-                        </button>
-                        <button type="button" className="mini-btn collection-delete" onClick={handleDelete}>
-                          Delete
-                        </button>
+                        <button type="button" className="mini-btn" onClick={beginRename}>{strings.rename}</button>
+                        <button type="button" className="mini-btn collection-delete" onClick={() => setPendingDeleteCollection(currentCollectionName)}>{strings.delete}</button>
                       </div>
                     )}
                   </>
                 )}
               </div>
             ) : (
-              <div className="empty-state collection-empty-state">
-                No collections yet. Create one from the field on the left.
-              </div>
+              <div className="empty-state collection-empty-state">{strings.noCollections}</div>
             )}
 
             {currentCollectionName && (
               <div className="list" id="collectionItems">
                 {currentItems.length === 0 ? (
-                  <div className="empty-state">This collection has no entries yet.</div>
+                  <div className="empty-state">{strings.emptyCollection}</div>
                 ) : (
                   currentItems.map((word, index) => {
-                    const t = termsByWord[word.toLowerCase()];
-                    const displayWord = t?.word || word;
+                    const term = termsByWord[word.toLowerCase()];
+                    const displayWord = term?.word || word;
                     return (
                       <div key={`${word}-${index}`} className="list-row collection-list-row">
                         <span className="list-letter">{displayWord[0]?.toUpperCase()}</span>
-                        {t ? (
+                        {term ? (
                           <button
                             type="button"
                             className="collection-item-open"
                             onClick={() => {
-                              onSelectTerm(t);
+                              onSelectTerm(term);
                               onClose();
                             }}
                           >
-                            <span className="collection-item-copy">
-                              <strong>{t.word}</strong>
-                              <span>{t.part}</span>
-                            </span>
-                            <span className="collection-item-open-label">open →</span>
+                            <span className="collection-item-copy"><strong>{term.word}</strong><span>{term.part}</span></span>
+                            <span className="collection-item-open-label">{strings.open} →</span>
                           </button>
                         ) : (
-                          <span className="collection-item-copy collection-item-missing">
-                            <strong>{word}</strong>
-                            <span>Entry unavailable</span>
-                          </span>
+                          <span className="collection-item-copy collection-item-missing"><strong>{word}</strong><span>{strings.entryUnavailable}</span></span>
                         )}
                         <button
                           type="button"
                           className="collection-remove"
-                          aria-label={`Remove ${displayWord} from ${currentCollectionName}`}
+                          aria-label={`${strings.remove} ${displayWord} · ${currentCollectionName}`}
                           onClick={() => onRemoveFromCollection(currentCollectionName, word)}
                         >
-                          remove
+                          {strings.remove}
                         </button>
                       </div>
                     );
@@ -253,7 +217,6 @@ export const CollectionsOverlay: React.FC<CollectionsOverlayProps> = ({
           </section>
         </div>
       </section>
-
     </div>
   );
 };
