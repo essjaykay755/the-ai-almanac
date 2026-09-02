@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import type { Term, TermSelectionTarget } from '../../types/almanac';
 import { normalizeText } from '../../utils/search';
 import { useDialogFocus } from '../../hooks/useDialogFocus';
+import { getOverlayStrings } from '../../i18n/overlayLocale';
+import { getUiStrings } from '../../i18n/reactLocale';
 
 interface IndexOverlayProps {
   isOpen: boolean;
@@ -16,6 +18,8 @@ export const IndexOverlay: React.FC<IndexOverlayProps> = ({
   onClose,
   onSelectTerm
 }) => {
+  const strings = getOverlayStrings();
+  const ui = getUiStrings();
   const [indexQuery, setIndexQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const dialogRef = useDialogFocus(isOpen, onClose);
@@ -28,8 +32,8 @@ export const IndexOverlay: React.FC<IndexOverlayProps> = ({
   }, [isOpen]);
 
   const categories = useMemo(
-    () => Array.from(new Set(terms.map((term) => term.category || 'AI Concepts'))).sort(),
-    [terms]
+    () => Array.from(new Set(terms.map((term) => term.category || ui.aiConcepts))).sort(),
+    [terms, ui.aiConcepts]
   );
 
   const filteredTerms = useMemo(() => {
@@ -40,15 +44,15 @@ export const IndexOverlay: React.FC<IndexOverlayProps> = ({
       term.word,
       term.category,
       ...term.aliases
-    ].join(' ')).includes(query) && (!categoryFilter || (term.category || 'AI Concepts') === categoryFilter));
-  }, [categoryFilter, indexQuery, terms]);
+    ].join(' ')).includes(query) && (!categoryFilter || (term.category || ui.aiConcepts) === categoryFilter));
+  }, [categoryFilter, indexQuery, terms, ui.aiConcepts]);
 
   const groups = useMemo(() => {
     const map: Record<string, Term[]> = {};
-    filteredTerms.forEach((t) => {
-      const l = t.word[0].toUpperCase();
-      if (!map[l]) map[l] = [];
-      map[l].push(t);
+    filteredTerms.forEach((term) => {
+      const letter = term.word[0].toUpperCase();
+      if (!map[letter]) map[letter] = [];
+      map[letter].push(term);
     });
     return map;
   }, [filteredTerms]);
@@ -64,7 +68,7 @@ export const IndexOverlay: React.FC<IndexOverlayProps> = ({
   };
 
   return (
-    <div className="overlay" id="indexOverlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="overlay" id="indexOverlay" onClick={(event) => event.target === event.currentTarget && onClose()}>
       <section
         ref={dialogRef}
         className="insert index-insert"
@@ -76,45 +80,45 @@ export const IndexOverlay: React.FC<IndexOverlayProps> = ({
       >
         <div className="insert-head">
           <div>
-            <small>The AI Almanac · complete index</small>
-            <h2 id="index-title">Every filed term</h2>
+            <small>The AI Almanac · {strings.completeIndex}</small>
+            <h2 id="index-title">{strings.everyFiledTerm}</h2>
           </div>
-          <button className="close" type="button" onClick={onClose} aria-label="Close complete index">
+          <button className="close" type="button" onClick={onClose} aria-label={`${strings.close} ${strings.completeIndex}`}>
             ×
           </button>
         </div>
 
         <div className="index-summary" id="indexSummary" aria-live="polite">
-          {filteredTerms.length} of {terms.length} entries · {sortedLetters.length} index sections · updated field edition
+          {filteredTerms.length} / {terms.length} {strings.entries} · {sortedLetters.length} {strings.indexSections} · {strings.updatedFieldEdition}
         </div>
 
         <div className="index-tools">
           <div className="index-filter-field">
-            <label className="index-search-label" htmlFor="indexSearch">Filter the complete index</label>
+            <label className="index-search-label" htmlFor="indexSearch">{strings.filterIndex}</label>
             <input
               id="indexSearch"
               className="index-search"
               type="search"
-              placeholder="Filter terms, aliases, or categories…"
+              placeholder={strings.filterTerms}
               value={indexQuery}
               onChange={(event) => setIndexQuery(event.target.value)}
             />
           </div>
           <div className="index-filter-field">
-            <label className="index-search-label" htmlFor="indexCategoryFilter">Filter by category</label>
+            <label className="index-search-label" htmlFor="indexCategoryFilter">{strings.filterCategory}</label>
             <select
               id="indexCategoryFilter"
               className="index-search index-category-filter"
               value={categoryFilter}
               onChange={(event) => setCategoryFilter(event.target.value)}
             >
-              <option value="">All categories</option>
+              <option value="">{strings.allCategories}</option>
               {categories.map((category) => <option key={category} value={category}>{category}</option>)}
             </select>
           </div>
         </div>
 
-        <nav className="index-jump" aria-label="Jump to index letter">
+        <nav className="index-jump" aria-label={strings.jumpToLetter}>
           {'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map((letter) => {
             const isAvailable = Boolean(groups[letter]);
             return (
@@ -122,7 +126,7 @@ export const IndexOverlay: React.FC<IndexOverlayProps> = ({
                 key={letter}
                 type="button"
                 disabled={!isAvailable}
-                aria-label={isAvailable ? `Jump to ${letter}` : `No entries under ${letter}`}
+                aria-label={isAvailable ? `${strings.jumpToLetter}: ${letter}` : `${strings.noEntriesUnder} ${letter}`}
                 onClick={() => jumpToLetter(letter)}
               >
                 {letter}
@@ -134,25 +138,25 @@ export const IndexOverlay: React.FC<IndexOverlayProps> = ({
         <div className="full-index" id="fullIndex">
           {sortedLetters.length === 0 ? (
             <div className="index-empty" role="status">
-              No terms match “{indexQuery}”.{' '}
-              <button type="button" onClick={() => setIndexQuery('')}>Clear filter</button>
+              {strings.noTermsMatch} “{indexQuery}”.{' '}
+              <button type="button" onClick={() => setIndexQuery('')}>{strings.clearFilter}</button>
             </div>
           ) : sortedLetters.map((letter) => (
             <section key={letter} id={`index-letter-${letter}`} className="index-letter-group">
               <div className="index-letter">{letter}</div>
               <div className="index-terms">
-                {groups[letter].map((t) => (
+                {groups[letter].map((term) => (
                   <button
-                    key={t.word}
+                    key={term.word}
                     className="index-term"
-                    title={t.category || 'AI Concepts'}
+                    title={term.category || ui.aiConcepts}
                     type="button"
                     onClick={() => {
-                      onSelectTerm(t);
+                      onSelectTerm(term);
                       onClose();
                     }}
                   >
-                    {t.word}
+                    {term.word}
                   </button>
                 ))}
               </div>

@@ -2,37 +2,15 @@ import { getLocaleFromPathname, type SupportedLocale } from '../i18n/catalog.ts'
 
 const PREFERENCE_KEY = 'aiAlmanacLanguage';
 const DISMISSAL_KEY = 'aiAlmanacLanguageSuggestionDismissed';
+const AUTO_SWITCH_SESSION_KEY = 'aiAlmanacAutomaticLanguageSwitch';
 
 const supportedLocales = ['es', 'pt', 'it', 'fr', 'de', 'hi'] as const;
 export type AutoLocale = (typeof supportedLocales)[number];
 
 const countryDefaultLocale: Partial<Record<string, AutoLocale>> = {
-  AR: 'es',
-  AT: 'de',
-  BO: 'es',
-  BR: 'pt',
-  CL: 'es',
-  CO: 'es',
-  CR: 'es',
-  CU: 'es',
-  DE: 'de',
-  DO: 'es',
-  EC: 'es',
-  ES: 'es',
-  FR: 'fr',
-  GT: 'es',
-  HN: 'es',
-  IT: 'it',
-  MX: 'es',
-  NI: 'es',
-  PA: 'es',
-  PE: 'es',
-  PR: 'es',
-  PT: 'pt',
-  PY: 'es',
-  SV: 'es',
-  UY: 'es',
-  VE: 'es'
+  AR: 'es', AT: 'de', BO: 'es', BR: 'pt', CL: 'es', CO: 'es', CR: 'es', CU: 'es', DE: 'de',
+  DO: 'es', EC: 'es', ES: 'es', FR: 'fr', GT: 'es', HN: 'es', IT: 'it', MX: 'es', NI: 'es',
+  PA: 'es', PE: 'es', PR: 'es', PT: 'pt', PY: 'es', SV: 'es', UY: 'es', VE: 'es'
 };
 
 function normalizeLanguage(value: string): AutoLocale | null {
@@ -49,15 +27,16 @@ export function getPreferredBrowserLocale(languages: readonly string[]): AutoLoc
 }
 
 export function resolveAutoLocale(country: string | null, browserLanguages: readonly string[]): AutoLocale | null {
-  const browserLocale = getPreferredBrowserLocale(browserLanguages);
   const region = country?.trim().toUpperCase() || null;
 
-  // India stays English unless the browser itself prefers Hindi.
-  if (region === 'IN') return browserLocale === 'hi' ? 'hi' : null;
+  // India intentionally defaults to English regardless of browser language.
+  if (region === 'IN') return null;
 
-  // Country is the primary automatic signal. Browser language is the fallback.
-  if (region && countryDefaultLocale[region]) return countryDefaultLocale[region] || null;
-  return browserLocale;
+  // A successfully detected country is authoritative. Unsupported countries stay English.
+  if (region) return countryDefaultLocale[region] || null;
+
+  // Browser language is only a fallback when IP country detection is unavailable.
+  return getPreferredBrowserLocale(browserLanguages);
 }
 
 function getBrowserLanguages(): string[] {
@@ -68,6 +47,11 @@ function getBrowserLanguages(): string[] {
 
 function getLanguageLink(locale: string): HTMLAnchorElement | null {
   return document.querySelector<HTMLAnchorElement>(`[data-language-code="${locale}"]`);
+}
+
+function getLanguageName(locale: string): string {
+  const link = getLanguageLink(locale);
+  return link?.querySelector('span')?.textContent?.trim() || locale.toUpperCase();
 }
 
 function getCurrentLocale(): SupportedLocale {
@@ -101,6 +85,33 @@ function clearLanguagePreferenceMemory(): void {
   } catch {}
 }
 
+function rememberAutomaticSwitch(locale: AutoLocale, country: string | null): void {
+  try {
+    sessionStorage.setItem(AUTO_SWITCH_SESSION_KEY, JSON.stringify({ locale, country }));
+  } catch {}
+}
+
+function readAutomaticSwitch(): { locale: AutoLocale; country: string | null } | null {
+  try {
+    const raw = sessionStorage.getItem(AUTO_SWITCH_SESSION_KEY);
+    if (!raw) return null;
+    const value = JSON.parse(raw) as { locale?: unknown; country?: unknown };
+    if (!supportedLocales.includes(value.locale as AutoLocale)) return null;
+    return {
+      locale: value.locale as AutoLocale,
+      country: typeof value.country === 'string' ? value.country : null
+    };
+  } catch {
+    return null;
+  }
+}
+
+function clearAutomaticSwitch(): void {
+  try {
+    sessionStorage.removeItem(AUTO_SWITCH_SESSION_KEY);
+  } catch {}
+}
+
 function syncLanguagePreferenceState(): void {
   const savedLanguage = getSavedLanguage();
 
@@ -110,48 +121,104 @@ function syncLanguagePreferenceState(): void {
   });
 
   document.querySelectorAll<HTMLAnchorElement>('[data-language-code]').forEach((link) => {
-    if (savedLanguage && link.dataset.languageCode === savedLanguage) {
-      link.dataset.languageRemembered = 'true';
-    } else {
-      delete link.dataset.languageRemembered;
-    }
+    if (savedLanguage && link.dataset.languageCode === savedLanguage) link.dataset.languageRemembered = 'true';
+    else delete link.dataset.languageRemembered;
   });
 }
 
 function closeLanguageMenus(): void {
-  document.querySelectorAll('details.site-language-switcher').forEach((details) => {
-    details.removeAttribute('open');
-  });
+  document.querySelectorAll('details.site-language-switcher').forEach((details) => details.removeAttribute('open'));
+}
+
+function isSameDestination(link: HTMLAnchorElement): boolean {
+  const next = new URL(link.href, window.location.href);
+  const current = new URL(window.location.href);
+  return next.origin === current.origin && next.pathname === current.pathname && next.search === current.search;
 }
 
 function navigateToLocale(locale: AutoLocale): void {
   const link = getLanguageLink(locale);
-  if (!link) return;
-
-  const next = new URL(link.href, window.location.href);
-  const current = new URL(window.location.href);
-  if (
-    next.origin === current.origin &&
-    next.pathname === current.pathname &&
-    next.search === current.search
-  ) return;
-
-  window.location.assign(next.href);
+  if (!link || isSameDestination(link)) return;
+  window.location.assign(link.href);
 }
 
 function navigateToEnglish(): void {
   const link = getLanguageLink('en');
-  if (!link) return;
+  if (!link || isSameDestination(link)) return;
+  window.location.assign(link.href);
+}
 
-  const next = new URL(link.href, window.location.href);
-  const current = new URL(window.location.href);
-  if (
-    next.origin === current.origin &&
-    next.pathname === current.pathname &&
-    next.search === current.search
-  ) return;
+function getCountryName(country: string | null): string | null {
+  if (!country) return null;
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'region' }).of(country) || country;
+  } catch {
+    return country;
+  }
+}
 
-  window.location.assign(next.href);
+function showAutomaticSwitchBanner(): void {
+  const pending = readAutomaticSwitch();
+  if (!pending || pending.locale !== getCurrentLocale()) return;
+
+  const host = document.querySelector<HTMLElement>('[data-language-suggestion-host]');
+  const englishLink = getLanguageLink('en');
+  if (!host || !englishLink || host.querySelector('[data-language-suggestion]')) return;
+
+  const languageName = getLanguageName(pending.locale);
+  const countryName = getCountryName(pending.country);
+  const card = document.createElement('aside');
+  card.className = 'site-language-suggestion';
+  card.dataset.languageSuggestion = pending.locale;
+  card.setAttribute('role', 'status');
+  card.setAttribute('aria-live', 'polite');
+
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.className = 'site-language-suggestion-close';
+  closeButton.setAttribute('aria-label', 'Dismiss language notice');
+  closeButton.textContent = '×';
+
+  const message = document.createElement('p');
+  message.textContent = countryName
+    ? `We switched The AI Almanac to ${languageName} based on your location in ${countryName}.`
+    : `We switched The AI Almanac to ${languageName} based on your browser language.`;
+
+  const actions = document.createElement('div');
+  actions.className = 'site-language-suggestion-actions';
+
+  const keepButton = document.createElement('button');
+  keepButton.type = 'button';
+  keepButton.className = 'site-language-suggestion-primary';
+  keepButton.textContent = `Keep ${languageName}`;
+
+  const englishButton = document.createElement('button');
+  englishButton.type = 'button';
+  englishButton.className = 'site-language-suggestion-secondary';
+  englishButton.textContent = 'Use English';
+
+  const dismiss = () => {
+    clearAutomaticSwitch();
+    card.remove();
+  };
+
+  closeButton.addEventListener('click', dismiss);
+  keepButton.addEventListener('click', () => {
+    rememberLanguageChoice(pending.locale);
+    clearDismissedLocale();
+    syncLanguagePreferenceState();
+    dismiss();
+  });
+  englishButton.addEventListener('click', () => {
+    rememberLanguageChoice('en');
+    clearDismissedLocale();
+    clearAutomaticSwitch();
+    window.location.assign(englishLink.href);
+  });
+
+  actions.append(keepButton, englishButton);
+  card.append(closeButton, message, actions);
+  host.append(card);
 }
 
 let controlsBound = false;
@@ -172,6 +239,7 @@ function bindLanguageControls(): void {
     const link = target.closest<HTMLAnchorElement>('[data-language-code]');
     if (link) {
       cancelLanguagePreferenceInitialization();
+      clearAutomaticSwitch();
       rememberLanguageChoice(link.dataset.languageCode || 'en');
       clearDismissedLocale();
       syncLanguagePreferenceState();
@@ -182,10 +250,10 @@ function bindLanguageControls(): void {
     if (!autoButton) return;
 
     cancelLanguagePreferenceInitialization();
+    clearAutomaticSwitch();
     clearLanguagePreferenceMemory();
     syncLanguagePreferenceState();
     closeLanguageMenus();
-
     void initializeLanguagePreference(true);
   });
 }
@@ -199,12 +267,9 @@ function observeLanguageMenus(callback: () => void): void {
   if (document.querySelector('.site-language-switcher')) callback();
 
   const observer = new MutationObserver((mutations) => {
-    const hasNewMenu = mutations.some((mutation) =>
-      Array.from(mutation.addedNodes).some(addedLanguageMenu)
-    );
+    const hasNewMenu = mutations.some((mutation) => Array.from(mutation.addedNodes).some(addedLanguageMenu));
     if (hasNewMenu) callback();
   });
-
   observer.observe(document.body, { childList: true, subtree: true });
 }
 
@@ -225,31 +290,38 @@ async function getIpCountry(): Promise<string | null> {
 async function initializeLanguagePreference(allowLocalizedPage = false): Promise<void> {
   const requestId = ++languagePreferenceRequestId;
   const currentLocale = getCurrentLocale();
+
+  // Direct localized links from search or sharing are respected. Automatic mode is the exception.
   if (!allowLocalizedPage && (currentLocale !== 'en' || document.documentElement.lang !== 'en')) return;
 
   const savedLanguage = getSavedLanguage();
   if (savedLanguage === 'en') return;
 
   if (supportedLocales.includes(savedLanguage as AutoLocale)) {
-    navigateToLocale(savedLanguage as AutoLocale);
+    if (currentLocale === 'en') navigateToLocale(savedLanguage as AutoLocale);
     return;
   }
 
   const country = await getIpCountry();
   if (requestId !== languagePreferenceRequestId) return;
 
-  // A manual choice may have been made while the country lookup was pending.
-  // Let the link navigation finish instead of overriding it with stale detection.
   const latestSavedLanguage = getSavedLanguage();
-  if (latestSavedLanguage || (!allowLocalizedPage && document.documentElement.lang !== 'en')) return;
+  if (latestSavedLanguage) return;
 
   const locale = resolveAutoLocale(country, getBrowserLanguages());
   if (requestId !== languagePreferenceRequestId) return;
+
   if (locale) {
-    if (locale !== getCurrentLocale()) navigateToLocale(locale);
+    rememberAutomaticSwitch(locale, country);
+    if (locale !== getCurrentLocale()) {
+      navigateToLocale(locale);
+      return;
+    }
+    showAutomaticSwitchBanner();
     return;
   }
 
+  clearAutomaticSwitch();
   if (allowLocalizedPage && getCurrentLocale() !== 'en') navigateToEnglish();
 }
 
@@ -259,6 +331,7 @@ function bootLanguagePreference(): void {
   let initialized = false;
   observeLanguageMenus(() => {
     syncLanguagePreferenceState();
+    showAutomaticSwitchBanner();
     if (initialized) return;
     initialized = true;
     void initializeLanguagePreference();
@@ -266,9 +339,6 @@ function bootLanguagePreference(): void {
 }
 
 if (typeof document !== 'undefined') {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootLanguagePreference, { once: true });
-  } else {
-    queueMicrotask(bootLanguagePreference);
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootLanguagePreference, { once: true });
+  else queueMicrotask(bootLanguagePreference);
 }
