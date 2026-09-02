@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useDialogFocus } from '../../hooks/useDialogFocus';
+import { getOverlayStrings } from '../../i18n/overlayLocale';
 
 interface PickerOverlayProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export const PickerOverlay: React.FC<PickerOverlayProps> = ({
   onClose,
   onAddToCollection
 }) => {
+  const strings = getOverlayStrings();
   const [newColName, setNewColName] = useState('');
   const dialogRef = useDialogFocus(isOpen, onClose);
 
@@ -21,8 +23,8 @@ export const PickerOverlay: React.FC<PickerOverlayProps> = ({
 
   const collectionNames = Object.keys(collections);
 
-  const handleCreateAndAdd = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateAndAdd = (event: React.FormEvent) => {
+    event.preventDefault();
     const trimmed = newColName.trim();
     if (trimmed) {
       onAddToCollection(trimmed);
@@ -31,7 +33,7 @@ export const PickerOverlay: React.FC<PickerOverlayProps> = ({
   };
 
   return (
-    <div className="overlay" id="pickerOverlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="overlay" id="pickerOverlay" onClick={(event) => event.target === event.currentTarget && onClose()}>
       <section
         ref={dialogRef}
         className="insert"
@@ -43,22 +45,16 @@ export const PickerOverlay: React.FC<PickerOverlayProps> = ({
       >
         <div className="insert-head">
           <div>
-            <small>Add this entry</small>
-            <h2 id="pickerTitle">Add to collection</h2>
+            <small>{strings.addThisEntry}</small>
+            <h2 id="pickerTitle">{strings.addToCollection}</h2>
           </div>
-          <button className="close" type="button" onClick={onClose} aria-label="Close collection picker">
-            ×
-          </button>
+          <button className="close" type="button" onClick={onClose} aria-label={strings.collectionPickerClose}>×</button>
         </div>
 
         <div className="picker" id="pickerList">
           {collectionNames.map((name) => (
-            <button
-              key={name}
-              type="button"
-              onClick={() => onAddToCollection(name)}
-            >
-              {name} <small>· {(collections[name] || []).length} entries</small>
+            <button key={name} type="button" onClick={() => onAddToCollection(name)}>
+              {name} <small>· {(collections[name] || []).length} {strings.collectionEntries}</small>
             </button>
           ))}
         </div>
@@ -66,14 +62,12 @@ export const PickerOverlay: React.FC<PickerOverlayProps> = ({
         <form onSubmit={handleCreateAndAdd} className="collection-new">
           <input
             id="newCollectionName"
-            placeholder="New collection name"
+            placeholder={strings.newCollectionName}
             maxLength={36}
             value={newColName}
-            onChange={(e) => setNewColName(e.target.value)}
+            onChange={(event) => setNewColName(event.target.value)}
           />
-          <button type="submit" className="mini-btn" id="createCollection">
-            Create
-          </button>
+          <button type="submit" className="mini-btn" id="createCollection">{strings.create}</button>
         </form>
       </section>
     </div>
