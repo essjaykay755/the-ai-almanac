@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { TutorialPlacement, TutorialStep } from './tutorialSteps';
 
 interface TutorialOverlayProps {
@@ -53,20 +53,32 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   const measureFrameRef = useRef<number | null>(null);
   const [targetRect, setTargetRect] = useState<RectPosition | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState<TooltipPosition | null>(null);
+  const [mobileSidebarCardMaxHeight, setMobileSidebarCardMaxHeight] = useState<number | null>(null);
 
   const resolveTarget = useCallback((step: TutorialStep): HTMLElement | null => {
     if (typeof document === 'undefined') return null;
 
     const compact = isCompactViewport();
-    const selectors = [
-      compact && step.mobileTarget ? step.mobileTarget : step.target,
-      compact ? step.target : step.mobileTarget,
-      step.fallbackTarget,
-      '#page',
-      '#mobileMenu'
-    ].filter((selector): selector is string => Boolean(selector));
+    const mobileSidebar = compact ? document.querySelector('#mobileSidebar') : null;
 
-    for (const selector of selectors) {
+    // On compact layouts the sidebar and page are separate visual surfaces. Do
+    // not briefly target the page while the drawer is still closing, or fall
+    // back to the hidden desktop sidebar while the mobile drawer is opening.
+    if (compact && step.region === 'page' && mobileSidebar && isVisible(mobileSidebar)) {
+      return null;
+    }
+
+    const selectors = compact && step.region === 'sidebar'
+      ? [step.mobileTarget]
+      : [
+          compact && step.mobileTarget ? step.mobileTarget : step.target,
+          compact ? step.target : step.mobileTarget,
+          step.fallbackTarget,
+          '#page',
+          '#mobileMenu'
+        ];
+
+    for (const selector of selectors.filter((value): value is string => Boolean(value))) {
       try {
         const element = document.querySelector(selector);
         if (element && isVisible(element)) return element;
@@ -87,6 +99,7 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
     if (!target) {
       setTargetRect(null);
       setTooltipPosition(null);
+      setMobileSidebarCardMaxHeight(null);
       return;
     }
 
@@ -105,6 +118,9 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       return;
     }
 
+    const compact = isCompactViewport();
+    const isMobileSidebarStep = compact && activeStep.region === 'sidebar';
+    const isMobilePageNavigationStep = compact && activeStep.id === 'page-navigation';
     const cardRect = card.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
@@ -112,6 +128,35 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
     const gap = viewportWidth <= 540 ? 12 : 18;
     const cardWidth = cardRect.width;
     const cardHeight = cardRect.height;
+
+    if (isMobileSidebarStep) {
+      // The mobile drawer leaves no useful horizontal space for a conventional
+      // tooltip. Reserve the non-interactive brand area above the navigation
+      // instead, so the tutorial never blankets the menu it is explaining.
+      const mobileNav = document.querySelector<HTMLElement>('#mobileSidebar #coverNav');
+      const navTop = mobileNav?.getBoundingClientRect().top ?? rect.top;
+      const availableHeight = Math.max(88, Math.floor(navTop - margin - gap));
+      setMobileSidebarCardMaxHeight(availableHeight);
+      setTooltipPosition({
+        top: margin,
+        left: clamp((viewportWidth - cardWidth) / 2, margin, viewportWidth - cardWidth - margin),
+        placement: 'top'
+      });
+      return;
+    }
+
+    setMobileSidebarCardMaxHeight(null);
+
+    if (isMobilePageNavigationStep) {
+      // Keep the bottom Previous / Next bar completely exposed. A top-docked
+      // coach card is stable and avoids the page-navigation target by design.
+      setTooltipPosition({
+        top: margin,
+        left: clamp((viewportWidth - cardWidth) / 2, margin, viewportWidth - cardWidth - margin),
+        placement: 'top'
+      });
+      return;
+    }
 
     const candidateWithoutClamp = (placement: Exclude<TutorialPlacement, 'auto'>): RectPosition => {
       let top = rect.top + rect.height / 2 - cardHeight / 2;
@@ -183,20 +228,34 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
     });
   }, [measure]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isOpen || !activeStep) return;
 
     const target = resolveTarget(activeStep);
     targetElementRef.current = target;
+
     if (target && activeStep.region === 'page') {
-      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      target.scrollIntoView({
-        behavior: reducedMotion ? 'auto' : 'smooth',
-        block: 'center',
-        inline: 'nearest'
-      });
+      const rect = target.getBoundingClientRect();
+      const viewportMargin = 16;
+      const isFullyVisible =
+        rect.top >= viewportMargin &&
+        rect.bottom <= window.innerHeight - viewportMargin &&
+        rect.left >= viewportMargin &&
+        rect.right <= window.innerWidth - viewportMargin;
+
+      // Smooth centering was making the spotlight and card visibly chase the
+      // target for a few hundred milliseconds. Only move when necessary, and
+      // do it synchronously before paint so each tutorial step opens settled.
+      if (!isFullyVisible) {
+        target.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest',
+          inline: 'nearest'
+        });
+      }
     }
 
+    measure();
     const firstFrame = window.requestAnimationFrame(scheduleMeasure);
     const settleTimer = window.setTimeout(scheduleMeasure, 320);
 
@@ -204,7 +263,7 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       window.cancelAnimationFrame(firstFrame);
       window.clearTimeout(settleTimer);
     };
-  }, [activeStep, isOpen, resolveTarget, scheduleMeasure]);
+  }, [activeStep, isOpen, measure, resolveTarget, scheduleMeasure]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -326,6 +385,11 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 
   if (!isOpen || !activeStep || steps.length === 0) return null;
 
+  const compact = isCompactViewport();
+  const isMobileSidebarStep = compact && activeStep.region === 'sidebar';
+  const isMobilePageNavigationStep = compact && activeStep.id === 'page-navigation';
+  const isCompactDockedStep = isMobileSidebarStep || isMobilePageNavigationStep;
+  const isWaitingForMobileSurface = compact && targetRect === null;
   const progress = ((activeStepIndex + 1) / steps.length) * 100;
   const cardStyle: React.CSSProperties = tooltipPosition
     ? {
@@ -338,6 +402,18 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         transform: 'translate(-50%, -50%)'
       };
 
+  if (isWaitingForMobileSurface) {
+    cardStyle.visibility = 'hidden';
+  }
+  if (isMobileSidebarStep && mobileSidebarCardMaxHeight !== null) {
+    cardStyle.maxHeight = `${mobileSidebarCardMaxHeight}px`;
+  } else if (isMobilePageNavigationStep) {
+    cardStyle.maxHeight = '220px';
+  }
+  if (isCompactDockedStep) {
+    cardStyle.padding = '12px 14px 10px';
+  }
+
   const spotlightStyle: React.CSSProperties | undefined = targetRect
     ? {
         top: `${Math.max(6, targetRect.top - 7)}px`,
@@ -345,6 +421,39 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         width: `${targetRect.width + 14}px`,
         height: `${targetRect.height + 14}px`
       }
+    : undefined;
+
+  const compactHeadStyle: React.CSSProperties | undefined = isCompactDockedStep
+    ? { gap: '10px', paddingBottom: '6px' }
+    : undefined;
+  const compactEyebrowStyle: React.CSSProperties | undefined = isCompactDockedStep
+    ? { fontSize: '7px', lineHeight: 1.2 }
+    : undefined;
+  const compactHeadingStyle: React.CSSProperties | undefined = isCompactDockedStep
+    ? { fontSize: '21px', lineHeight: 1.05, margin: 0 }
+    : undefined;
+  const compactBodyStyle: React.CSSProperties | undefined = isCompactDockedStep
+    ? {
+        margin: '7px 0 10px',
+        fontSize: '13px',
+        lineHeight: 1.35,
+        display: '-webkit-box',
+        WebkitBoxOrient: 'vertical',
+        WebkitLineClamp: isMobileSidebarStep ? 2 : 3,
+        overflow: 'hidden'
+      }
+    : undefined;
+  const compactProgressStyle: React.CSSProperties | undefined = isCompactDockedStep
+    ? { margin: '6px 0 8px' }
+    : undefined;
+  const compactActionsStyle: React.CSSProperties | undefined = isCompactDockedStep
+    ? { marginTop: 0 }
+    : undefined;
+  const compactButtonStyle: React.CSSProperties | undefined = isCompactDockedStep
+    ? { padding: '7px 11px', minHeight: '34px', fontSize: '11px' }
+    : undefined;
+  const compactSkipStyle: React.CSSProperties | undefined = isCompactDockedStep
+    ? { marginTop: '5px', padding: '2px 4px', fontSize: '9px' }
     : undefined;
 
   return (
@@ -355,7 +464,7 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 
       <section
         ref={cardRef}
-        className={`tutorial-card${tooltipPosition ? ' is-positioned' : ''}`}
+        className={`tutorial-card${tooltipPosition ? ' is-positioned' : ''}${isCompactDockedStep ? ' tutorial-card-compact-docked' : ''}`}
         style={cardStyle}
         role="dialog"
         aria-modal="true"
@@ -363,9 +472,9 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         aria-describedby={`tutorial-body-${activeStep.id}`}
         tabIndex={-1}
       >
-        <div className="tutorial-card-head">
+        <div className="tutorial-card-head" style={compactHeadStyle}>
           <div>
-            <small>How to use The AI Almanac</small>
+            <small style={compactEyebrowStyle}>How to use The AI Almanac</small>
             <div className="tutorial-step-count" aria-live="polite">
               Step {activeStepIndex + 1} of {steps.length}
             </div>
@@ -375,26 +484,54 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
           </button>
         </div>
 
-        <div className="tutorial-progress" role="progressbar" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={activeStepIndex + 1}>
+        <div
+          className="tutorial-progress"
+          style={compactProgressStyle}
+          role="progressbar"
+          aria-valuemin={1}
+          aria-valuemax={steps.length}
+          aria-valuenow={activeStepIndex + 1}
+        >
           <span style={{ width: `${progress}%` }} />
         </div>
 
-        <h2 ref={headingRef} id={`tutorial-title-${activeStep.id}`} tabIndex={-1}>
+        <h2
+          ref={headingRef}
+          id={`tutorial-title-${activeStep.id}`}
+          style={compactHeadingStyle}
+          tabIndex={-1}
+        >
           {activeStep.title}
         </h2>
-        <p id={`tutorial-body-${activeStep.id}`}>{activeStep.body}</p>
+        <p id={`tutorial-body-${activeStep.id}`} style={compactBodyStyle}>{activeStep.body}</p>
 
-        <div className="tutorial-actions">
-          <button type="button" className="tutorial-secondary" onClick={handlePrevious} disabled={activeStepIndex === 0}>
+        <div className="tutorial-actions" style={compactActionsStyle}>
+          <button
+            type="button"
+            className="tutorial-secondary"
+            style={compactButtonStyle}
+            onClick={handlePrevious}
+            disabled={activeStepIndex === 0}
+          >
             Back
           </button>
-          <button type="button" className="tutorial-primary" onClick={handleNext}>
+          <button
+            type="button"
+            className="tutorial-primary"
+            style={compactButtonStyle}
+            onClick={handleNext}
+          >
             {activeStepIndex === steps.length - 1 ? 'Finish' : 'Next'}
             <span aria-hidden="true">→</span>
           </button>
         </div>
 
-        <button type="button" className="tutorial-skip" onClick={onClose}>
+        <button
+          type="button"
+          className="tutorial-skip"
+          style={compactSkipStyle}
+          onClick={onClose}
+        >
           Skip tutorial
         </button>
       </section>
