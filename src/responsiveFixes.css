@@ -111,6 +111,48 @@
   }
 
   /*
+   * Keep the drawer itself fixed to the viewport. The navigation list is the
+   * only scrolling region, so short screens cannot push menu items into the
+   * sound controls. This also overrides the legacy short-height rule that made
+   * the entire sidebar scroll as one block.
+   */
+  .cover.mobile-sidebar {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .cover.mobile-sidebar .brand,
+  .cover.mobile-sidebar .cover-divider-mark,
+  .cover.mobile-sidebar .cover-sound-panel {
+    flex: 0 0 auto;
+  }
+
+  .cover.mobile-sidebar .cover-nav,
+  .cover.mobile-sidebar .cover-nav:has(.site-language-switcher[open]) {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scrollbar-width: none;
+  }
+
+  .cover.mobile-sidebar .cover-nav::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  .cover.mobile-sidebar .cover-sound-panel {
+    position: relative;
+    z-index: 4;
+    margin-top: 0;
+  }
+
+  /*
    * iPhone Safari fix: pin Previous / Page / Next directly to the visual
    * viewport. Keeping this bar in normal page flow proved unreliable on a real
    * device because Safari can size the page/3D book tree differently from its
@@ -209,6 +251,47 @@
   /* Keep the alphabet rail above the floating navigation strip. */
   .tabs {
     bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/*
+ * Desktop/tablet guard rail for unusually short windows. Match the mobile
+ * drawer behavior: keep the footer controls available and scroll only nav.
+ */
+@media (min-width: 761px) and (max-height: 620px) {
+  .cover {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .cover .brand,
+  .cover .cover-divider-mark,
+  .cover .cover-sound-panel {
+    flex: 0 0 auto;
+  }
+
+  .cover .cover-nav,
+  .cover .cover-nav:has(.site-language-switcher[open]) {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: none;
+  }
+
+  .cover .cover-nav::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  .cover .cover-sound-panel {
+    position: static;
+    z-index: 4;
+    margin-top: 12px;
   }
 }
 
