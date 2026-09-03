@@ -1,0 +1,65 @@
+/*
+ * Sidebar layout invariant
+ * ------------------------
+ * The sound controls are a footer, never an overlay. Navigation is the only
+ * cover region allowed to shrink and scroll when vertical space runs out.
+ * Keep these rules loaded after the legacy responsive stylesheet so older
+ * breakpoint-specific overrides cannot reintroduce overlap.
+ */
+.cover:not(.mobile-sidebar),
+.cover.mobile-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.cover:not(.mobile-sidebar) .brand,
+.cover:not(.mobile-sidebar) .cover-divider-mark,
+.cover:not(.mobile-sidebar) .cover-sound-panel,
+.cover.mobile-sidebar .brand,
+.cover.mobile-sidebar .cover-divider-mark,
+.cover.mobile-sidebar .cover-sound-panel {
+  flex: 0 0 auto;
+}
+
+.cover:not(.mobile-sidebar) .cover-nav,
+.cover:not(.mobile-sidebar) .cover-nav:has(.site-language-switcher[open]),
+.cover.mobile-sidebar .cover-nav,
+.cover.mobile-sidebar .cover-nav:has(.site-language-switcher[open]) {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+}
+
+.cover:not(.mobile-sidebar) .cover-nav::-webkit-scrollbar,
+.cover.mobile-sidebar .cover-nav::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.cover:not(.mobile-sidebar) .cover-sound-panel,
+.cover.mobile-sidebar .cover-sound-panel {
+  position: static;
+  z-index: 4;
+  margin-top: auto;
+}
+
+/* On very short covers, trade decoration for usable navigation space. */
+@media (max-height: 560px) {
+  .cover:not(.mobile-sidebar) .cover-divider-mark,
+  .cover.mobile-sidebar .cover-divider-mark {
+    display: none;
+  }
+
+  .cover:not(.mobile-sidebar) .cover-sound-panel,
+  .cover.mobile-sidebar .cover-sound-panel {
+    padding-top: 10px;
+  }
+}
