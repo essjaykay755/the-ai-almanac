@@ -29,10 +29,17 @@ async function expectTutorialCardClearOf(page: Page, targetSelector: string) {
   }).toBe(0);
 }
 
+async function getRect(page: Page, selector: string) {
+  return page.locator(selector).evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { top: rect.top, left: rect.left, right: rect.right, bottom: rect.bottom };
+  });
+}
+
 test.describe('mobile tutorial', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test('keeps tutorial copy off highlighted controls and includes Language', async ({ page }) => {
+  test('keeps sidebar navigation uncovered, includes Language, and stabilizes page navigation', async ({ page }) => {
     await page.goto('/');
 
     await page.locator('#mobileMenu').click();
@@ -43,6 +50,7 @@ test.describe('mobile tutorial', () => {
     const tutorial = page.getByRole('dialog');
     await expect(tutorial).toBeVisible();
     await expect(tutorial.getByRole('heading', { name: 'A guide you can replay' })).toBeVisible();
+    await expectTutorialCardClearOf(page, '#mobileSidebar #coverNav');
 
     const next = tutorial.getByRole('button', { name: /Next/ });
     await next.click();
@@ -51,6 +59,7 @@ test.describe('mobile tutorial', () => {
     const languageControl = '#mobileSidebar .site-language-switcher summary';
     await expect(page.locator(languageControl)).toContainText('Language');
     await expectTutorialCardClearOf(page, languageControl);
+    await expectTutorialCardClearOf(page, '#mobileSidebar #coverNav');
 
     const cardMaxHeight = await page.locator('.tutorial-card').evaluate((element) =>
       parseFloat(getComputedStyle(element).maxHeight)
@@ -60,9 +69,39 @@ test.describe('mobile tutorial', () => {
     await next.click();
     await expect(tutorial.getByRole('heading', { name: 'Your navigation shelf' })).toBeVisible();
     await expectTutorialCardClearOf(page, '#mobileSidebar #navIndex');
+    await expectTutorialCardClearOf(page, '#mobileSidebar #coverNav');
 
     await next.click();
     await expect(tutorial.getByRole('heading', { name: 'Ask or search' })).toBeVisible();
     await expectTutorialCardClearOf(page, '#mobileSearch');
+
+    const remainingStepTitles = [
+      'Read the current entry',
+      'Change the explanation mode',
+      'Keep useful entries close',
+      'Save, collect and share',
+      'Follow the references',
+      'Pick up your reading trail',
+      'Jump by letter',
+      'Turn the pages'
+    ];
+
+    for (const title of remainingStepTitles) {
+      await next.click();
+      await expect(tutorial.getByRole('heading', { name: title })).toBeVisible();
+    }
+
+    await expectTutorialCardClearOf(page, '#pageNavigation');
+
+    const cardBefore = await getRect(page, '.tutorial-card');
+    const navigationBefore = await getRect(page, '#pageNavigation');
+    await page.waitForTimeout(420);
+    const cardAfter = await getRect(page, '.tutorial-card');
+    const navigationAfter = await getRect(page, '#pageNavigation');
+
+    expect(Math.abs(cardAfter.top - cardBefore.top)).toBeLessThan(1);
+    expect(Math.abs(cardAfter.left - cardBefore.left)).toBeLessThan(1);
+    expect(Math.abs(navigationAfter.top - navigationBefore.top)).toBeLessThan(1);
+    expect(Math.abs(navigationAfter.bottom - navigationBefore.bottom)).toBeLessThan(1);
   });
 });
