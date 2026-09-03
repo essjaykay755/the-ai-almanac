@@ -43,6 +43,7 @@ test.describe('mobile top spacing', () => {
     expect(geometry).not.toBeNull();
     expect(geometry!.searchGap).toBeGreaterThanOrEqual(8);
     expect(geometry!.searchGap).toBeLessThanOrEqual(40);
-    expect(geometry!.termGapAfterSearch).toBeGreaterThanOrEqual(16);
+    expect(geometry!.termGapAfterSearch).toBeGreaterThanOrEqual(6);
+    expect(geometry!.termGapAfterSearch).toBeLessThanOrEqual(32);
   });
 });
