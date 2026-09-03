@@ -16,24 +16,42 @@ test('localized cover stays translated after language navigation settles', async
   expect(await page.evaluate(() => window.location.pathname.startsWith('/pt/'))).toBe(true);
 });
 
-test('automatic language switch keeps the English fallback available after session state is lost', async ({ page }) => {
-  await page.route('**/api/locale', (route) => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({ country: 'BR' })
-  }));
+test('remembered language restoration still offers Use English', async ({ page }) => {
+  let localeRequests = 0;
 
-  await page.goto('/term/context-window/');
-  await expect(page).toHaveURL(/\/pt\/term\/janela-de-contexto\/(?:#.*)?$/);
+  await page.addInitScript(() => {
+    if (window.location.pathname === '/') {
+      localStorage.setItem('aiAlmanacLanguage', 'pt');
+    }
+  });
+
+  await page.route('**/api/locale', (route) => {
+    localeRequests += 1;
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ country: 'BR' })
+    });
+  });
+
+  await page.goto('/');
+
+  await expect(page).toHaveURL(/\/pt\/term\/inteligencia-artificial\/(?:#.*)?$/);
+
+  const notice = page.locator('[data-language-suggestion="pt"]');
+  await expect(notice).toBeVisible();
+  await expect(notice).toContainText('saved language preference');
+  await expect(page.getByRole('button', { name: 'Keep Português' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Use English' })).toBeVisible();
+  expect(localeRequests).toBe(0);
 
-  await page.evaluate(() => sessionStorage.removeItem('aiAlmanacAutomaticLanguageSwitch'));
-  await page.reload();
-
-  await expect(page.getByRole('button', { name: 'Use English' })).toBeVisible();
   await page.getByRole('button', { name: 'Use English' }).click();
-  await expect(page).toHaveURL(/\/term\/context-window\/(?:#.*)?$/);
+
+  await expect(page).toHaveURL(/\/term\/artificial-intelligence\/(?:#.*)?$/);
   await expect.poll(() => page.evaluate(() => localStorage.getItem('aiAlmanacLanguage'))).toBe('en');
+  await page.waitForTimeout(750);
+  await expect(page).toHaveURL(/\/term\/artificial-intelligence\/(?:#.*)?$/);
+  await expect(page.locator('[data-language-suggestion]')).toHaveCount(0);
 });
 
 test('tutorial includes the language selector', async ({ page }) => {
