@@ -1,0 +1,34 @@
+/*
+ * Bottom page navigation alignment
+ * --------------------------------
+ * Desktop/tablet pages used to keep their bottom breathing room as padding on
+ * .page-inner after the footer. That made the controls look pinned to the top
+ * of the visible bottom strip even though the footer grid itself was centered.
+ * Move the same reserve into equal padding above and below the footer so the
+ * overall vertical footprint stays effectively unchanged while the controls
+ * are visually centered.
+ */
+@media (min-width: 761px) {
+  .page-inner {
+    --page-footer-vertical-reserve: clamp(38px, 4vh, 50px);
+    padding-bottom: 0;
+  }
+
+  .page-footer {
+    padding-top: calc(var(--page-footer-vertical-reserve) / 2);
+    padding-bottom: calc(var(--page-footer-vertical-reserve) / 2);
+    align-items: center;
+  }
+
+  .page-footer .footer-nav,
+  .page-footer .center {
+    align-self: center;
+  }
+}
+
+/* The tablet layout previously used an explicit 42px bottom reserve. */
+@media (min-width: 761px) and (max-width: 1080px) {
+  .page-inner {
+    --page-footer-vertical-reserve: 42px;
+  }
+}
