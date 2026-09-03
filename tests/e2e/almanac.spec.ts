@@ -339,7 +339,10 @@ test.describe('automatic language selection', () => {
 
     await expect(page).toHaveURL(/\/pt\/term\/inteligencia-artificial\/(?:#.*)?$/);
     await expect(page.locator('#entry h1.word')).toHaveText('artificial intelligence');
-    await expect(page.locator('[data-language-suggestion]')).toHaveCount(0);
+    const notice = page.locator('[data-language-suggestion="pt"]');
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText('saved language preference');
+    await expect(page.getByRole('button', { name: 'Use English' })).toBeVisible();
   });
 });
 
