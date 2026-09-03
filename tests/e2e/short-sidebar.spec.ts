@@ -66,6 +66,52 @@ test.describe('short sidebar guard rails', () => {
     });
   });
 
+  test.describe('very short mobile drawer', () => {
+    test.use({ viewport: { width: 390, height: 340 } });
+
+    test('covers the fixed top bar and keeps the close button as the topmost hit target', async ({ page }) => {
+      await page.goto('/');
+      await page.locator('#mobileMenu').click();
+
+      const sidebar = page.locator('#mobileSidebar');
+      const close = sidebar.locator('.mobile-sidebar-close');
+      await expect(sidebar).toBeVisible();
+      await expect(close).toBeVisible();
+
+      const stacking = await page.evaluate(() => {
+        const sidebarEl = document.querySelector<HTMLElement>('#mobileSidebar');
+        const closeEl = sidebarEl?.querySelector<HTMLElement>('.mobile-sidebar-close');
+        const mobileBar = document.querySelector<HTMLElement>('.mobile-bar');
+        const pageFooter = document.querySelector<HTMLElement>('.page-footer');
+        if (!sidebarEl || !closeEl || !mobileBar || !pageFooter) return null;
+
+        const sidebarRect = sidebarEl.getBoundingClientRect();
+        const closeRect = closeEl.getBoundingClientRect();
+        const hit = document.elementFromPoint(
+          closeRect.left + closeRect.width / 2,
+          closeRect.top + closeRect.height / 2
+        );
+
+        return {
+          sidebarTop: sidebarRect.top,
+          sidebarZ: Number.parseInt(getComputedStyle(sidebarEl).zIndex || '0', 10),
+          mobileBarZ: Number.parseInt(getComputedStyle(mobileBar).zIndex || '0', 10),
+          pageFooterZ: Number.parseInt(getComputedStyle(pageFooter).zIndex || '0', 10),
+          hitIsClose: hit === closeEl || Boolean(hit && closeEl.contains(hit))
+        };
+      });
+
+      expect(stacking).not.toBeNull();
+      expect(Math.abs(stacking!.sidebarTop)).toBeLessThanOrEqual(1);
+      expect(stacking!.sidebarZ).toBeGreaterThan(stacking!.mobileBarZ);
+      expect(stacking!.sidebarZ).toBeGreaterThan(stacking!.pageFooterZ);
+      expect(stacking!.hitIsClose).toBe(true);
+
+      await close.click();
+      await expect(sidebar).toHaveCount(0);
+    });
+  });
+
   test.describe('short desktop cover', () => {
     test.use({ viewport: { width: 900, height: 482 } });
 
