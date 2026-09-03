@@ -1,0 +1,26 @@
+@media (max-width: 760px) {
+  /*
+   * Keep the first entry visually connected to the fixed mobile masthead.
+   * The legacy mobile rules reserved space at four different nesting levels;
+   * together they created an unnecessarily large blank band above the term.
+   * Reserve the masthead once, then keep the content offsets deliberately small.
+   */
+  .page-inner {
+    padding-top: calc(var(--mobile-bar-height) + 12px);
+    scroll-padding-top: calc(var(--mobile-bar-height) + 12px);
+  }
+
+  .page-layout {
+    padding-top: 6px;
+  }
+
+  .entry,
+  .headword-line {
+    padding-top: 0;
+  }
+
+  /* Search replaces the normal topline on mobile; keep it close to the masthead too. */
+  .topline.mobile-search-open {
+    padding-top: 2px;
+  }
+}
