@@ -2,7 +2,7 @@ import { getLocaleFromPathname, type SupportedLocale } from '../i18n/catalog.ts'
 
 const PREFERENCE_KEY = 'aiAlmanacLanguage';
 const DISMISSAL_KEY = 'aiAlmanacLanguageSuggestionDismissed';
-const AUTO_SWITCH_SESSION_KEY = 'aiAlmanacAutomaticLanguageSwitch';
+const AUTO_SWITCH_KEY = 'aiAlmanacAutomaticLanguageSwitch';
 
 const supportedLocales = ['es', 'pt', 'it', 'fr', 'de', 'hi'] as const;
 export type AutoLocale = (typeof supportedLocales)[number];
@@ -10,7 +10,7 @@ export type AutoLocale = (typeof supportedLocales)[number];
 const countryDefaultLocale: Partial<Record<string, AutoLocale>> = {
   AR: 'es', AT: 'de', BO: 'es', BR: 'pt', CL: 'es', CO: 'es', CR: 'es', CU: 'es', DE: 'de',
   DO: 'es', EC: 'es', ES: 'es', FR: 'fr', GT: 'es', HN: 'es', IT: 'it', MX: 'es', NI: 'es',
-  PA: 'es', PE: 'es', PR: 'es', PT: 'pt', PY: 'es', SV: 'es', UY: 'es', VE: 'es'
+  PA: 'es', PE: 'es', PR: 'pt', PY: 'es', SV: 'es', UY: 'es', VE: 'es'
 };
 
 function normalizeLanguage(value: string): AutoLocale | null {
@@ -85,16 +85,13 @@ function clearLanguagePreferenceMemory(): void {
   } catch {}
 }
 
-function rememberAutomaticSwitch(locale: AutoLocale, country: string | null): void {
-  try {
-    sessionStorage.setItem(AUTO_SWITCH_SESSION_KEY, JSON.stringify({ locale, country }));
-  } catch {}
+function serializeAutomaticSwitch(locale: AutoLocale, country: string | null): string {
+  return JSON.stringify({ locale, country });
 }
 
-function readAutomaticSwitch(): { locale: AutoLocale; country: string | null } | null {
+function parseAutomaticSwitch(raw: string | null): { locale: AutoLocale; country: string | null } | null {
+  if (!raw) return null;
   try {
-    const raw = sessionStorage.getItem(AUTO_SWITCH_SESSION_KEY);
-    if (!raw) return null;
     const value = JSON.parse(raw) as { locale?: unknown; country?: unknown };
     if (!supportedLocales.includes(value.locale as AutoLocale)) return null;
     return {
@@ -106,9 +103,38 @@ function readAutomaticSwitch(): { locale: AutoLocale; country: string | null } |
   }
 }
 
+function rememberAutomaticSwitch(locale: AutoLocale, country: string | null): void {
+  const value = serializeAutomaticSwitch(locale, country);
+
+  // Keep a durable copy as well as the session copy. Some browser/navigation flows
+  // can lose sessionStorage state during the redirect to the localized route.
+  try {
+    sessionStorage.setItem(AUTO_SWITCH_KEY, value);
+  } catch {}
+  try {
+    localStorage.setItem(AUTO_SWITCH_KEY, value);
+  } catch {}
+}
+
+function readAutomaticSwitch(): { locale: AutoLocale; country: string | null } | null {
+  try {
+    const pending = parseAutomaticSwitch(sessionStorage.getItem(AUTO_SWITCH_KEY));
+    if (pending) return pending;
+  } catch {}
+
+  try {
+    return parseAutomaticSwitch(localStorage.getItem(AUTO_SWITCH_KEY));
+  } catch {
+    return null;
+  }
+}
+
 function clearAutomaticSwitch(): void {
   try {
-    sessionStorage.removeItem(AUTO_SWITCH_SESSION_KEY);
+    sessionStorage.removeItem(AUTO_SWITCH_KEY);
+  } catch {}
+  try {
+    localStorage.removeItem(AUTO_SWITCH_KEY);
   } catch {}
 }
 
