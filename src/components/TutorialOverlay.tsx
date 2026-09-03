@@ -113,33 +113,6 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
     const cardWidth = cardRect.width;
     const cardHeight = cardRect.height;
 
-    const candidate = (placement: Exclude<TutorialPlacement, 'auto'>): TooltipPosition => {
-      let top = rect.top + rect.height / 2 - cardHeight / 2;
-      let left = rect.left + rect.width / 2 - cardWidth / 2;
-
-      if (placement === 'top') top = rect.top - cardHeight - gap;
-      if (placement === 'right') left = rect.right + gap;
-      if (placement === 'bottom') top = rect.bottom + gap;
-      if (placement === 'left') left = rect.left - cardWidth - gap;
-
-      return {
-        top: clamp(top, margin, viewportHeight - cardHeight - margin),
-        left: clamp(left, margin, viewportWidth - cardWidth - margin),
-        placement
-      };
-    };
-
-    const fits = (position: TooltipPosition): boolean => {
-      const tolerance = 2;
-      const unClamped = candidateWithoutClamp(position.placement);
-      return (
-        unClamped.top >= margin - tolerance &&
-        unClamped.left >= margin - tolerance &&
-        unClamped.top + cardHeight <= viewportHeight - margin + tolerance &&
-        unClamped.left + cardWidth <= viewportWidth - margin + tolerance
-      );
-    };
-
     const candidateWithoutClamp = (placement: Exclude<TutorialPlacement, 'auto'>): RectPosition => {
       let top = rect.top + rect.height / 2 - cardHeight / 2;
       let left = rect.left + rect.width / 2 - cardWidth / 2;
@@ -152,6 +125,29 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       return { top, left, width: cardWidth, height: cardHeight };
     };
 
+    const candidate = (placement: Exclude<TutorialPlacement, 'auto'>): TooltipPosition => {
+      const raw = candidateWithoutClamp(placement);
+      return {
+        top: clamp(raw.top, margin, viewportHeight - cardHeight - margin),
+        left: clamp(raw.left, margin, viewportWidth - cardWidth - margin),
+        placement
+      };
+    };
+
+    const overlapWithTarget = (position: TooltipPosition): number => {
+      // Keep a small visual moat around the spotlight, not merely a zero-pixel collision.
+      const keepout = gap;
+      const targetTop = rect.top - keepout;
+      const targetLeft = rect.left - keepout;
+      const targetRight = rect.right + keepout;
+      const targetBottom = rect.bottom + keepout;
+      const cardRight = position.left + cardWidth;
+      const cardBottom = position.top + cardHeight;
+      const overlapWidth = Math.max(0, Math.min(cardRight, targetRight) - Math.max(position.left, targetLeft));
+      const overlapHeight = Math.max(0, Math.min(cardBottom, targetBottom) - Math.max(position.top, targetTop));
+      return overlapWidth * overlapHeight;
+    };
+
     const preferred: Exclude<TutorialPlacement, 'auto'> = activeStep.placement && activeStep.placement !== 'auto'
       ? activeStep.placement
       : 'bottom';
@@ -162,8 +158,19 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       'top',
       'left'
     ].filter((placement, index, all) => all.indexOf(placement) === index) as Exclude<TutorialPlacement, 'auto'>[];
-    const selected = placements.find((placement) => fits(candidate(placement))) || placements[0];
-    setTooltipPosition(candidate(selected));
+
+    const options = placements.map((placement) => {
+      const position = candidate(placement);
+      return {
+        position,
+        overlap: overlapWithTarget(position)
+      };
+    });
+    const clearOption = options.find((option) => option.overlap === 0);
+    const selected = clearOption || options.reduce((best, option) =>
+      option.overlap < best.overlap ? option : best
+    );
+    setTooltipPosition(selected.position);
   }, [activeStep, isOpen, resolveTarget]);
 
   const scheduleMeasure = useCallback(() => {
@@ -207,9 +214,10 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
     window.addEventListener('scroll', handleViewportChange, true);
 
     let resizeObserver: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined' && targetElementRef.current) {
+    if (typeof ResizeObserver !== 'undefined') {
       resizeObserver = new ResizeObserver(handleViewportChange);
-      resizeObserver.observe(targetElementRef.current);
+      if (targetElementRef.current) resizeObserver.observe(targetElementRef.current);
+      if (cardRef.current) resizeObserver.observe(cardRef.current);
     }
 
     return () => {
