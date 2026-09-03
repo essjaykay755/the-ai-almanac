@@ -1,0 +1,12 @@
+@media (max-width: 760px) {
+  /*
+   * Mobile tutorial targets often switch between the full-height drawer and
+   * the page beneath it. The desktop position tween makes the coach card and
+   * spotlight visibly chase their new targets for a fraction of a second.
+   * Position them atomically on phones so each step is settled on first paint.
+   */
+  .tutorial-card,
+  .tutorial-spotlight {
+    transition: none !important;
+  }
+}
