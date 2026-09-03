@@ -6,6 +6,13 @@ const AUTO_SWITCH_SESSION_KEY = 'aiAlmanacAutomaticLanguageSwitch';
 
 const supportedLocales = ['es', 'pt', 'it', 'fr', 'de', 'hi'] as const;
 export type AutoLocale = (typeof supportedLocales)[number];
+type AutomaticSwitchReason = 'detected' | 'remembered';
+
+type AutomaticSwitchRecord = {
+  locale: AutoLocale;
+  country: string | null;
+  reason: AutomaticSwitchReason;
+};
 
 const countryDefaultLocale: Partial<Record<string, AutoLocale>> = {
   AR: 'es', AT: 'de', BO: 'es', BR: 'pt', CL: 'es', CO: 'es', CR: 'es', CU: 'es', DE: 'de',
@@ -85,45 +92,27 @@ function clearLanguagePreferenceMemory(): void {
   } catch {}
 }
 
-function serializeAutomaticSwitch(locale: AutoLocale, country: string | null): string {
-  return JSON.stringify({ locale, country });
+function rememberAutomaticSwitch(
+  locale: AutoLocale,
+  country: string | null,
+  reason: AutomaticSwitchReason = 'detected'
+): void {
+  try {
+    sessionStorage.setItem(AUTO_SWITCH_SESSION_KEY, JSON.stringify({ locale, country, reason }));
+  } catch {}
 }
 
-function parseAutomaticSwitch(raw: string | null): { locale: AutoLocale; country: string | null } | null {
-  if (!raw) return null;
+function readAutomaticSwitch(): AutomaticSwitchRecord | null {
   try {
-    const value = JSON.parse(raw) as { locale?: unknown; country?: unknown };
+    const raw = sessionStorage.getItem(AUTO_SWITCH_SESSION_KEY);
+    if (!raw) return null;
+    const value = JSON.parse(raw) as { locale?: unknown; country?: unknown; reason?: unknown };
     if (!supportedLocales.includes(value.locale as AutoLocale)) return null;
     return {
       locale: value.locale as AutoLocale,
-      country: typeof value.country === 'string' ? value.country : null
+      country: typeof value.country === 'string' ? value.country : null,
+      reason: value.reason === 'remembered' ? 'remembered' : 'detected'
     };
-  } catch {
-    return null;
-  }
-}
-
-function rememberAutomaticSwitch(locale: AutoLocale, country: string | null): void {
-  const value = serializeAutomaticSwitch(locale, country);
-
-  // Keep a durable copy as well as the session copy. Some browser/navigation flows
-  // can lose sessionStorage state during the redirect to the localized route.
-  try {
-    sessionStorage.setItem(AUTO_SWITCH_SESSION_KEY, value);
-  } catch {}
-  try {
-    localStorage.setItem(AUTO_SWITCH_SESSION_KEY, value);
-  } catch {}
-}
-
-function readAutomaticSwitch(): { locale: AutoLocale; country: string | null } | null {
-  try {
-    const pending = parseAutomaticSwitch(sessionStorage.getItem(AUTO_SWITCH_SESSION_KEY));
-    if (pending) return pending;
-  } catch {}
-
-  try {
-    return parseAutomaticSwitch(localStorage.getItem(AUTO_SWITCH_SESSION_KEY));
   } catch {
     return null;
   }
@@ -132,9 +121,6 @@ function readAutomaticSwitch(): { locale: AutoLocale; country: string | null } |
 function clearAutomaticSwitch(): void {
   try {
     sessionStorage.removeItem(AUTO_SWITCH_SESSION_KEY);
-  } catch {}
-  try {
-    localStorage.removeItem(AUTO_SWITCH_SESSION_KEY);
   } catch {}
 }
 
@@ -206,9 +192,13 @@ function showAutomaticSwitchBanner(): void {
   closeButton.textContent = '×';
 
   const message = document.createElement('p');
-  message.textContent = countryName
-    ? `We switched The AI Almanac to ${languageName} based on your location in ${countryName}.`
-    : `We switched The AI Almanac to ${languageName} based on your browser language.`;
+  if (pending.reason === 'remembered') {
+    message.textContent = `The AI Almanac is using ${languageName} from your saved language preference.`;
+  } else {
+    message.textContent = countryName
+      ? `We switched The AI Almanac to ${languageName} based on your location in ${countryName}.`
+      : `We switched The AI Almanac to ${languageName} based on your browser language.`;
+  }
 
   const actions = document.createElement('div');
   actions.className = 'site-language-suggestion-actions';
@@ -324,7 +314,13 @@ async function initializeLanguagePreference(allowLocalizedPage = false): Promise
   if (savedLanguage === 'en') return;
 
   if (supportedLocales.includes(savedLanguage as AutoLocale)) {
-    if (currentLocale === 'en') navigateToLocale(savedLanguage as AutoLocale);
+    const savedLocale = savedLanguage as AutoLocale;
+    if (currentLocale === 'en') {
+      // Restoring a remembered choice is still an automatic navigation on this visit,
+      // so keep the same escape hatch that fresh geo/browser detection provides.
+      rememberAutomaticSwitch(savedLocale, null, 'remembered');
+      navigateToLocale(savedLocale);
+    }
     return;
   }
 
