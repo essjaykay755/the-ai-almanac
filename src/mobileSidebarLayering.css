@@ -1,11 +1,16 @@
 @media (max-width: 760px) {
   /*
    * Keep the open navigation drawer above the persistent mobile chrome.
-   * Short-height phones expose this most clearly because the close button
-   * occupies the same vertical band as the fixed top bar.
+   * While the drawer is mounted, hide the fixed mobile bar completely so its
+   * hamburger/search controls can never cover the drawer's own close button.
    */
   .mobile-bar {
     z-index: 100 !important;
+  }
+
+  body:has(#mobileSidebar) .mobile-bar {
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 
   .mobile-sidebar-scrim {
@@ -27,7 +32,7 @@
   }
 
   .cover.mobile-sidebar .mobile-sidebar-close {
-    z-index: 3;
+    z-index: 10;
   }
 
   /* The fixed mobile page footer must also sit behind an open drawer. */
