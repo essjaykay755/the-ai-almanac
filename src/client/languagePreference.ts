@@ -10,7 +10,7 @@ export type AutoLocale = (typeof supportedLocales)[number];
 const countryDefaultLocale: Partial<Record<string, AutoLocale>> = {
   AR: 'es', AT: 'de', BO: 'es', BR: 'pt', CL: 'es', CO: 'es', CR: 'es', CU: 'es', DE: 'de',
   DO: 'es', EC: 'es', ES: 'es', FR: 'fr', GT: 'es', HN: 'es', IT: 'it', MX: 'es', NI: 'es',
-  PA: 'es', PE: 'es', PR: 'pt', PY: 'es', SV: 'es', UY: 'es', VE: 'es'
+  PA: 'es', PE: 'es', PR: 'es', PT: 'pt', PY: 'es', SV: 'es', UY: 'es', VE: 'es'
 };
 
 function normalizeLanguage(value: string): AutoLocale | null {
