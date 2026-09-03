@@ -40,7 +40,7 @@ const BASE_TUTORIAL_STEPS: readonly TutorialStep[] = [
     title: 'Your navigation shelf',
     body: 'Use the sidebar to search, browse the complete index, revisit bookmarks and history, open the timeline, manage collections, find a surprise term, save an entry, or read About.',
     target: '#coverNav',
-    mobileTarget: '#mobileSidebar #coverNav',
+    mobileTarget: '#mobileSidebar #navIndex',
     fallbackTarget: '#mobileMenu',
     region: 'sidebar',
     placement: 'right'
@@ -50,6 +50,7 @@ const BASE_TUTORIAL_STEPS: readonly TutorialStep[] = [
     title: 'Ask or search',
     body: 'Type a term or describe an idea in plain language. Suggestions appear as you type and ⌘ K or Ctrl K focuses the field from anywhere.',
     target: '#search',
+    mobileTarget: '#mobileSearch',
     fallbackTarget: '#page',
     region: 'page',
     placement: 'bottom'
@@ -59,6 +60,7 @@ const BASE_TUTORIAL_STEPS: readonly TutorialStep[] = [
     title: 'Read the current entry',
     body: 'Each page gives you the definition, an example, where the term came from and how it shows up in practice.',
     target: '#definitionContent',
+    mobileTarget: '#entry .headword-line',
     fallbackTarget: '#entry',
     region: 'page',
     placement: 'right'
@@ -95,6 +97,7 @@ const BASE_TUTORIAL_STEPS: readonly TutorialStep[] = [
     title: 'Follow the references',
     body: 'The margin gathers related terms, comparisons, common confusions and the category where the current entry is filed.',
     target: '#margin',
+    mobileTarget: '#margin h3',
     fallbackTarget: '#entry',
     region: 'page',
     placement: 'left'
@@ -113,6 +116,7 @@ const BASE_TUTORIAL_STEPS: readonly TutorialStep[] = [
     title: 'Jump by letter',
     body: 'The A–Z rail lets you jump straight to the first available term under any letter.',
     target: '#tabs',
+    mobileTarget: '#tabs .tab.active',
     fallbackTarget: '#page',
     region: 'page',
     placement: 'left'
