@@ -2,7 +2,7 @@ import { getLocaleFromPathname, type SupportedLocale } from '../i18n/catalog.ts'
 
 const PREFERENCE_KEY = 'aiAlmanacLanguage';
 const DISMISSAL_KEY = 'aiAlmanacLanguageSuggestionDismissed';
-const AUTO_SWITCH_KEY = 'aiAlmanacAutomaticLanguageSwitch';
+const AUTO_SWITCH_SESSION_KEY = 'aiAlmanacAutomaticLanguageSwitch';
 
 const supportedLocales = ['es', 'pt', 'it', 'fr', 'de', 'hi'] as const;
 export type AutoLocale = (typeof supportedLocales)[number];
@@ -109,21 +109,21 @@ function rememberAutomaticSwitch(locale: AutoLocale, country: string | null): vo
   // Keep a durable copy as well as the session copy. Some browser/navigation flows
   // can lose sessionStorage state during the redirect to the localized route.
   try {
-    sessionStorage.setItem(AUTO_SWITCH_KEY, value);
+    sessionStorage.setItem(AUTO_SWITCH_SESSION_KEY, value);
   } catch {}
   try {
-    localStorage.setItem(AUTO_SWITCH_KEY, value);
+    localStorage.setItem(AUTO_SWITCH_SESSION_KEY, value);
   } catch {}
 }
 
 function readAutomaticSwitch(): { locale: AutoLocale; country: string | null } | null {
   try {
-    const pending = parseAutomaticSwitch(sessionStorage.getItem(AUTO_SWITCH_KEY));
+    const pending = parseAutomaticSwitch(sessionStorage.getItem(AUTO_SWITCH_SESSION_KEY));
     if (pending) return pending;
   } catch {}
 
   try {
-    return parseAutomaticSwitch(localStorage.getItem(AUTO_SWITCH_KEY));
+    return parseAutomaticSwitch(localStorage.getItem(AUTO_SWITCH_SESSION_KEY));
   } catch {
     return null;
   }
@@ -131,10 +131,10 @@ function readAutomaticSwitch(): { locale: AutoLocale; country: string | null } |
 
 function clearAutomaticSwitch(): void {
   try {
-    sessionStorage.removeItem(AUTO_SWITCH_KEY);
+    sessionStorage.removeItem(AUTO_SWITCH_SESSION_KEY);
   } catch {}
   try {
-    localStorage.removeItem(AUTO_SWITCH_KEY);
+    localStorage.removeItem(AUTO_SWITCH_SESSION_KEY);
   } catch {}
 }
 
