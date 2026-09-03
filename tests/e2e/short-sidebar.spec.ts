@@ -25,6 +25,45 @@ async function readSidebarGeometry(page: import('@playwright/test').Page, select
   }, selector);
 }
 
+test.describe('mobile cover and search regression', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('keeps the in-book desktop cover hidden when search opens', async ({ page }) => {
+    await page.goto('/');
+
+    const regularCover = page.locator('.book > .cover:not(.mobile-sidebar)').first();
+    const mobileBar = page.locator('.mobile-bar');
+    const search = page.locator('#search');
+
+    await expect(mobileBar).toBeVisible();
+    await expect(regularCover).toBeHidden();
+
+    await page.locator('#mobileSearch').click();
+
+    await expect(search).toBeVisible();
+    await expect(search).toBeFocused();
+    await expect(regularCover).toBeHidden();
+    await expect(page.locator('#mobileSidebar')).toHaveCount(0);
+  });
+
+  test('hides the persistent mobile bar while the drawer is mounted', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#mobileMenu').click();
+
+    const sidebar = page.locator('#mobileSidebar');
+    const mobileBar = page.locator('.mobile-bar');
+    const close = sidebar.locator('.mobile-sidebar-close');
+
+    await expect(sidebar).toBeVisible();
+    await expect(close).toBeVisible();
+    await expect(mobileBar).toBeHidden();
+
+    await close.click();
+    await expect(sidebar).toHaveCount(0);
+    await expect(mobileBar).toBeVisible();
+  });
+});
+
 test.describe('short sidebar guard rails', () => {
   test.describe('mobile drawer', () => {
     test.use({ viewport: { width: 562, height: 482 } });
@@ -69,7 +108,7 @@ test.describe('short sidebar guard rails', () => {
   test.describe('very short mobile drawer', () => {
     test.use({ viewport: { width: 390, height: 340 } });
 
-    test('covers the fixed top bar and keeps the close button as the topmost hit target', async ({ page }) => {
+    test('covers persistent chrome and keeps the close button as the topmost hit target', async ({ page }) => {
       await page.goto('/');
       await page.locator('#mobileMenu').click();
 
@@ -94,17 +133,14 @@ test.describe('short sidebar guard rails', () => {
 
         return {
           sidebarTop: sidebarRect.top,
-          sidebarZ: Number.parseInt(getComputedStyle(sidebarEl).zIndex || '0', 10),
-          mobileBarZ: Number.parseInt(getComputedStyle(mobileBar).zIndex || '0', 10),
-          pageFooterZ: Number.parseInt(getComputedStyle(pageFooter).zIndex || '0', 10),
+          mobileBarVisibility: getComputedStyle(mobileBar).visibility,
           hitIsClose: hit === closeEl || Boolean(hit && closeEl.contains(hit))
         };
       });
 
       expect(stacking).not.toBeNull();
       expect(Math.abs(stacking!.sidebarTop)).toBeLessThanOrEqual(1);
-      expect(stacking!.sidebarZ).toBeGreaterThan(stacking!.mobileBarZ);
-      expect(stacking!.sidebarZ).toBeGreaterThan(stacking!.pageFooterZ);
+      expect(stacking!.mobileBarVisibility).toBe('hidden');
       expect(stacking!.hitIsClose).toBe(true);
 
       await close.click();
