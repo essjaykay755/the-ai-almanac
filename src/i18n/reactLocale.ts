@@ -137,6 +137,11 @@ const localized: Record<LocalizedLocale, UiStrings> = {
     ...en,
     brandTagline: 'AI सीखने वालों और vibe coders के लिए लगातार विकसित होती संदर्भ पुस्तक', navSearch: 'पूछें / खोजें', navTutorial: 'ट्यूटोरियल देखें', navIndex: 'पूरा इंडेक्स', navBookmarks: 'बुकमार्क', navHistory: 'पढ़ने का इतिहास', navTimeline: 'समयरेखा', navCollections: 'संग्रह', navSurprise: 'कुछ नया दिखाएँ', navSave: 'यह प्रविष्टि सहेजें', navAbout: 'परिचय', soundEffects: 'ध्वनि प्रभाव', soundOn: 'चालू', soundOff: 'बंद', closeNavigation: 'नेविगेशन मेनू बंद करें', openNavigation: 'नेविगेशन मेनू खोलें', closeSearch: 'खोज बंद करें', openSearch: 'खोज खोलें', searchTerms: 'शब्द खोजें',
     fieldEdition: 'फील्ड संस्करण', terms: 'शब्द', page: 'पृष्ठ', searchPlaceholder: 'The AI Almanac से पूछें या कोई शब्द खोजें…', searchLabel: 'The AI Almanac में खोजें', searchSuggestions: 'खोज सुझाव', noExactMatch: 'सटीक मिलान नहीं मिला', tryIdea: 'अपने प्रश्न के विचार से खोजें:', clearSearch: 'खोज साफ़ करें', dictionary: 'शब्दकोश', plain: 'सरल भाषा', technical: 'तकनीकी', vibe: 'Vibe Coder', explanationMode: 'व्याख्या मोड', origin: 'उत्पत्ति', inPractice: 'व्यवहार में', addCollection: '+ संग्रह में जोड़ें', saveEntry: 'प्रविष्टि सहेजें', copyLink: 'लिंक कॉपी करें', recentTerms: 'हाल के शब्द', clearList: 'सूची साफ़ करें', seeAlso: 'यह भी देखें', compare: 'तुलना करें', confused: 'अक्सर इससे भ्रमित होता है', filedUnder: 'श्रेणी', marginalia: 'हाशिया टिप्पणी', almanacSuggests: 'The Almanac का सुझाव', previous: 'पिछला', next: 'अगला', bookmark: 'बुकमार्क करें', removeBookmark: 'बुकमार्क हटाएँ', bookmarkEntry: 'इस प्रविष्टि को बुकमार्क करें', pronounce: 'उच्चारण सुनें', suggested: 'सुझाव', entry: 'प्रविष्टि', related: 'संबंधित', aboutTitle: 'AI की भाषा के लिए\nएक फील्ड गाइड।', aboutLede: 'AI सीखने वालों और vibe coders के लिए लगातार विकसित होती संदर्भ पुस्तक।', madeWith: 'बनाया गया', by: 'द्वारा', returnToBook: 'पुस्तक पर वापस जाएँ', aiConcepts: 'AI अवधारणाएँ', searchExamples: ['AI गलत जवाब क्यों गढ़ता है?', 'मॉडल कितना याद रख सकता है?', 'RAG क्या है?'], searchPointsToEntry: (query) => `“${query}” इस प्रविष्टि से सबसे अधिक मेल खाता है।`
+  },
+  bn: {
+    ...en,
+    brandTagline: 'এআই অনুরাগী ও vibe coder-দের জন্য ক্রমশ বিকশিত একটি রেফারেন্স বই', navSearch: 'জিজ্ঞেস করুন / খুঁজুন', navTutorial: 'টিউটোরিয়াল দেখুন', navIndex: 'সম্পূর্ণ সূচি', navBookmarks: 'বুকমার্ক', navHistory: 'পড়ার ইতিহাস', navTimeline: 'সময়রেখা', navCollections: 'সংগ্রহ', navSurprise: 'চমকে দিন', navSave: 'এই এন্ট্রি সংরক্ষণ করুন', navAbout: 'পরিচিতি', soundEffects: 'শব্দ প্রভাব', soundOn: 'চালু', soundOff: 'বন্ধ', closeNavigation: 'নেভিগেশন মেনু বন্ধ করুন', openNavigation: 'নেভিগেশন মেনু খুলুন', closeSearch: 'খোঁজ বন্ধ করুন', openSearch: 'খোঁজ খুলুন', searchTerms: 'শব্দ খুঁজুন',
+    fieldEdition: 'ফিল্ড সংস্করণ', terms: 'শব্দ', page: 'পৃষ্ঠা', searchPlaceholder: 'The AI Almanac-কে জিজ্ঞেস করুন বা কোনো শব্দ খুঁজুন…', searchLabel: 'The AI Almanac-এ খুঁজুন', searchSuggestions: 'খোঁজার পরামর্শ', noExactMatch: 'সঠিক মিল পাওয়া যায়নি', tryIdea: 'আপনার প্রশ্নের ধারণা দিয়ে খুঁজে দেখুন:', clearSearch: 'খোঁজ পরিষ্কার করুন', dictionary: 'অভিধান', plain: 'সহজ ভাষা', technical: 'প্রযুক্তিগত', vibe: 'Vibe Coder', explanationMode: 'ব্যাখ্যার ধরন', origin: 'উৎপত্তি', inPractice: 'ব্যবহারে', addCollection: '+ সংগ্রহে যোগ করুন', saveEntry: 'এন্ট্রি সংরক্ষণ করুন', copyLink: 'লিংক কপি করুন', recentTerms: 'সাম্প্রতিক শব্দ', clearList: 'তালিকা পরিষ্কার করুন', seeAlso: 'আরও দেখুন', compare: 'তুলনা করুন', confused: 'প্রায়ই যেটির সঙ্গে গুলিয়ে ফেলা হয়', filedUnder: 'শ্রেণি', marginalia: 'পার্শ্বটীকা', almanacSuggests: 'The Almanac-এর পরামর্শ', previous: 'আগের', next: 'পরের', bookmark: 'বুকমার্ক করুন', removeBookmark: 'বুকমার্ক সরান', bookmarkEntry: 'এই এন্ট্রিটি বুকমার্ক করুন', pronounce: 'উচ্চারণ শুনুন', suggested: 'প্রস্তাবিত', entry: 'এন্ট্রি', related: 'সম্পর্কিত', aboutTitle: 'এআই-এর ভাষার জন্য\nএকটি ফিল্ড গাইড।', aboutLede: 'এআই অনুরাগী ও vibe coder-দের জন্য ক্রমশ বিকশিত একটি রেফারেন্স বই।', madeWith: 'তৈরি হয়েছে', by: 'দ্বারা', returnToBook: 'বইয়ে ফিরে যান', aiConcepts: 'এআই ধারণা', searchExamples: ['এআই কেন বানানো উত্তর দেয়?', 'একটি মডেল কতটা মনে রাখতে পারে?', 'RAG কী?'], searchPointsToEntry: (query) => `“${query}” এই এন্ট্রিটির সঙ্গে সবচেয়ে বেশি মেলে।`
   }
 };
 
@@ -146,7 +151,8 @@ const parts: Partial<Record<LocalizedLocale, Record<string, string>>> = {
   it: { noun: 'sostantivo', verb: 'verbo', adjective: 'aggettivo', phrase: 'espressione', acronym: 'acronimo' },
   fr: { noun: 'nom', verb: 'verbe', adjective: 'adjectif', phrase: 'expression', acronym: 'acronyme' },
   de: { noun: 'Substantiv', verb: 'Verb', adjective: 'Adjektiv', phrase: 'Ausdruck', acronym: 'Akronym' },
-  hi: { noun: 'संज्ञा', verb: 'क्रिया', adjective: 'विशेषण', phrase: 'वाक्यांश', acronym: 'संक्षिप्त रूप' }
+  hi: { noun: 'संज्ञा', verb: 'क्रिया', adjective: 'विशेषण', phrase: 'वाक्यांश', acronym: 'संक्षिप्त रूप' },
+  bn: { noun: 'বিশেষ্য', verb: 'ক্রিয়া', adjective: 'বিশেষণ', phrase: 'বাক্যাংশ', acronym: 'সংক্ষিপ্ত রূপ' }
 };
 
 const exampleByLocale: Record<LocalizedLocale, Record<string, string>> = {
@@ -173,6 +179,9 @@ const exampleByLocale: Record<LocalizedLocale, Record<string, string>> = {
   },
   hi: {
     'artificial intelligence': '“टीम ने perception, reasoning और generation जैसे कामों को automate करने के लिए artificial intelligence का उपयोग किया।”', 'machine learning': '“सिस्टम ने पुराने उदाहरणों से patterns सीखने के लिए machine learning का उपयोग किया।”', 'generative AI': '“टीम ने content का पहला draft बनाने के लिए generative AI का उपयोग किया।”', 'large language model': '“उत्पाद ने उत्तर बनाने के लिए request को large language model को भेजा।”', prompt: '“prompt में लक्ष्य, सीमाएँ और अपेक्षित output format साफ़ लिखा था।”', token: '“लंबे context ने मॉडल के उत्तर शुरू करने से पहले बहुत से tokens इस्तेमाल कर लिए।”', 'context window': '“हमने केवल जरूरी files भेजीं ताकि context window बेकार जानकारी से न भर जाए।”', hallucination: '“मॉडल ने एक ऐसा package name बना दिया जो था ही नहीं; यह hallucination था।”', RAG: '“RAG ने मॉडल के उत्तर लिखने से पहले मौजूदा policy खोज ली।”', agentic: '“workflow तब agentic हुआ जब वह tools चुनकर कई steps खुद आगे बढ़ा सका।”'
+  },
+  bn: {
+    'artificial intelligence': '“দলটি উপলব্ধি, যুক্তি ও বিষয়বস্তু তৈরির কাজ স্বয়ংক্রিয় করতে artificial intelligence ব্যবহার করেছে।”', 'machine learning': '“সিস্টেমটি আগের উদাহরণ থেকে প্যাটার্ন শিখতে machine learning ব্যবহার করেছে।”', 'generative AI': '“দলটি বিষয়বস্তুর প্রথম খসড়া তৈরি করতে generative AI ব্যবহার করেছে।”', 'large language model': '“পণ্যটি উত্তর তৈরি করতে অনুরোধটি large language model-এ পাঠিয়েছে।”', prompt: '“prompt-এ লক্ষ্য, সীমাবদ্ধতা এবং প্রত্যাশিত আউটপুটের ধরন স্পষ্টভাবে লেখা ছিল।”', token: '“দীর্ঘ কনটেক্সটের কারণে মডেল উত্তর দেওয়ার আগেই অনেক token ব্যবহার হয়ে গিয়েছিল।”', 'context window': '“context window অপ্রয়োজনীয় তথ্যে ভরে না যায় বলে আমরা শুধু প্রাসঙ্গিক ফাইল পাঠিয়েছি।”', hallucination: '“মডেলটি এমন একটি প্যাকেজের নাম বানিয়েছে যার অস্তিত্ব নেই; এটি hallucination ছিল।”', RAG: '“মডেল উত্তর লেখার আগে RAG বর্তমান নীতিটি খুঁজে এনেছিল।”', agentic: '“ওয়ার্কফ্লোটি agentic হয়েছিল যখন সেটি নিজে টুল বেছে নিয়ে একাধিক ধাপ এগোতে পেরেছিল।”'
   }
 };
 
@@ -182,7 +191,8 @@ const originByLocale: Record<LocalizedLocale, string> = {
   it: 'La forma inglese è comune nella documentazione tecnica e nella pratica moderna dell’IA.',
   fr: 'La forme anglaise reste courante dans la documentation technique et la pratique moderne de l’IA.',
   de: 'Die englische Form ist in technischer Dokumentation und moderner KI-Praxis üblich.',
-  hi: 'तकनीकी documentation और आधुनिक AI practice में इसका English रूप आम तौर पर इस्तेमाल होता है।'
+  hi: 'तकनीकी documentation और आधुनिक AI practice में इसका English रूप आम तौर पर इस्तेमाल होता है।',
+  bn: 'প্রযুক্তিগত নথি ও আধুনিক এআই চর্চায় এই ধারণার ইংরেজি নামটিই সাধারণত ব্যবহৃত হয়।'
 };
 
 const modeLead: Record<LocalizedLocale, { plain: string; technical: string; vibe: string }> = {
@@ -191,7 +201,8 @@ const modeLead: Record<LocalizedLocale, { plain: string; technical: string; vibe
   it: { plain: 'In parole semplici:', technical: 'In termini tecnici:', vibe: 'Per un vibe coder:' },
   fr: { plain: 'En termes simples :', technical: 'En termes techniques :', vibe: 'Pour un vibe coder :' },
   de: { plain: 'Einfach gesagt:', technical: 'Technisch formuliert:', vibe: 'Für einen Vibe Coder:' },
-  hi: { plain: 'सरल शब्दों में:', technical: 'तकनीकी रूप से:', vibe: 'एक vibe coder के लिए:' }
+  hi: { plain: 'सरल शब्दों में:', technical: 'तकनीकी रूप से:', vibe: 'एक vibe coder के लिए:' },
+  bn: { plain: 'সহজভাবে:', technical: 'প্রযুক্তিগতভাবে:', vibe: 'একজন vibe coder-এর জন্য:' }
 };
 
 function isLocalizedLocale(locale: SupportedLocale): locale is LocalizedLocale {
