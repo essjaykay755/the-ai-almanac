@@ -15,7 +15,8 @@ const automaticLanguageLabels: Record<SupportedLocale, string> = {
   it: 'Automatico',
   fr: 'Automatique',
   de: 'Automatisch',
-  hi: 'स्वचालित'
+  hi: 'स्वचालित',
+  bn: 'স্বয়ংক্রিয়'
 };
 
 interface LanguageSwitcherProps {
@@ -68,4 +69,3 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ termKey }) =
     </div>
   );
 };
-
