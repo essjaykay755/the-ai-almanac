@@ -90,7 +90,10 @@ def translate_definitions(definitions: list[str]) -> list[str]:
             " ".join(text.split())
             for text in tokenizer.batch_decode(generated, skip_special_tokens=True)
         )
-        print(f"Translated {min(offset + BATCH_SIZE, len(definitions))}/{len(definitions)}")
+        print(
+            f"Translated {min(offset + BATCH_SIZE, len(definitions))}/{len(definitions)}",
+            flush=True,
+        )
 
     return translated
 
@@ -150,7 +153,7 @@ def main() -> None:
     translations = translate_definitions([definition for _, definition in pairs])
     validate(pairs, translations)
     write_typescript(pairs, translations)
-    print(f"Wrote {EXPECTED_TERM_COUNT} Bengali definitions to {OUTPUT_PATH}")
+    print(f"Wrote {EXPECTED_TERM_COUNT} Bengali definitions to {OUTPUT_PATH}", flush=True)
 
 
 if __name__ == "__main__":
