@@ -61,9 +61,12 @@ test('Bengali edition exposes only entries that are actually translated', async 
   await expect(page.locator('.tab[data-letter="B"]')).toBeDisabled();
 
   await page.locator('#navIndex').click();
-  await expect(page.locator('#indexOverlay')).toBeVisible();
-  await expect(page.locator('#indexOverlay')).toContainText('Activation Patching');
-  await expect(page.locator('#indexOverlay')).not.toContainText('gated recurrent unit');
+  const index = page.locator('#indexOverlay');
+  await expect(index).toBeVisible();
+  await expect(index.getByRole('button', { name: 'activation patching', exact: true })).toBeVisible();
+  await expect(index).not.toContainText('gated recurrent unit');
+  await expect(index.locator('#indexCategoryFilter')).toContainText('ইন্টারপ্রিটেবিলিটি');
+  await expect(index.locator('#indexCategoryFilter')).not.toContainText('Interpretability');
 });
 
 test('Bengali interface localizes visible navigation microcopy', async ({ page }) => {
