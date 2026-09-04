@@ -2,13 +2,13 @@ import { StrictMode, Suspense, use, useLayoutEffect } from 'react';
 import App from '../App';
 import { isStrictAlmanacAppPath } from '../i18n/appPath';
 import { prepareLocalizedRuntime, startLocalizedDomSync } from '../i18n/runtimeClient';
-import { getLocalizedEntries, type LocalizedLocale } from '../i18n/catalog';
+import type { LocalizedLocale } from '../i18n/catalog';
 import { getBengaliTermCopy } from '../i18n/bengali';
+import { getBengaliDefinition } from '../i18n/bengaliDefinitions.generated';
 import { NotFoundPage } from './NotFoundPage';
 
 type AlmanacData = typeof import('../data/terms');
 const almanacDataPromise: Promise<AlmanacData> = import('../data/terms');
-const bengaliKeys = new Set(getLocalizedEntries('bn').map((entry) => entry.key.toLowerCase()));
 const bengaliParts: Record<string, string> = {
   noun: 'বিশেষ্য',
   verb: 'ক্রিয়া',
@@ -21,59 +21,39 @@ let bengaliCorpusPrepared = false;
 function prepareBengaliCorpus(data: AlmanacData): void {
   if (bengaliCorpusPrepared) return;
 
-  const isVisible = (value: string): boolean => {
-    const resolved = data.resolveTerm(value);
-    return Boolean(resolved && bengaliKeys.has(resolved.word.toLowerCase()));
-  };
-
-  // The Bengali edition must never masquerade an English-only entry as localized.
-  // Keep canonical technical headwords in English, but expose only entries that
-  // have complete Bengali content and normalize raw term data for every surface
-  // that does not go through the localized presentation helper.
+  // Every source term has a committed Bengali definition. Keep canonical
+  // technical headwords in English while replacing the explanatory text used
+  // by the page, search, overlays and page-turn snapshots. Hand-curated Bengali
+  // entries override the generated definition where richer copy exists.
   data.terms.forEach((term) => {
-    if (!bengaliKeys.has(term.word.toLowerCase())) return;
-
-    const bengali = getBengaliTermCopy(term.word);
-    if (bengali) {
-      term.definition = bengali.modes.dictionary;
-      term.example = bengali.example;
-      term.origin = bengali.origin;
-      term.note = bengali.note;
-      term.category = bengali.category;
-      term.part = bengaliParts[term.part.toLowerCase()] || term.part;
-      data.specialModes[term.word] = {
-        plain: bengali.modes.plain,
-        technical: bengali.modes.technical,
-        vibe: bengali.modes.vibe
-      };
+    const generatedDefinition = getBengaliDefinition(term.word);
+    if (!generatedDefinition) {
+      throw new Error(`Missing Bengali definition for ${term.word}`);
     }
 
-    term.related.splice(0, term.related.length, ...term.related.filter(isVisible));
+    term.definition = generatedDefinition;
+    term.part = bengaliParts[term.part.toLowerCase()] || term.part;
+    data.specialModes[term.word] = {
+      plain: `সহজভাবে: ${generatedDefinition}`,
+      technical: `প্রযুক্তিগতভাবে: ${generatedDefinition}`,
+      vibe: `ভাইব কোডারের দৃষ্টিতে: ${generatedDefinition}`
+    };
+
+    const curated = getBengaliTermCopy(term.word);
+    if (!curated) return;
+
+    term.definition = curated.modes.dictionary;
+    term.example = curated.example;
+    term.origin = curated.origin;
+    term.note = curated.note;
+    term.category = curated.category;
+    data.specialModes[term.word] = {
+      plain: curated.modes.plain,
+      technical: curated.modes.technical,
+      vibe: curated.modes.vibe
+    };
   });
 
-  data.terms.splice(0, data.terms.length, ...data.terms.filter((term) => bengaliKeys.has(term.word.toLowerCase())));
-  data.sortedTerms.splice(
-    0,
-    data.sortedTerms.length,
-    ...data.sortedTerms.filter((term) => bengaliKeys.has(term.word.toLowerCase()))
-  );
-
-  Object.keys(data.termsByWord).forEach((key) => {
-    const term = data.termsByWord[key];
-    if (!term || !bengaliKeys.has(term.word.toLowerCase())) delete data.termsByWord[key];
-  });
-
-  Object.keys(data.crossRefs).forEach((key) => {
-    if (!isVisible(key)) {
-      delete data.crossRefs[key];
-      return;
-    }
-    const refs = data.crossRefs[key];
-    refs.compare = refs.compare.filter(isVisible);
-    refs.confused = refs.confused.filter(isVisible);
-  });
-
-  data.timeline.splice(0, data.timeline.length, ...data.timeline.filter((item) => isVisible(item.term)));
   bengaliCorpusPrepared = true;
 }
 
