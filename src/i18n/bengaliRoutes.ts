@@ -1,5 +1,5 @@
-import { getLocalizedEntryByKey } from './catalog';
-import { slugifyTerm } from '../utils/ogImage';
+import { getLocalizedEntryByKey } from './catalog.ts';
+import { slugifyTerm } from '../utils/ogImage.ts';
 
 export function getBengaliTermSlug(termKey: string): string {
   return getLocalizedEntryByKey('bn', termKey)?.slug || slugifyTerm(termKey);
