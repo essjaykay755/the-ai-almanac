@@ -1,6 +1,6 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator } from '@playwright/test';
 
-const expectBengaliText = async (locator: ReturnType<Parameters<typeof test>[0]> extends never ? never : any) => {
+const expectBengaliText = async (locator: Locator) => {
   const text = (await locator.textContent()) || '';
   expect(text).toMatch(/[\u0980-\u09FF]/);
 };
