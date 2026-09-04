@@ -49,12 +49,17 @@ test('term routes remain stable and crawlable', () => {
   assert.equal(getTermRoutePath({ word: 'context window' }), 'term/context-window/');
 });
 
-test('multilingual starter exposes six locales with ten translated explanations each', () => {
-  assert.deepEqual(localizedLocales, ['es', 'pt', 'it', 'fr', 'de', 'hi']);
+test('multilingual starter exposes seven locales with ten translated explanations each', () => {
+  assert.deepEqual(localizedLocales, ['es', 'pt', 'it', 'fr', 'de', 'hi', 'bn']);
   for (const locale of localizedLocales) assert.equal(getLocalizedEntries(locale).length, 10);
   assert.equal(getLocalizedTermPath('es', 'artificial intelligence'), 'es/term/inteligencia-artificial/');
   assert.equal(getLocalizedTermPath('hi', 'artificial intelligence'), 'hi/term/kritrim-buddhimatta/');
   assert.equal(getLocalizedTermPath('pt', 'context window'), 'pt/term/janela-de-contexto/');
+  assert.equal(getLocalizedTermPath('bn', 'machine learning'), 'bn/term/machine-learning/');
+
+  const bengaliMachineLearning = getLocalizedEntries('bn').find((entry) => entry.key === 'machine learning');
+  assert.equal(bengaliMachineLearning?.word, 'Machine Learning');
+  assert.match(bengaliMachineLearning?.definition || '', /[\u0980-\u09FF]/);
 });
 
 test('localized routes use the same React app and render full localization through React', () => {
@@ -89,7 +94,9 @@ test('localized routes use the same React app and render full localization throu
   assert.match(reactLocale, /originByLocale/);
   assert.match(reactLocale, /Em termos simples:/);
   assert.match(reactLocale, /पूछें \/ खोजें/);
+  assert.match(reactLocale, /জিজ্ঞেস করুন \/ খুঁজুন/);
   assert.match(tutorialLocale, /localizeTutorialStep/);
+  assert.match(tutorialLocale, /আপনার ভাষা বেছে নিন/);
   assert.match(englishClient, /import App from '..\/App'/);
   assert.doesNotMatch(englishClient, /runtimeClient/);
   assert.match(localizedClient, /import App from '..\/App'/);
@@ -103,12 +110,16 @@ test('strict app routes reject extra path segments', () => {
   assert.equal(isStrictAlmanacAppPath('/es/'), true);
   assert.equal(isStrictAlmanacAppPath('/pt/term/janela-de-contexto/'), true);
   assert.equal(isStrictAlmanacAppPath('/hi/'), true);
+  assert.equal(isStrictAlmanacAppPath('/bn/'), true);
+  assert.equal(isStrictAlmanacAppPath('/bn/term/machine-learning/'), true);
   assert.equal(isStrictAlmanacAppPath('/term/context-window/extra/'), false);
   assert.equal(isStrictAlmanacAppPath('/pt/term/janela-de-contexto/extra/'), false);
   assert.equal(isStrictAlmanacAppPath('/not-a-page/'), false);
   assert.equal(getLocaleFromPathname('/pt/term/janela-de-contexto/'), 'pt');
+  assert.equal(getLocaleFromPathname('/bn/term/machine-learning/'), 'bn');
   assert.equal(getLocaleFromPathname('/term/context-window/'), 'en');
   assert.equal(getLanguageSwitchPath('pt', 'context window'), 'pt/term/janela-de-contexto/');
+  assert.equal(getLanguageSwitchPath('bn', 'machine learning'), 'bn/term/machine-learning/');
   assert.equal(getLanguageSwitchPath('es'), 'es/');
   assert.equal(getLanguageSwitchPath('en', 'context window'), 'term/context-window/');
 });
@@ -117,11 +128,14 @@ test('automatic language selection is IP-first, keeps India English and uses bro
   assert.equal(resolveAutoLocale('BR', ['en-US']), 'pt');
   assert.equal(resolveAutoLocale('ES', ['en-US']), 'es');
   assert.equal(resolveAutoLocale('DE', ['en-US']), 'de');
+  assert.equal(resolveAutoLocale('BD', ['en-US']), 'bn');
   assert.equal(resolveAutoLocale('BR', ['fr-FR', 'en-US']), 'pt');
   assert.equal(resolveAutoLocale('IN', ['en-IN']), null);
   assert.equal(resolveAutoLocale('IN', ['hi-IN', 'en-IN']), null);
+  assert.equal(resolveAutoLocale('IN', ['bn-IN', 'en-IN']), null);
   assert.equal(resolveAutoLocale('US', ['fr-FR']), null);
   assert.equal(resolveAutoLocale(null, ['fr-FR']), 'fr');
+  assert.equal(resolveAutoLocale(null, ['bn-BD', 'en-US']), 'bn');
 
   const source = readFileSync(new URL('../src/client/languagePreference.ts', import.meta.url), 'utf8');
   const switcher = readFileSync(new URL('../src/components/LanguageSwitcher.tsx', import.meta.url), 'utf8');
@@ -139,6 +153,7 @@ test('automatic language selection is IP-first, keeps India English and uses bro
   assert.match(source, /syncLanguagePreferenceState/);
   assert.match(switcher, /data-language-auto/);
   assert.match(switcher, /automaticLanguageLabels/);
+  assert.match(switcher, /স্বয়ংক্রিয়/);
   assert.match(workflow, /push:\s*\n\s*branches:\s*\n\s*- main/);
   assert.match(endpoint, /x-vercel-ip-country/);
 });
