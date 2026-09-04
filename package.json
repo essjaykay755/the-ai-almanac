@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "build": "tsc --noEmit && astro build",
     "lint": "oxlint",
-    "test": "node --test --experimental-strip-types tests/search-and-routes.test.ts",
+    "test": "node --test --experimental-strip-types tests/*.test.ts",
     "test:e2e": "node tests/run-e2e.mjs",
     "preview": "astro preview"
   },
