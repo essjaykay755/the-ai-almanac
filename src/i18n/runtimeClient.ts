@@ -55,6 +55,9 @@ const ui: Record<LocalizedLocale, UiStrings> = {
   },
   hi: {
     fieldEdition: 'फील्ड संस्करण', terms: 'शब्द', searchPlaceholder: 'The AI Almanac से पूछें या कोई शब्द खोजें…', searchLabel: 'The AI Almanac में खोजें', page: 'पृष्ठ', dictionary: 'शब्दकोश', plain: 'सरल भाषा', technical: 'तकनीकी', vibe: 'Vibe Coder', origin: 'उत्पत्ति', inPractice: 'व्यवहार में', addCollection: '+ संग्रह में जोड़ें', saveEntry: 'प्रविष्टि सहेजें', copyLink: 'लिंक कॉपी करें', timeline: 'समयरेखा', recentTerms: 'हाल के शब्द', clearList: 'सूची साफ़ करें', seeAlso: 'यह भी देखें', compare: 'तुलना करें', confused: 'अक्सर इससे भ्रमित होता है', filedUnder: 'श्रेणी', marginalia: 'हाशिया टिप्पणी', previous: 'पिछला', next: 'अगला', noExactMatch: 'सटीक मिलान नहीं मिला', tryIdea: 'अपने प्रश्न के विचार से खोजें:', clearSearch: 'खोज साफ़ करें'
+  },
+  bn: {
+    fieldEdition: 'ফিল্ড সংস্করণ', terms: 'শব্দ', searchPlaceholder: 'The AI Almanac-কে জিজ্ঞেস করুন বা কোনো শব্দ খুঁজুন…', searchLabel: 'The AI Almanac-এ খুঁজুন', page: 'পৃষ্ঠা', dictionary: 'অভিধান', plain: 'সহজ ভাষা', technical: 'প্রযুক্তিগত', vibe: 'Vibe Coder', origin: 'উৎপত্তি', inPractice: 'ব্যবহারে', addCollection: '+ সংগ্রহে যোগ করুন', saveEntry: 'এন্ট্রি সংরক্ষণ করুন', copyLink: 'লিংক কপি করুন', timeline: 'সময়রেখা', recentTerms: 'সাম্প্রতিক শব্দ', clearList: 'তালিকা পরিষ্কার করুন', seeAlso: 'আরও দেখুন', compare: 'তুলনা করুন', confused: 'প্রায়ই যেটির সঙ্গে গুলিয়ে ফেলা হয়', filedUnder: 'শ্রেণি', marginalia: 'পার্শ্বটীকা', previous: 'আগের', next: 'পরের', noExactMatch: 'সঠিক মিল পাওয়া যায়নি', tryIdea: 'আপনার প্রশ্নের ধারণা দিয়ে খুঁজে দেখুন:', clearSearch: 'খোঁজ পরিষ্কার করুন'
   }
 };
 
@@ -64,7 +67,8 @@ const partTranslations: Record<LocalizedLocale, Record<string, string>> = {
   it: { noun: 'sostantivo', verb: 'verbo', adjective: 'aggettivo', phrase: 'espressione', acronym: 'acronimo' },
   fr: { noun: 'nom', verb: 'verbe', adjective: 'adjectif', phrase: 'expression', acronym: 'acronyme' },
   de: { noun: 'Substantiv', verb: 'Verb', adjective: 'Adjektiv', phrase: 'Ausdruck', acronym: 'Akronym' },
-  hi: { noun: 'संज्ञा', verb: 'क्रिया', adjective: 'विशेषण', phrase: 'वाक्यांश', acronym: 'संक्षिप्त रूप' }
+  hi: { noun: 'संज्ञा', verb: 'क्रिया', adjective: 'विशेषण', phrase: 'वाक्यांश', acronym: 'संक्षिप्त रूप' },
+  bn: { noun: 'বিশেষ্য', verb: 'ক্রিয়া', adjective: 'বিশেষণ', phrase: 'বাক্যাংশ', acronym: 'সংক্ষিপ্ত রূপ' }
 };
 
 function isLocalizedLocale(locale: SupportedLocale): locale is LocalizedLocale {
