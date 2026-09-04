@@ -4,7 +4,7 @@ const PREFERENCE_KEY = 'aiAlmanacLanguage';
 const DISMISSAL_KEY = 'aiAlmanacLanguageSuggestionDismissed';
 const AUTO_SWITCH_SESSION_KEY = 'aiAlmanacAutomaticLanguageSwitch';
 
-const supportedLocales = ['es', 'pt', 'it', 'fr', 'de', 'hi'] as const;
+const supportedLocales = ['es', 'pt', 'it', 'fr', 'de', 'hi', 'bn'] as const;
 export type AutoLocale = (typeof supportedLocales)[number];
 type AutomaticSwitchReason = 'detected' | 'remembered';
 
@@ -15,7 +15,7 @@ type AutomaticSwitchRecord = {
 };
 
 const countryDefaultLocale: Partial<Record<string, AutoLocale>> = {
-  AR: 'es', AT: 'de', BO: 'es', BR: 'pt', CL: 'es', CO: 'es', CR: 'es', CU: 'es', DE: 'de',
+  AR: 'es', AT: 'de', BD: 'bn', BO: 'es', BR: 'pt', CL: 'es', CO: 'es', CR: 'es', CU: 'es', DE: 'de',
   DO: 'es', EC: 'es', ES: 'es', FR: 'fr', GT: 'es', HN: 'es', IT: 'it', MX: 'es', NI: 'es',
   PA: 'es', PE: 'es', PR: 'es', PT: 'pt', PY: 'es', SV: 'es', UY: 'es', VE: 'es'
 };
