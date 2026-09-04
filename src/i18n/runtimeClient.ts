@@ -5,6 +5,7 @@ import {
   type LocalizedLocale,
   type SupportedLocale
 } from './catalog';
+import { getBengaliTermCopy } from './bengali';
 import { getPublicPath } from '../utils/ogImage';
 
 interface UiStrings {
@@ -57,7 +58,7 @@ const ui: Record<LocalizedLocale, UiStrings> = {
     fieldEdition: 'फील्ड संस्करण', terms: 'शब्द', searchPlaceholder: 'The AI Almanac से पूछें या कोई शब्द खोजें…', searchLabel: 'The AI Almanac में खोजें', page: 'पृष्ठ', dictionary: 'शब्दकोश', plain: 'सरल भाषा', technical: 'तकनीकी', vibe: 'Vibe Coder', origin: 'उत्पत्ति', inPractice: 'व्यवहार में', addCollection: '+ संग्रह में जोड़ें', saveEntry: 'प्रविष्टि सहेजें', copyLink: 'लिंक कॉपी करें', timeline: 'समयरेखा', recentTerms: 'हाल के शब्द', clearList: 'सूची साफ़ करें', seeAlso: 'यह भी देखें', compare: 'तुलना करें', confused: 'अक्सर इससे भ्रमित होता है', filedUnder: 'श्रेणी', marginalia: 'हाशिया टिप्पणी', previous: 'पिछला', next: 'अगला', noExactMatch: 'सटीक मिलान नहीं मिला', tryIdea: 'अपने प्रश्न के विचार से खोजें:', clearSearch: 'खोज साफ़ करें'
   },
   bn: {
-    fieldEdition: 'ফিল্ড সংস্করণ', terms: 'শব্দ', searchPlaceholder: 'The AI Almanac-কে জিজ্ঞেস করুন বা কোনো শব্দ খুঁজুন…', searchLabel: 'The AI Almanac-এ খুঁজুন', page: 'পৃষ্ঠা', dictionary: 'অভিধান', plain: 'সহজ ভাষা', technical: 'প্রযুক্তিগত', vibe: 'Vibe Coder', origin: 'উৎপত্তি', inPractice: 'ব্যবহারে', addCollection: '+ সংগ্রহে যোগ করুন', saveEntry: 'এন্ট্রি সংরক্ষণ করুন', copyLink: 'লিংক কপি করুন', timeline: 'সময়রেখা', recentTerms: 'সাম্প্রতিক শব্দ', clearList: 'তালিকা পরিষ্কার করুন', seeAlso: 'আরও দেখুন', compare: 'তুলনা করুন', confused: 'প্রায়ই যেটির সঙ্গে গুলিয়ে ফেলা হয়', filedUnder: 'শ্রেণি', marginalia: 'পার্শ্বটীকা', previous: 'আগের', next: 'পরের', noExactMatch: 'সঠিক মিল পাওয়া যায়নি', tryIdea: 'আপনার প্রশ্নের ধারণা দিয়ে খুঁজে দেখুন:', clearSearch: 'খোঁজ পরিষ্কার করুন'
+    fieldEdition: 'ফিল্ড সংস্করণ', terms: 'শব্দ', searchPlaceholder: 'The AI Almanac-কে জিজ্ঞেস করুন বা কোনো শব্দ খুঁজুন…', searchLabel: 'The AI Almanac-এ খুঁজুন', page: 'পৃষ্ঠা', dictionary: 'অভিধান', plain: 'সহজ ভাষা', technical: 'প্রযুক্তিগত', vibe: 'ভাইব কোডার', origin: 'উৎপত্তি', inPractice: 'ব্যবহারে', addCollection: '+ সংগ্রহে যোগ করুন', saveEntry: 'এন্ট্রি সংরক্ষণ করুন', copyLink: 'লিংক কপি করুন', timeline: 'সময়রেখা', recentTerms: 'সাম্প্রতিক শব্দ', clearList: 'তালিকা পরিষ্কার করুন', seeAlso: 'আরও দেখুন', compare: 'তুলনা করুন', confused: 'প্রায়ই যেটির সঙ্গে গুলিয়ে ফেলা হয়', filedUnder: 'শ্রেণি', marginalia: 'পার্শ্বটীকা', previous: 'আগের', next: 'পরের', noExactMatch: 'সঠিক মিল পাওয়া যায়নি', tryIdea: 'আপনার প্রশ্নের ধারণা দিয়ে খুঁজে দেখুন:', clearSearch: 'খোঁজ পরিষ্কার করুন'
   }
 };
 
@@ -150,24 +151,50 @@ function localizePage(page: Element, locale: LocalizedLocale): void {
   const word = page.querySelector('.word');
   const rawWord = word?.textContent?.trim().toLowerCase() || '';
   const entry = entries.find((item) => item.key.toLowerCase() === rawWord || item.word.toLowerCase() === rawWord);
+  const selectedMode = page.querySelector('[id^="mode-tab-"][aria-selected="true"]')?.id.replace('mode-tab-', '') || 'dictionary';
 
   if (entry) {
-    // AI vocabulary is commonly used in English. Keep the canonical term while localizing its explanation.
-    setText(word, entry.key);
-    const dictionarySelected = page.querySelector('#mode-tab-dictionary')?.getAttribute('aria-selected') === 'true';
-    if (dictionarySelected) setText(page.querySelector('.definition'), entry.definition);
+    // Keep established AI vocabulary in English script while localizing the surrounding explanation.
+    setText(word, entry.word);
 
     const lowerParagraphs = page.querySelectorAll('.lower-grid p');
-    if (lowerParagraphs[1]) setText(lowerParagraphs[1], entry.note);
-
     const note = page.querySelector('.margin-note:not(.search-note) p');
-    if (note) setText(note, entry.note);
+
+    if (locale === 'bn') {
+      const bengali = getBengaliTermCopy(entry.key);
+      if (bengali) {
+        const mode = selectedMode as keyof typeof bengali.modes;
+        setText(page.querySelector('.definition'), bengali.modes[mode] || bengali.modes.dictionary);
+        setText(page.querySelector('.example'), bengali.example);
+        if (lowerParagraphs[0]) setText(lowerParagraphs[0], bengali.origin);
+        if (lowerParagraphs[1]) setText(lowerParagraphs[1], bengali.note);
+        if (note) setText(note, bengali.note);
+
+        page.querySelectorAll('.margin-section').forEach((section) => {
+          const heading = section.querySelector('h3')?.textContent?.trim();
+          if (heading === 'Filed under' || heading === strings.filedUnder) {
+            setText(section.querySelector('p'), bengali.category);
+          }
+        });
+      }
+    } else {
+      const dictionarySelected = selectedMode === 'dictionary';
+      if (dictionarySelected) setText(page.querySelector('.definition'), entry.definition);
+      if (lowerParagraphs[1]) setText(lowerParagraphs[1], entry.note);
+      if (note) setText(note, entry.note);
+    }
   }
 
   const part = page.querySelector('.headword-line .part');
   const partKey = part?.textContent?.trim().toLowerCase() || '';
   const partValue = partTranslations[locale][partKey];
   if (partValue) setText(part, partValue);
+
+  page.querySelectorAll('.suggestion span small').forEach((suggestionPart) => {
+    const key = suggestionPart.textContent?.trim().toLowerCase() || '';
+    const translated = partTranslations[locale][key];
+    if (translated) setText(suggestionPart, translated);
+  });
 
   const edition = page.querySelector('.edition');
   const editionMatch = edition?.textContent?.match(/v([\d.]+).*?(\d+)/);
@@ -192,7 +219,6 @@ function localizePage(page: Element, locale: LocalizedLocale): void {
     vibe: strings.vibe
   };
   Object.entries(modeLabels).forEach(([mode, label]) => setText(page.querySelector(`#mode-tab-${mode}`), label));
-  const selectedMode = page.querySelector('[id^="mode-tab-"][aria-selected="true"]')?.id.replace('mode-tab-', '');
   if (selectedMode && modeLabels[selectedMode]) setText(page.querySelector('.definition-mode'), modeLabels[selectedMode]);
 
   const lowerHeadings = page.querySelectorAll('.lower-grid .kicker');
@@ -241,6 +267,18 @@ function localizePage(page: Element, locale: LocalizedLocale): void {
   }
 }
 
+function localizeInterface(root: Element, locale: LocalizedLocale): void {
+  if (locale !== 'bn') return;
+
+  setAttribute(root.querySelector('.cover-nav'), 'aria-label', 'অ্যালম্যানাক নেভিগেশন');
+  setText(root.querySelector('#navTutorial small'), 'গাইড');
+  setText(root.querySelector('#navTimeline small'), 'দেখুন');
+  setText(root.querySelector('#navSurprise small'), 'এলোমেলো');
+  setText(root.querySelector('#navClip small'), 'শেয়ার');
+  setText(root.querySelector('#navAbout small'), 'পরিচিতি');
+  setText(root.querySelector('[data-language-auto] span:last-child'), 'অটো');
+}
+
 export function startLocalizedDomSync(locale: SupportedLocale): () => void {
   if (typeof window === 'undefined' || !isLocalizedLocale(locale)) return () => {};
 
@@ -250,6 +288,7 @@ export function startLocalizedDomSync(locale: SupportedLocale): () => void {
   let frame = 0;
   const sync = () => {
     frame = 0;
+    localizeInterface(root, locale);
     root.querySelectorAll('.page-inner').forEach((page) => localizePage(page, locale));
   };
   const schedule = () => {
