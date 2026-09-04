@@ -6,6 +6,7 @@ import {
   localeMeta,
   type SupportedLocale
 } from '../i18n/catalog';
+import { getBengaliTermPath } from '../i18n/bengaliRoutes';
 import { getPublicPath } from '../utils/ogImage';
 
 const automaticLanguageLabels: Record<SupportedLocale, string> = {
@@ -46,10 +47,13 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ termKey }) =
         <nav className="site-language-menu" aria-label={currentMeta.languageLabel}>
           {allLocaleCodes.map((code) => {
             const meta = localeMeta[code];
+            const switchPath = code === 'bn' && termKey
+              ? getBengaliTermPath(termKey)
+              : getLanguageSwitchPath(code, termKey);
             return (
               <a
                 key={code}
-                href={getPublicPath(base, getLanguageSwitchPath(code, termKey))}
+                href={getPublicPath(base, switchPath)}
                 hrefLang={meta.htmlLang}
                 lang={meta.htmlLang}
                 aria-current={code === locale ? 'true' : undefined}

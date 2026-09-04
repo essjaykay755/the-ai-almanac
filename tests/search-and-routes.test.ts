@@ -49,17 +49,25 @@ test('term routes remain stable and crawlable', () => {
   assert.equal(getTermRoutePath({ word: 'context window' }), 'term/context-window/');
 });
 
-test('multilingual starter exposes seven locales with ten translated explanations each', () => {
+test('multilingual starter exposes the localized editions and their translated coverage', () => {
   assert.deepEqual(localizedLocales, ['es', 'pt', 'it', 'fr', 'de', 'hi', 'bn']);
-  for (const locale of localizedLocales) assert.equal(getLocalizedEntries(locale).length, 10);
+  for (const locale of localizedLocales.filter((locale) => locale !== 'bn')) {
+    assert.equal(getLocalizedEntries(locale).length, 10);
+  }
+  assert.equal(getLocalizedEntries('bn').length, 11);
   assert.equal(getLocalizedTermPath('es', 'artificial intelligence'), 'es/term/inteligencia-artificial/');
   assert.equal(getLocalizedTermPath('hi', 'artificial intelligence'), 'hi/term/kritrim-buddhimatta/');
   assert.equal(getLocalizedTermPath('pt', 'context window'), 'pt/term/janela-de-contexto/');
   assert.equal(getLocalizedTermPath('bn', 'machine learning'), 'bn/term/machine-learning/');
+  assert.equal(getLocalizedTermPath('bn', 'activation patching'), 'bn/term/activation-patching/');
 
   const bengaliMachineLearning = getLocalizedEntries('bn').find((entry) => entry.key === 'machine learning');
   assert.equal(bengaliMachineLearning?.word, 'Machine Learning');
   assert.match(bengaliMachineLearning?.definition || '', /[\u0980-\u09FF]/);
+
+  const bengaliActivationPatching = getLocalizedEntries('bn').find((entry) => entry.key === 'activation patching');
+  assert.equal(bengaliActivationPatching?.word, 'Activation Patching');
+  assert.match(bengaliActivationPatching?.definition || '', /[\u0980-\u09FF]/);
 });
 
 test('localized routes use the same React app and render full localization through React', () => {

@@ -165,7 +165,7 @@ export const localeMeta: Record<SupportedLocale, LocaleMeta> = {
     englishLabel: 'ইংরেজি শব্দ',
     openEnglishLabel: 'সম্পূর্ণ ইংরেজি এন্ট্রি খুলুন',
     availableTermsLabel: 'অনূদিত প্রধান শব্দ',
-    translationNotice: 'এই বাংলা সংস্করণটি ক্রমশ বিস্তৃত হচ্ছে। যেসব এন্ট্রি এখনও অনূদিত নয়, সেগুলো সম্পূর্ণ ইংরেজি অভিধানে পাওয়া যাবে।',
+    translationNotice: 'বাংলা সংস্করণে এখন শুধু সম্পূর্ণ অনূদিত এন্ট্রিগুলোই দেখানো হয়। নতুন অনুবাদ যোগ হলে সেগুলো এই সংস্করণে যুক্ত হবে।',
     homeLinkLabel: 'বাংলা হোম',
     languageLabel: 'ভাষা'
   }
@@ -529,6 +529,11 @@ export const localizedEntries: Record<LocalizedLocale, readonly LocalizedEntry[]
       key: 'RAG', slug: 'retrieval-augmented-generation-rag', word: 'Retrieval-Augmented Generation (RAG)',
       definition: 'এমন একটি আর্কিটেকচার যেখানে সিস্টেম প্রথমে প্রাসঙ্গিক বাহ্যিক তথ্য খুঁজে আনে এবং উত্তর তৈরির আগে সেই তথ্য মডেলের কনটেক্সটে যোগ করে।',
       note: 'RAG মডেলের অভ্যন্তরীণ স্মৃতির ওপর নির্ভরতা কমায়, কিন্তু সঠিক উত্তরের নিশ্চয়তা দেয় না।'
+    },
+    {
+      key: 'activation patching', slug: 'activation-patching', word: 'Activation Patching',
+      definition: 'মডেলের এক রান থেকে নেওয়া অভ্যন্তরীণ activation অন্য একটি রানে বসিয়ে কোনো নির্দিষ্ট অভ্যন্তরীণ উপস্থাপন মডেলের আচরণে কারণগত প্রভাব ফেলে কি না পরীক্ষা করার কৌশল।',
+      note: 'এটি সরাসরি intervention ব্যবহার করে কোন activation আচরণের জন্য কারণগতভাবে গুরুত্বপূর্ণ তা যাচাই করতে সাহায্য করে।'
     },
     {
       key: 'agentic', slug: 'agentic-ai', word: 'Agentic AI',

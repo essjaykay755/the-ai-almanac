@@ -1,20 +1,38 @@
 ---
 import AppShell from '../../../layouts/AppShell.astro';
+import { terms } from '../../../data/terms';
 import {
   getLocalizedEntries,
-  getLocalizedTermPath,
+  getLocalizedEntryByKey,
   localizedLocales,
   type LocalizedEntry,
   type LocalizedLocale
 } from '../../../i18n/catalog';
+import { getBengaliDefinition } from '../../../i18n/bengaliDefinitions.generated';
+import { getBengaliTermSlug } from '../../../i18n/bengaliRoutes';
 
 export function getStaticPaths() {
-  return localizedLocales.flatMap((lang) =>
-    getLocalizedEntries(lang).map((entry) => ({
+  const bengaliEntries: LocalizedEntry[] = terms.map((term) => {
+    const definition = getBengaliDefinition(term.word);
+    if (!definition) throw new Error(`Missing Bengali definition for ${term.word}`);
+
+    const curated = getLocalizedEntryByKey('bn', term.word);
+    return {
+      key: term.word,
+      slug: getBengaliTermSlug(term.word),
+      word: curated?.word || term.word,
+      definition: curated?.definition || definition,
+      note: curated?.note || ''
+    };
+  });
+
+  return localizedLocales.flatMap((lang) => {
+    const entries = lang === 'bn' ? bengaliEntries : getLocalizedEntries(lang);
+    return entries.map((entry) => ({
       params: { lang, slug: entry.slug },
       props: { lang, entry }
-    }))
-  );
+    }));
+  });
 }
 
 interface Props {
@@ -23,7 +41,7 @@ interface Props {
 }
 
 const { lang, entry } = Astro.props as Props;
-const canonicalPath = getLocalizedTermPath(lang, entry.key) || `${lang}/`;
+const canonicalPath = `${lang}/term/${entry.slug}/`;
 ---
 
 <AppShell
