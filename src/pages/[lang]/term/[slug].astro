@@ -11,21 +11,21 @@ import {
 import { getBengaliDefinition } from '../../../i18n/bengaliDefinitions.generated';
 import { getBengaliTermSlug } from '../../../i18n/bengaliRoutes';
 
-const bengaliEntries: LocalizedEntry[] = terms.map((term) => {
-  const definition = getBengaliDefinition(term.word);
-  if (!definition) throw new Error(`Missing Bengali definition for ${term.word}`);
-
-  const curated = getLocalizedEntryByKey('bn', term.word);
-  return {
-    key: term.word,
-    slug: getBengaliTermSlug(term.word),
-    word: curated?.word || term.word,
-    definition: curated?.definition || definition,
-    note: curated?.note || ''
-  };
-});
-
 export function getStaticPaths() {
+  const bengaliEntries: LocalizedEntry[] = terms.map((term) => {
+    const definition = getBengaliDefinition(term.word);
+    if (!definition) throw new Error(`Missing Bengali definition for ${term.word}`);
+
+    const curated = getLocalizedEntryByKey('bn', term.word);
+    return {
+      key: term.word,
+      slug: getBengaliTermSlug(term.word),
+      word: curated?.word || term.word,
+      definition: curated?.definition || definition,
+      note: curated?.note || ''
+    };
+  });
+
   return localizedLocales.flatMap((lang) => {
     const entries = lang === 'bn' ? bengaliEntries : getLocalizedEntries(lang);
     return entries.map((entry) => ({
