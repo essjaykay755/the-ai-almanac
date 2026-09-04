@@ -151,11 +151,14 @@ function localizePage(page: Element, locale: LocalizedLocale): void {
   const word = page.querySelector('.word');
   const rawWord = word?.textContent?.trim().toLowerCase() || '';
   const entry = entries.find((item) => item.key.toLowerCase() === rawWord || item.word.toLowerCase() === rawWord);
-  const selectedMode = page.querySelector('[id^="mode-tab-"][aria-selected="true"]')?.id.replace('mode-tab-', '') || 'dictionary';
+  const selectedTab = page.querySelector('.mode-btn[aria-selected="true"]');
+  const modeOrder = ['dictionary', 'plain', 'technical', 'vibe'] as const;
+  const selectedIndex = selectedTab ? Array.from(page.querySelectorAll('.mode-btn')).indexOf(selectedTab) : -1;
+  const selectedMode = selectedTab?.id?.replace('mode-tab-', '') || modeOrder[selectedIndex] || 'dictionary';
 
   if (entry) {
-    // Keep established AI vocabulary in English script while localizing the surrounding explanation.
-    setText(word, entry.word);
+    // Bengali uses the English-script display term; other localized editions retain the canonical English key.
+    setText(word, locale === 'bn' ? entry.word : entry.key);
 
     const lowerParagraphs = page.querySelectorAll('.lower-grid p');
     const note = page.querySelector('.margin-note:not(.search-note) p');
@@ -218,7 +221,11 @@ function localizePage(page: Element, locale: LocalizedLocale): void {
     technical: strings.technical,
     vibe: strings.vibe
   };
-  Object.entries(modeLabels).forEach(([mode, label]) => setText(page.querySelector(`#mode-tab-${mode}`), label));
+  Object.entries(modeLabels).forEach(([mode, label], index) => {
+    const byId = page.querySelector(`#mode-tab-${mode}`);
+    const byIndex = page.querySelectorAll('.mode-btn')[index] || null;
+    setText(byId || byIndex, label);
+  });
   if (selectedMode && modeLabels[selectedMode]) setText(page.querySelector('.definition-mode'), modeLabels[selectedMode]);
 
   const lowerHeadings = page.querySelectorAll('.lower-grid .kicker');
