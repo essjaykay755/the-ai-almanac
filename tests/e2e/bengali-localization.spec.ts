@@ -45,7 +45,7 @@ test('Activation Patching has complete Bengali content', async ({ page }) => {
   await expect(page.locator('.definition')).not.toContainText('Replacing internal activations');
   await expect(page.locator('.example')).not.toContainText('The team used activation patching');
   await expect(page.locator('.margin-section').filter({ hasText: 'শ্রেণি' })).toContainText('ইন্টারপ্রিটেবিলিটি');
-  await expect(page.getByText('activation steering', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('activation steering', { exact: true }).first()).toBeVisible();
 
   for (const mode of ['plain', 'technical', 'vibe'] as const) {
     await page.locator(`#mode-tab-${mode}`).click();
@@ -53,20 +53,26 @@ test('Activation Patching has complete Bengali content', async ({ page }) => {
   }
 });
 
-test('Bengali edition exposes only entries that are actually translated', async ({ page }) => {
-  await page.goto('/bn/term/artificial-intelligence/');
+test('Bengali edition exposes all 791 terms with Bengali definitions', async ({ page }) => {
+  await page.goto('/bn/term/gated-recurrent-unit/');
 
-  await expect(page.locator('#termCount')).toHaveText('11');
-  await expect(page.locator('.edition')).toContainText('11');
-  await expect(page.locator('.tab[data-letter="B"]')).toBeDisabled();
+  await expect(page.locator('#termCount')).toHaveText('791');
+  await expect(page.locator('.edition')).toContainText('791');
+  await expect(page.locator('.word')).toHaveText('gated recurrent unit');
+  await expectBengaliText(page.locator('.definition'));
+
+  for (const mode of ['plain', 'technical', 'vibe'] as const) {
+    await page.locator(`#mode-tab-${mode}`).click();
+    await expectBengaliText(page.locator('.definition'));
+    await expect(page.locator('.definition')).not.toContainText('Technical lens');
+    await expect(page.locator('.definition')).not.toContainText('In everyday language');
+  }
 
   await page.locator('#navIndex').click();
   const index = page.locator('#indexOverlay');
   await expect(index).toBeVisible();
-  await expect(index.getByRole('button', { name: 'activation patching', exact: true })).toBeVisible();
-  await expect(index).not.toContainText('gated recurrent unit');
-  await expect(index.locator('#indexCategoryFilter')).toContainText('ইন্টারপ্রিটেবিলিটি');
-  await expect(index.locator('#indexCategoryFilter')).not.toContainText('Interpretability');
+  await expect(index.locator('#indexSummary')).toContainText('791 / 791');
+  await expect(index.getByRole('button', { name: 'gated recurrent unit', exact: true })).toBeVisible();
 });
 
 test('Bengali interface localizes visible navigation microcopy', async ({ page }) => {
