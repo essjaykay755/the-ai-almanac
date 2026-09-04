@@ -3,11 +3,19 @@ import App from '../App';
 import { isStrictAlmanacAppPath } from '../i18n/appPath';
 import { prepareLocalizedRuntime, startLocalizedDomSync } from '../i18n/runtimeClient';
 import { getLocalizedEntries, type LocalizedLocale } from '../i18n/catalog';
+import { getBengaliTermCopy } from '../i18n/bengali';
 import { NotFoundPage } from './NotFoundPage';
 
 type AlmanacData = typeof import('../data/terms');
 const almanacDataPromise: Promise<AlmanacData> = import('../data/terms');
 const bengaliKeys = new Set(getLocalizedEntries('bn').map((entry) => entry.key.toLowerCase()));
+const bengaliParts: Record<string, string> = {
+  noun: 'বিশেষ্য',
+  verb: 'ক্রিয়া',
+  adjective: 'বিশেষণ',
+  phrase: 'বাক্যাংশ',
+  acronym: 'সংক্ষিপ্ত রূপ'
+};
 let bengaliCorpusPrepared = false;
 
 function prepareBengaliCorpus(data: AlmanacData): void {
@@ -19,10 +27,27 @@ function prepareBengaliCorpus(data: AlmanacData): void {
   };
 
   // The Bengali edition must never masquerade an English-only entry as localized.
-  // Keep the canonical English technical headword, but expose only entries that
-  // have complete Bengali content.
+  // Keep canonical technical headwords in English, but expose only entries that
+  // have complete Bengali content and normalize raw term data for every surface
+  // that does not go through the localized presentation helper.
   data.terms.forEach((term) => {
     if (!bengaliKeys.has(term.word.toLowerCase())) return;
+
+    const bengali = getBengaliTermCopy(term.word);
+    if (bengali) {
+      term.definition = bengali.modes.dictionary;
+      term.example = bengali.example;
+      term.origin = bengali.origin;
+      term.note = bengali.note;
+      term.category = bengali.category;
+      term.part = bengaliParts[term.part.toLowerCase()] || term.part;
+      data.specialModes[term.word] = {
+        plain: bengali.modes.plain,
+        technical: bengali.modes.technical,
+        vibe: bengali.modes.vibe
+      };
+    }
+
     term.related.splice(0, term.related.length, ...term.related.filter(isVisible));
   });
 
