@@ -48,7 +48,7 @@ jobs:
 
       - name: Commit generated definitions
         run: |
-          if git diff --quiet -- src/i18n/bengaliDefinitions.generated.ts; then
+          if [ -z "$(git status --porcelain -- src/i18n/bengaliDefinitions.generated.ts)" ]; then
             echo 'Bengali definitions are already current.'
             exit 0
           fi
