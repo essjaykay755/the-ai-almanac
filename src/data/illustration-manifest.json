@@ -1,0 +1,38 @@
+{
+  "termImages": {
+    "artificial-intelligence": "/illustrations/generated/processed/artificial-intelligence.webp",
+    "grounding": "/illustrations/generated/processed/grounding.webp",
+    "hallucination": "/illustrations/generated/processed/hallucination.webp",
+    "neural-network": "/illustrations/generated/processed/neural-network.webp",
+    "fine-tuning": "/illustrations/generated/processed/fine-tuning.webp",
+    "rag": "/illustrations/generated/processed/rag.webp",
+    "machine-learning": "/illustrations/generated/processed/machine-learning.webp",
+    "token": "/illustrations/generated/processed/token.webp",
+    "transformer": "/illustrations/generated/processed/transformer.webp",
+    "context-window": "/illustrations/generated/processed/context-window.webp",
+    "embedding": "/illustrations/generated/processed/embedding.webp",
+    "prompt-injection": "/illustrations/generated/processed/prompt-injection.webp"
+  },
+  "categoryImages": {
+    "Agents, Tools & MCP": "/illustrations/generated/processed/agents-tools-mcp.webp",
+    "AI Product, Coding & Culture": "/illustrations/generated/processed/ai-product-coding-culture.webp",
+    "Architectures": "/illustrations/generated/processed/architectures.webp",
+    "Audio & Speech": "/illustrations/generated/processed/audio-speech.webp",
+    "Data & MLOps": "/illustrations/generated/processed/data-mlops.webp",
+    "Embodied AI & Robotics": "/illustrations/generated/processed/embodied-ai-robotics.webp",
+    "Evaluation & Metrics": "/illustrations/generated/processed/evaluation-metrics.webp",
+    "Foundations": "/illustrations/generated/processed/foundations.webp",
+    "Generation & Decoding": "/illustrations/generated/processed/generation-decoding.webp",
+    "Governance & Responsible AI": "/illustrations/generated/processed/governance-responsible-ai.webp",
+    "Hardware & Systems": "/illustrations/generated/processed/hardware-systems.webp",
+    "Inference & Optimization": "/illustrations/generated/processed/inference-optimization.webp",
+    "Interpretability": "/illustrations/generated/processed/interpretability.webp",
+    "Language Models & Prompting": "/illustrations/generated/processed/language-models-prompting.webp",
+    "Natural Language Processing": "/illustrations/generated/processed/natural-language-processing.webp",
+    "Reinforcement Learning & Classical ML": "/illustrations/generated/processed/reinforcement-learning-classical-ml.webp",
+    "Retrieval & Knowledge": "/illustrations/generated/processed/retrieval-knowledge.webp",
+    "Safety, Security & Alignment": "/illustrations/generated/processed/safety-security-alignment.webp",
+    "Training & Adaptation": "/illustrations/generated/processed/training-adaptation.webp",
+    "Vision, Image & Video": "/illustrations/generated/processed/vision-image-video.webp"
+  }
+}

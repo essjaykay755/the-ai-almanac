@@ -27,6 +27,7 @@ import {
 import { getPronunciation } from './utils/pronunciation';
 import { createSearchIndex } from './utils/search';
 import { getExplanationForTerm } from './utils/explanations';
+import { getTermIllustrationSource, preloadTermIllustration } from './utils/illustrations';
 import {
   getPublicPath,
   getTermOgImagePath,
@@ -213,6 +214,23 @@ function cloneWithScroll(node: HTMLElement, scrollTop: number, scrollLeft: numbe
   return clone;
 }
 
+function waitForIllustration(root: HTMLElement | null): Promise<void> {
+  if (!root) return Promise.resolve();
+
+  const images = Array.from(root.querySelectorAll<HTMLImageElement>('.entry-illustration'));
+  if (images.length === 0) return Promise.resolve();
+
+  return Promise.all(images.map((image) => {
+    if (image.complete && image.naturalWidth > 0) return Promise.resolve();
+
+    return new Promise<void>((resolve) => {
+      const finish = () => resolve();
+      image.addEventListener('load', finish, { once: true });
+      image.addEventListener('error', finish, { once: true });
+    });
+  })).then(() => undefined);
+}
+
 function createDestinationSnapshot(
   term: Term,
   mode: ExplanationMode,
@@ -260,6 +278,36 @@ function createDestinationSnapshot(
     exEl.style.display = term.example ? 'block' : 'none';
   }
 
+  // 5. Illustration: update the animated destination before the live React
+  // page changes, so the page turn never reveals the previous term's artwork.
+  const nextIllustrationSrc = getTermIllustrationSource(term);
+  const definitionPrimary = clone.querySelector<HTMLElement>('.definition-primary');
+  const illustrationWrap = clone.querySelector<HTMLElement>('.entry-illustration-wrap');
+  const illustration = clone.querySelector<HTMLImageElement>('.entry-illustration');
+  if (nextIllustrationSrc && illustration) {
+    illustration.src = nextIllustrationSrc;
+    illustration.loading = 'eager';
+    illustration.decoding = 'async';
+  } else if (nextIllustrationSrc && definitionPrimary && !illustrationWrap) {
+    const nextWrap = document.createElement('div');
+    nextWrap.className = 'entry-illustration-wrap';
+    nextWrap.setAttribute('aria-hidden', 'true');
+    const nextImage = document.createElement('img');
+    nextImage.className = 'entry-illustration';
+    nextImage.src = nextIllustrationSrc;
+    nextImage.alt = '';
+    nextImage.width = 512;
+    nextImage.height = 512;
+    nextImage.loading = 'eager';
+    nextImage.decoding = 'async';
+    nextWrap.appendChild(nextImage);
+    definitionPrimary.classList.add('has-illustration');
+    definitionPrimary.appendChild(nextWrap);
+  } else if (!nextIllustrationSrc && illustrationWrap) {
+    illustrationWrap.remove();
+    definitionPrimary?.classList.remove('has-illustration');
+  }
+
   // Keep the controlled search input in sync with the target React render.
   const searchInput = clone.querySelector('.search-box input') as HTMLInputElement | null;
   if (searchInput) {
@@ -269,14 +317,14 @@ function createDestinationSnapshot(
   }
   clone.querySelector('.suggestions')?.remove();
 
-  // 5. Lower grid (Origin & In Practice)
+  // 6. Lower grid (Origin & In Practice)
   const lowerGridPs = clone.querySelectorAll('.lower-grid p');
   if (lowerGridPs.length >= 2) {
     lowerGridPs[0].textContent = term.origin || 'A standard term in modern AI practice.';
     lowerGridPs[1].textContent = term.note || 'Use the term precisely in context.';
   }
 
-  // 6. Thread & Trail
+  // 7. Thread & Trail
   const trailEl = clone.querySelector('.trail');
   if (trailEl) {
     trailEl.innerHTML = nextTrail
@@ -285,7 +333,7 @@ function createDestinationSnapshot(
       .join('');
   }
 
-  // 7. Margin sections: See also, Compare, Often confused with, Filed under, Marginalia
+  // 8. Margin sections: See also, Compare, Often confused with, Filed under, Marginalia
   const marginEl = clone.querySelector('.margin');
   if (marginEl) {
     const x = data.crossRefs[term.word] || { compare: [], confused: [] };
@@ -355,7 +403,7 @@ function createDestinationSnapshot(
     }
   }
 
-  // 8. Folio top, page counter
+  // 9. Folio top, page counter
   const pageNumEl = clone.querySelector('#pageNumber') || clone.querySelector('.page-footer .center');
   if (pageNumEl) {
     pageNumEl.textContent = `Page ${termIndex + 1}`;
@@ -365,7 +413,7 @@ function createDestinationSnapshot(
     folioTopEl.textContent = `Page ${termIndex + 1}`;
   }
 
-  // 9. Bookmark button
+  // 10. Bookmark button
   const bookmarkBtn = clone.querySelector('.bookmark-btn');
   if (bookmarkBtn) {
     bookmarkBtn.classList.toggle('saved', isBookmarked);
@@ -496,6 +544,17 @@ const AlmanacApp: React.FC = () => {
     return idx >= 0 ? idx : 0;
   }, [currentTerm.word, termIndexByWord]);
   const totalPages = sortedTerms.length;
+
+  useEffect(() => {
+    if (sortedTerms.length === 0) return;
+
+    const previous = sortedTerms[(termIndex - 1 + sortedTerms.length) % sortedTerms.length];
+    const next = sortedTerms[(termIndex + 1) % sortedTerms.length];
+    preloadTermIllustration(currentTerm);
+    preloadTermIllustration(previous);
+    preloadTermIllustration(next);
+  }, [currentTerm, sortedTerms, termIndex]);
+
   const searchIndex = useMemo(() => createSearchIndex(sortedTerms), [sortedTerms]);
 
   const availableLetters = useMemo(() => {
@@ -1029,6 +1088,11 @@ const AlmanacApp: React.FC = () => {
       if (typeof document !== 'undefined' && document.fonts?.ready) {
         await document.fonts.ready;
       }
+      const destinationLayer = direction === 'forward' ? turnBottomEl : turnBackEl;
+      await Promise.race([
+        waitForIllustration(destinationLayer),
+        new Promise<void>((resolve) => window.setTimeout(resolve, 160))
+      ]);
       await new Promise<void>((resolve) => {
         window.requestAnimationFrame(() => resolve());
       });
@@ -1070,6 +1134,10 @@ const AlmanacApp: React.FC = () => {
         triggerStamp('ENTRY NOT FOUND');
         return;
       }
+
+      // Warm the destination asset before the fold starts. The page-turn
+      // snapshot also receives this URL synchronously below.
+      preloadTermIllustration(resolved);
 
       const fromSearch = options?.fromSearch ?? false;
       const addTrail = options?.addTrail ?? true;

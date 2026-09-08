@@ -1755,6 +1755,48 @@ button {
   transform: scaleX(1);
 }
 
+.definition-primary {
+  min-width: 0;
+}
+
+.definition-primary.has-illustration {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(170px, 18vw, 220px);
+  gap: clamp(24px, 3vw, 48px);
+  align-items: start;
+  margin-bottom: 22px;
+}
+
+.definition-copy {
+  min-width: 0;
+}
+
+.definition-primary.has-illustration .definition-wrap {
+  margin-bottom: 0;
+}
+
+.entry-illustration-wrap {
+  width: 100%;
+  max-width: 220px;
+  justify-self: end;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: clamp(18px, 1.2vw, 24px);
+  color: var(--ink);
+}
+
+.entry-illustration {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  aspect-ratio: 1;
+  overflow: visible;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
 .definition-wrap {
   position: relative;
   padding-left: 34px;
@@ -4227,6 +4269,14 @@ button {
     gap: 27px;
     align-content: start;
   }
+  .definition-primary.has-illustration {
+    grid-template-columns: minmax(0, 1fr) clamp(150px, 20vw, 180px);
+    gap: 24px;
+  }
+  .entry-illustration-wrap {
+    max-width: 180px;
+    padding-top: 14px;
+  }
   .margin {
     border-left: 0;
     border-top: 1px solid var(--rule);
@@ -4557,9 +4607,13 @@ button {
     overflow-x: hidden;
   }
   .entry,
+  .definition-primary,
+  .definition-copy,
   .definition-wrap,
   .definition,
   .example,
+  .entry-illustration-wrap,
+  .entry-illustration,
   .lower-grid,
   .lower-grid section,
   .lower-grid p {
@@ -4571,6 +4625,25 @@ button {
   .example,
   .lower-grid p {
     overflow-wrap: anywhere;
+  }
+  .definition-primary.has-illustration {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 0;
+  }
+  .definition-primary.has-illustration .definition-wrap {
+    margin-bottom: 0;
+  }
+  .entry-illustration-wrap {
+    order: 2;
+    max-width: 100%;
+    padding-top: 0;
+    justify-content: center;
+  }
+  .entry-illustration {
+    width: clamp(150px, 48vw, 190px);
+    max-width: 190px;
   }
   .headword-line {
     display: flex;

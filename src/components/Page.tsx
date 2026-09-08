@@ -3,6 +3,7 @@ import type { Term, ExplanationMode, CrossRefInfo, SpecialModes, TermSelectionTa
 import { searchTerms, type SearchIndex } from '../utils/search';
 import { getPronunciation } from '../utils/pronunciation';
 import { APP_VERSION } from '../version';
+import { getTermIllustrationSource } from '../utils/illustrations';
 import {
   getLocalizedTermPresentation,
   getModeLabels,
@@ -77,6 +78,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
   const strings = getUiStrings(locale);
   const modeNames = getModeLabels(locale);
   const localizedTerm = getLocalizedTermPresentation(currentTerm, explanationMode, specialModes, locale);
+  const illustrationSrc = getTermIllustrationSource(currentTerm);
 
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const suggestions = useMemo(
@@ -239,11 +241,29 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
               ))}
             </div>
 
-            <div className="definition-wrap" id="definitionContent" role="tabpanel" aria-labelledby={`mode-tab-${explanationMode}`} tabIndex={0}>
-              <span className="sense-num">1.</span>
-              <div className="definition-mode">{modeNames[explanationMode]}</div>
-              <p className={`definition ${fromSearchQuestion ? 'search-hit' : ''}`}>{localizedTerm.definition}</p>
-              <p className="example">{localizedTerm.example}</p>
+            <div className={`definition-primary${illustrationSrc ? ' has-illustration' : ''}`}>
+              <div className="definition-copy">
+                <div className="definition-wrap" id="definitionContent" role="tabpanel" aria-labelledby={`mode-tab-${explanationMode}`} tabIndex={0}>
+                  <span className="sense-num">1.</span>
+                  <div className="definition-mode">{modeNames[explanationMode]}</div>
+                  <p className={`definition ${fromSearchQuestion ? 'search-hit' : ''}`}>{localizedTerm.definition}</p>
+                  <p className="example">{localizedTerm.example}</p>
+                </div>
+              </div>
+
+              {illustrationSrc && (
+                <div className="entry-illustration-wrap" aria-hidden="true">
+                  <img
+                    className="entry-illustration"
+                    src={illustrationSrc}
+                    alt=""
+                    width="512"
+                    height="512"
+                    loading="eager"
+                    decoding="async"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="lower-grid">
