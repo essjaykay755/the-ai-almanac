@@ -199,7 +199,18 @@ function isLocalizedLocale(locale: SupportedLocale): locale is LocalizedLocale {
   return localizedLocales.includes(locale as LocalizedLocale);
 }
 
+// Astro knows the edition before the client-only island mounts. Keep that
+// value authoritative while the browser finishes the URL/hash handoff; reading
+// window.location.pathname in every component can briefly expose the English
+// route during that handoff and make the cover/sidebar flicker back to English.
+let runtimeLocaleOverride: SupportedLocale | null = null;
+
+export function setRuntimeLocale(locale: SupportedLocale): void {
+  runtimeLocaleOverride = locale;
+}
+
 export function getRuntimeLocale(): SupportedLocale {
+  if (runtimeLocaleOverride) return runtimeLocaleOverride;
   if (typeof window === 'undefined') return 'en';
   return getLocaleFromPathname(window.location.pathname, import.meta.env.BASE_URL || '/');
 }

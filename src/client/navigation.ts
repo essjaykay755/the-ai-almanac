@@ -40,6 +40,11 @@ function normalizeLegacyTermUrl(): boolean {
 function normalizeAboutUrl(): boolean {
   if (window.location.hash !== '#about') return false;
 
+  // Localized editions keep About in the React app at /<locale>/#about. The
+  // English /about/ route is only valid for the English edition; rewriting a
+  // localized hash to it changes the runtime locale underneath the app.
+  if (getLocaleFromPathname(window.location.pathname, publicBase) !== 'en') return false;
+
   const cleanUrl = `${aboutPath}${window.location.search}`;
   window.history.replaceState(window.history.state, '', cleanUrl);
   return true;

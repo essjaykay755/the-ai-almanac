@@ -3,6 +3,7 @@ import App from '../App';
 import { isStrictAlmanacAppPath } from '../i18n/appPath';
 import { prepareLocalizedRuntime, startLocalizedDomSync } from '../i18n/runtimeClient';
 import type { LocalizedLocale } from '../i18n/catalog';
+import { setRuntimeLocale } from '../i18n/reactLocale';
 import { getBengaliTermCopy } from '../i18n/bengali';
 import { getBengaliDefinition } from '../i18n/bengaliDefinitions.generated';
 import { NotFoundPage } from './NotFoundPage';
@@ -72,6 +73,7 @@ const appLoader = (
 );
 
 export function LocalizedClientApp({ locale, initialTermKey }: LocalizedClientAppProps) {
+  setRuntimeLocale(locale);
   const data = use(almanacDataPromise);
   if (locale === 'bn') prepareBengaliCorpus(data);
 

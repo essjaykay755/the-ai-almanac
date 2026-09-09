@@ -2,11 +2,11 @@ import React from 'react';
 import {
   allLocaleCodes,
   getLanguageSwitchPath,
-  getLocaleFromPathname,
   localeMeta,
   type SupportedLocale
 } from '../i18n/catalog';
 import { getBengaliTermPath } from '../i18n/bengaliRoutes';
+import { getRuntimeLocale } from '../i18n/reactLocale';
 import { getPublicPath } from '../utils/ogImage';
 
 const automaticLanguageLabels: Record<SupportedLocale, string> = {
@@ -26,9 +26,7 @@ interface LanguageSwitcherProps {
 
 export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ termKey }) => {
   const base = import.meta.env.BASE_URL || '/';
-  const locale = typeof window === 'undefined'
-    ? 'en'
-    : getLocaleFromPathname(window.location.pathname, base);
+  const locale = getRuntimeLocale();
   const currentMeta = localeMeta[locale];
 
   return (

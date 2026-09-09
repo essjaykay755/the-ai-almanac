@@ -16,6 +16,39 @@ test('localized cover stays translated after language navigation settles', async
   expect(await page.evaluate(() => window.location.pathname.startsWith('/pt/'))).toBe(true);
 });
 
+test('Hindi stays authoritative for the cover and mobile sidebar after switching', async ({ page }) => {
+  await page.goto('/term/context-window/');
+  await page.locator('.site-language-switcher summary').click();
+  await page.locator('[data-language-code="hi"]').click();
+
+  await expect(page).toHaveURL(/\/hi\/term\/context-window\/(?:#.*)?$/);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'hi');
+  await expect(page.locator('#navIndex').first()).toContainText('पूरा इंडेक्स');
+  await expect(page.locator('.brand p').first()).toContainText('AI सीखने वालों');
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator('#mobileMenu').click();
+  await expect(page.locator('#mobileSidebar #navIndex')).toContainText('पूरा इंडेक्स');
+  await expect(page.locator('#mobileSidebar .brand p')).toContainText('AI सीखने वालों');
+
+  await page.waitForTimeout(1_200);
+  await expect(page.locator('#mobileSidebar #navIndex')).toContainText('पूरा इंडेक्स');
+  await expect(page.locator('#mobileSidebar .brand p')).toContainText('AI सीखने वालों');
+});
+
+test('localized About stays on the localized cover route', async ({ page }) => {
+  await page.goto('/hi/');
+  await page.locator('#navAbout').click();
+
+  await expect(page.locator('.about-page-layer')).toBeVisible();
+  await expect(page).toHaveURL(/\/hi\/#about$/);
+  await expect(page.locator('.about-page-layer')).toContainText('AI की भाषा के लिए');
+
+  await page.waitForTimeout(1_200);
+  await expect(page).toHaveURL(/\/hi\/#about$/);
+  await expect(page.locator('#navIndex')).toContainText('पूरा इंडेक्स');
+});
+
 test('remembered language restoration still offers Use English', async ({ page }) => {
   let localeRequests = 0;
 

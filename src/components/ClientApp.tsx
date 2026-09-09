@@ -1,6 +1,7 @@
 import { StrictMode, Suspense } from 'react';
 import App from '../App';
 import { isStrictAlmanacAppPath } from '../i18n/appPath';
+import { setRuntimeLocale } from '../i18n/reactLocale';
 import { NotFoundPage } from './NotFoundPage';
 
 const appLoader = (
@@ -13,6 +14,7 @@ const appLoader = (
 );
 
 export function ClientApp() {
+  setRuntimeLocale('en');
   const pathname = typeof window === 'undefined' ? '/' : window.location.pathname;
   const content = isStrictAlmanacAppPath(pathname, import.meta.env.BASE_URL || '/')
     ? <App />
