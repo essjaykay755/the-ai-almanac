@@ -1,12 +1,12 @@
-import type { ExplanationMode, SpecialModes, Term } from '../types/almanac';
-import { getExplanationForTerm } from '../utils/explanations';
+import type { ExplanationMode, SpecialModes, Term } from '../types/almanac.ts';
+import { getExplanationForTerm } from '../utils/explanations.ts';
 import {
   getLocaleFromPathname,
   getLocalizedEntryByKey,
   localizedLocales,
   type LocalizedLocale,
   type SupportedLocale
-} from './catalog';
+} from './catalog.ts';
 
 export interface UiStrings {
   brandTagline: string;
@@ -140,8 +140,8 @@ const localized: Record<LocalizedLocale, UiStrings> = {
   },
   bn: {
     ...en,
-    brandTagline: 'এআই অনুরাগী ও vibe coder-দের জন্য ক্রমশ বিকশিত একটি রেফারেন্স বই', navSearch: 'জিজ্ঞেস করুন / খুঁজুন', navTutorial: 'টিউটোরিয়াল দেখুন', navIndex: 'সম্পূর্ণ সূচি', navBookmarks: 'বুকমার্ক', navHistory: 'পড়ার ইতিহাস', navTimeline: 'সময়রেখা', navCollections: 'সংগ্রহ', navSurprise: 'চমকে দিন', navSave: 'এই এন্ট্রি সংরক্ষণ করুন', navAbout: 'পরিচিতি', soundEffects: 'শব্দ প্রভাব', soundOn: 'চালু', soundOff: 'বন্ধ', closeNavigation: 'নেভিগেশন মেনু বন্ধ করুন', openNavigation: 'নেভিগেশন মেনু খুলুন', closeSearch: 'খোঁজ বন্ধ করুন', openSearch: 'খোঁজ খুলুন', searchTerms: 'শব্দ খুঁজুন',
-    fieldEdition: 'ফিল্ড সংস্করণ', terms: 'শব্দ', page: 'পৃষ্ঠা', searchPlaceholder: 'The AI Almanac-কে জিজ্ঞেস করুন বা কোনো শব্দ খুঁজুন…', searchLabel: 'The AI Almanac-এ খুঁজুন', searchSuggestions: 'খোঁজার পরামর্শ', noExactMatch: 'সঠিক মিল পাওয়া যায়নি', tryIdea: 'আপনার প্রশ্নের ধারণা দিয়ে খুঁজে দেখুন:', clearSearch: 'খোঁজ পরিষ্কার করুন', dictionary: 'অভিধান', plain: 'সহজ ভাষা', technical: 'প্রযুক্তিগত', vibe: 'Vibe Coder', explanationMode: 'ব্যাখ্যার ধরন', origin: 'উৎপত্তি', inPractice: 'ব্যবহারে', addCollection: '+ সংগ্রহে যোগ করুন', saveEntry: 'এন্ট্রি সংরক্ষণ করুন', copyLink: 'লিংক কপি করুন', recentTerms: 'সাম্প্রতিক শব্দ', clearList: 'তালিকা পরিষ্কার করুন', seeAlso: 'আরও দেখুন', compare: 'তুলনা করুন', confused: 'প্রায়ই যেটির সঙ্গে গুলিয়ে ফেলা হয়', filedUnder: 'শ্রেণি', marginalia: 'পার্শ্বটীকা', almanacSuggests: 'The Almanac-এর পরামর্শ', previous: 'আগের', next: 'পরের', bookmark: 'বুকমার্ক করুন', removeBookmark: 'বুকমার্ক সরান', bookmarkEntry: 'এই এন্ট্রিটি বুকমার্ক করুন', pronounce: 'উচ্চারণ শুনুন', suggested: 'প্রস্তাবিত', entry: 'এন্ট্রি', related: 'সম্পর্কিত', aboutTitle: 'এআই-এর ভাষার জন্য\nএকটি ফিল্ড গাইড।', aboutLede: 'এআই অনুরাগী ও vibe coder-দের জন্য ক্রমশ বিকশিত একটি রেফারেন্স বই।', madeWith: 'তৈরি হয়েছে', by: 'দ্বারা', returnToBook: 'বইয়ে ফিরে যান', aiConcepts: 'এআই ধারণা', searchExamples: ['এআই কেন বানানো উত্তর দেয়?', 'একটি মডেল কতটা মনে রাখতে পারে?', 'RAG কী?'], searchPointsToEntry: (query) => `“${query}” এই এন্ট্রিটির সঙ্গে সবচেয়ে বেশি মেলে।`
+    brandTagline: 'এআই অনুরাগী ও vibe coder-দের জন্য ক্রমশ বিকশিত একটি রেফারেন্স বই', navSearch: 'জিজ্ঞেস করুন / খুঁজুন', navTutorial: 'টিউটোরিয়াল দেখুন', navIndex: 'সম্পূর্ণ সূচি', navBookmarks: 'বুকমার্ক', navHistory: 'পড়ার ইতিহাস', navTimeline: 'সময়রেখা', navCollections: 'সংগ্রহ', navSurprise: 'অন্য শব্দ দেখুন', navSave: 'এন্ট্রি সেভ করুন', navAbout: 'পরিচিতি', soundEffects: 'শব্দ প্রভাব', soundOn: 'চালু', soundOff: 'বন্ধ', closeNavigation: 'নেভিগেশন মেনু বন্ধ করুন', openNavigation: 'নেভিগেশন মেনু খুলুন', closeSearch: 'খোঁজ বন্ধ করুন', openSearch: 'খোঁজ খুলুন', searchTerms: 'শব্দ খুঁজুন',
+    fieldEdition: 'ফিল্ড সংস্করণ', terms: 'শব্দ', page: 'পৃষ্ঠা', searchPlaceholder: 'The AI Almanac-কে জিজ্ঞেস করুন বা কোনো শব্দ খুঁজুন…', searchLabel: 'The AI Almanac-এ খুঁজুন', searchSuggestions: 'খোঁজার পরামর্শ', noExactMatch: 'সঠিক মিল পাওয়া যায়নি', tryIdea: 'আপনার প্রশ্নের ধারণা দিয়ে খুঁজে দেখুন:', clearSearch: 'খোঁজ পরিষ্কার করুন', dictionary: 'অভিধান', plain: 'সহজ ভাষা', technical: 'প্রযুক্তিগত', vibe: 'Vibe Coder', explanationMode: 'ব্যাখ্যার ধরন', origin: 'উৎপত্তি', inPractice: 'ব্যবহারে', addCollection: '+ সংগ্রহে যোগ করুন', saveEntry: 'এন্ট্রি সেভ করুন', copyLink: 'লিংক কপি করুন', recentTerms: 'সাম্প্রতিক শব্দ', clearList: 'তালিকা পরিষ্কার করুন', seeAlso: 'আরও দেখুন', compare: 'তুলনা করুন', confused: 'প্রায়ই যেটির সঙ্গে গুলিয়ে ফেলা হয়', filedUnder: 'শ্রেণি', marginalia: 'পার্শ্বটীকা', almanacSuggests: 'The Almanac-এর পরামর্শ', previous: 'আগের', next: 'পরের', bookmark: 'বুকমার্ক করুন', removeBookmark: 'বুকমার্ক সরান', bookmarkEntry: 'এই এন্ট্রিটি বুকমার্ক করুন', pronounce: 'উচ্চারণ শুনুন', suggested: 'প্রস্তাবিত', entry: 'এন্ট্রি', related: 'সম্পর্কিত', aboutTitle: 'এআই-এর ভাষার জন্য\nএকটি ফিল্ড গাইড।', aboutLede: 'এআই অনুরাগী ও vibe coder-দের জন্য ক্রমশ বিকশিত একটি রেফারেন্স বই।', madeWith: 'তৈরি হয়েছে', by: 'দ্বারা', returnToBook: 'বইয়ে ফিরে যান', aiConcepts: 'এআই ধারণা', searchExamples: ['এআই কেন বানানো উত্তর দেয়?', 'একটি মডেল কতটা মনে রাখতে পারে?', 'RAG কী?'], searchPointsToEntry: (query) => `“${query}” এই এন্ট্রিটির সঙ্গে সবচেয়ে বেশি মেলে।`
   }
 };
 
@@ -193,16 +193,6 @@ const originByLocale: Record<LocalizedLocale, string> = {
   de: 'Die englische Form ist in technischer Dokumentation und moderner KI-Praxis üblich.',
   hi: 'तकनीकी documentation और आधुनिक AI practice में इसका English रूप आम तौर पर इस्तेमाल होता है।',
   bn: 'প্রযুক্তিগত নথি ও আধুনিক এআই চর্চায় এই ধারণার ইংরেজি নামটিই সাধারণত ব্যবহৃত হয়।'
-};
-
-const modeLead: Record<LocalizedLocale, { plain: string; technical: string; vibe: string }> = {
-  es: { plain: 'En sencillo:', technical: 'En términos técnicos:', vibe: 'Para un vibe coder:' },
-  pt: { plain: 'Em termos simples:', technical: 'Em termos técnicos:', vibe: 'Para um vibe coder:' },
-  it: { plain: 'In parole semplici:', technical: 'In termini tecnici:', vibe: 'Per un vibe coder:' },
-  fr: { plain: 'En termes simples :', technical: 'En termes techniques :', vibe: 'Pour un vibe coder :' },
-  de: { plain: 'Einfach gesagt:', technical: 'Technisch formuliert:', vibe: 'Für einen Vibe Coder:' },
-  hi: { plain: 'सरल शब्दों में:', technical: 'तकनीकी रूप से:', vibe: 'एक vibe coder के लिए:' },
-  bn: { plain: 'সহজভাবে:', technical: 'প্রযুক্তিগতভাবে:', vibe: 'একজন vibe coder-এর জন্য:' }
 };
 
 function isLocalizedLocale(locale: SupportedLocale): locale is LocalizedLocale {
@@ -262,10 +252,11 @@ export function getLocalizedTermPresentation(
     };
   }
 
-  let definition = entry.definition;
-  if (mode === 'plain') definition = `${modeLead[locale].plain} ${entry.definition}`;
-  if (mode === 'technical') definition = `${modeLead[locale].technical} ${entry.definition}`;
-  if (mode === 'vibe') definition = `${modeLead[locale].vibe} ${entry.note}`;
+  const bengaliModeCopy = locale === 'bn' && mode !== 'dictionary'
+    ? specialModes[term.word]?.[mode]?.trim()
+    : undefined;
+  let definition = bengaliModeCopy || entry.definition;
+  if (mode === 'vibe' && !bengaliModeCopy) definition = entry.note;
 
   return {
     word: entry.key,

@@ -115,11 +115,11 @@ test.describe('desktop regression flows', () => {
     await expect(page.locator('#navSearch')).toContainText('Perguntar / Pesquisar');
 
     await page.locator('#mode-tab-plain').click();
-    await expect(page.locator('#entry .definition')).toContainText('Em termos simples:');
+    await expect(page.locator('#entry .definition')).not.toContainText('Em termos simples:');
     await page.locator('#mode-tab-technical').click();
-    await expect(page.locator('#entry .definition')).toContainText('Em termos técnicos:');
+    await expect(page.locator('#entry .definition')).not.toContainText('Em termos técnicos:');
     await page.locator('#mode-tab-vibe').click();
-    await expect(page.locator('#entry .definition')).toContainText('Para um vibe coder:');
+    await expect(page.locator('#entry .definition')).not.toContainText('Para um vibe coder:');
 
     await page.getByRole('button', { name: /^Índice completo/ }).click();
     await expect(page.getByRole('dialog', { name: 'Todos os termos catalogados' })).toBeVisible();

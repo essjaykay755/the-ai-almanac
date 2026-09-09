@@ -14,14 +14,14 @@ function fallbackExplanations(term: Term): Record<ExplanationMode, string> {
   return {
     dictionary: term.definition,
     plain: example
-      ? `A simple way to think about ${term.word}: ${example}`
+      ? `Think of ${term.word} this way — ${example}`
       : `In everyday language, ${term.word} is the idea described by this entry.`,
     technical: related
-      ? `Technical lens - ${term.word}: ${term.definition} It is commonly discussed alongside ${related}.`
-      : `Technical lens - ${term.word}: ${term.definition}`,
+      ? `${term.definition} It is commonly discussed alongside ${related}.`
+      : term.definition,
     vibe: note && example
-      ? `${term.word} in the build: ${note} Example: ${example}`
-      : `${term.word} in the build: ${note || example || 'Use the term precisely and verify it in context.'}`
+      ? `${note} ${example}`
+      : note || example || 'Use the term precisely and verify it in context.'
   };
 }
 
@@ -30,8 +30,9 @@ function normalizeExplanation(text: string): string {
 }
 
 /**
- * Returns the four explanation lenses for a term, resolving bespoke copy first
- * and making sure a duplicated override cannot collapse two tabs into one.
+ * Returns the four explanation lenses for a term, resolving bespoke copy first.
+ * Explicit overrides stay authoritative even when a translation only has one
+ * shared piece of copy for several lenses.
  */
 export function getExplanations(
   term: Term,
@@ -44,10 +45,11 @@ export function getExplanations(
 
   for (const mode of explanationModes) {
     const override = mode === 'dictionary' ? undefined : overrides[mode];
-    const candidate = override?.trim() || fallbacks[mode];
+    const explicitCandidate = override?.trim();
+    const candidate = explicitCandidate || fallbacks[mode];
     const normalizedCandidate = normalizeExplanation(candidate);
 
-    if (!used.has(normalizedCandidate)) {
+    if (explicitCandidate || !used.has(normalizedCandidate)) {
       explanations[mode] = candidate;
       used.add(normalizedCandidate);
       continue;

@@ -54,7 +54,7 @@ test('multilingual starter exposes the localized editions and their translated c
   for (const locale of localizedLocales.filter((locale) => locale !== 'bn')) {
     assert.equal(getLocalizedEntries(locale).length, 10);
   }
-  assert.equal(getLocalizedEntries('bn').length, 11);
+  assert.equal(getLocalizedEntries('bn').length, 12);
   assert.equal(getLocalizedTermPath('es', 'artificial intelligence'), 'es/term/inteligencia-artificial/');
   assert.equal(getLocalizedTermPath('hi', 'artificial intelligence'), 'hi/term/kritrim-buddhimatta/');
   assert.equal(getLocalizedTermPath('pt', 'context window'), 'pt/term/janela-de-contexto/');
@@ -100,7 +100,7 @@ test('localized routes use the same React app and render full localization throu
   assert.match(compareOverlay, /getLocalizedTermPresentation/);
   assert.match(reactLocale, /exampleByLocale/);
   assert.match(reactLocale, /originByLocale/);
-  assert.match(reactLocale, /Em termos simples:/);
+  assert.doesNotMatch(reactLocale, /modeLead|Em termos simples:/);
   assert.match(reactLocale, /पूछें \/ खोजें/);
   assert.match(reactLocale, /জিজ্ঞেস করুন \/ খুঁজুন/);
   assert.match(tutorialLocale, /localizeTutorialStep/);
@@ -109,6 +109,7 @@ test('localized routes use the same React app and render full localization throu
   assert.doesNotMatch(englishClient, /runtimeClient/);
   assert.match(localizedClient, /import App from '..\/App'/);
   assert.match(localizedClient, /prepareLocalizedRuntime/);
+  assert.doesNotMatch(localizedClient, /সহজভাবে:|প্রযুক্তিগতভাবে:|ভাইব কোডারের দৃষ্টিতে:/);
   assert.doesNotMatch(localizedHome, /locale-term-card/);
 });
 

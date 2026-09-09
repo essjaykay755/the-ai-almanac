@@ -53,6 +53,22 @@ test('Activation Patching has complete Bengali content', async ({ page }) => {
   }
 });
 
+test('Taste has Bengali copy across every explanation mode', async ({ page }) => {
+  await page.goto('/bn/term/taste/');
+
+  await expect(page.locator('.word')).toHaveText('Taste');
+
+  for (const mode of ['dictionary', 'plain', 'technical', 'vibe'] as const) {
+    await page.locator(`#mode-tab-${mode}`).click();
+    await expectBengaliText(page.locator('.definition'));
+    await expect(page.locator('.definition')).not.toContainText('As generation gets cheaper');
+  }
+
+  await expectBengaliText(page.locator('.example'));
+  await expectBengaliText(page.locator('.lower-grid p').nth(0));
+  await expectBengaliText(page.locator('.lower-grid p').nth(1));
+});
+
 test('Bengali edition exposes all 791 terms with Bengali definitions', async ({ page }) => {
   await page.goto('/bn/term/gated-recurrent-unit/');
 
@@ -82,7 +98,9 @@ test('Bengali interface localizes visible navigation microcopy', async ({ page }
   await expect(page.locator('#navTutorial span')).toHaveText('টিউটোরিয়াল দেখুন');
   await expect(page.locator('#navTutorial small')).toHaveText('গাইড');
   await expect(page.locator('#navTimeline small')).toHaveText('দেখুন');
-  await expect(page.locator('#navSurprise small')).toHaveText('এলোমেলো');
+  await expect(page.locator('#navSurprise span')).toHaveText('অন্য শব্দ দেখুন');
+  await expect(page.locator('#navSurprise small')).toHaveText('যেকোনো');
+  await expect(page.locator('#navClip span')).toHaveText('এন্ট্রি সেভ করুন');
   await expect(page.locator('#navClip small')).toHaveText('শেয়ার');
   await expect(page.locator('#navAbout small')).toHaveText('পরিচিতি');
 });

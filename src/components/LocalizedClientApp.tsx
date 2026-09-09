@@ -34,9 +34,9 @@ function prepareBengaliCorpus(data: AlmanacData): void {
     term.definition = generatedDefinition;
     term.part = bengaliParts[term.part.toLowerCase()] || term.part;
     data.specialModes[term.word] = {
-      plain: `সহজভাবে: ${generatedDefinition}`,
-      technical: `প্রযুক্তিগতভাবে: ${generatedDefinition}`,
-      vibe: `ভাইব কোডারের দৃষ্টিতে: ${generatedDefinition}`
+      plain: generatedDefinition,
+      technical: generatedDefinition,
+      vibe: generatedDefinition
     };
 
     const curated = getBengaliTermCopy(term.word);
