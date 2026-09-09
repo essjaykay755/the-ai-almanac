@@ -137,11 +137,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
         <footer className="about-page-footer redesign-footer">
           <div className="about-credits">
             <div className="about-credit-line">
-              <span>{strings.madeWith} </span>
+              <span>Made with </span>
               <svg className="heart-icon" viewBox="0 0 24 24" fill="currentColor" aria-label="love">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
-              <span> {strings.by} </span>
+              <span> by </span>
               <div ref={authorCreditRef} className="author-credit" onMouseEnter={handleAuthorMouseEnter} onMouseLeave={() => setShowVideo(false)}>
                 <a href="https://x.com/essjaykay755" target="_blank" rel="noreferrer" aria-expanded={wantsVideoPreview} aria-controls="author-video-popup" onPointerDown={handleAuthorPointerDown} onClick={handleAuthorClick}>Subhojit Karmakar</a>
                 <div id="author-video-popup" className={`author-video-popup${wantsVideoPreview ? ' is-visible' : ''}`} aria-hidden={!wantsVideoPreview}>

@@ -43,6 +43,11 @@ test('localized About stays on the localized cover route', async ({ page }) => {
   await expect(page.locator('.about-page-layer')).toBeVisible();
   await expect(page).toHaveURL(/\/hi\/#about$/);
   await expect(page.locator('.about-page-layer')).toContainText('AI की भाषा के लिए');
+  const aboutCredit = page.locator('.about-credit-line').first();
+  await expect(aboutCredit).toContainText('Made with');
+  await expect(aboutCredit).toContainText('by Subhojit Karmakar');
+  await expect(aboutCredit).not.toContainText('बनाया गया');
+  await expect(aboutCredit).not.toContainText('द्वारा');
 
   await page.waitForTimeout(1_200);
   await expect(page).toHaveURL(/\/hi\/#about$/);
