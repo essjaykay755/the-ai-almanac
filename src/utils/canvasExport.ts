@@ -50,6 +50,9 @@ export async function renderClipPreviewToCanvas(
   const scale = Math.max(2, Math.min(3, 2400 / width));
   const renderOptions = {
     allowTaint: false,
+    // Keep this transparent: the retry below detects a failed
+    // foreignObject render by looking for visible pixels, and an opaque
+    // seed color would mask that failure as a blank solid image.
     backgroundColor: null,
     imageTimeout: 15000,
     logging: false,

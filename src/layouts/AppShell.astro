@@ -49,6 +49,7 @@ const absoluteUrl = (path: string) => Astro.site
   : withBase(path);
 const rootPath = withBase('');
 const aboutPath = withBase('about/');
+const clarityProjectId = import.meta.env.PUBLIC_CLARITY_PROJECT_ID || 'ylluy2ww1n';
 const canonicalUrl = absoluteUrl(canonicalPath);
 const imageUrl = absoluteUrl(imagePath);
 const alternateLinks = translationKey ? getTermAlternateLinks(translationKey) : getHomeAlternateLinks();
@@ -101,6 +102,19 @@ const shouldBridgeAbout = locale === 'en';
       href="https://fonts.googleapis.com/css2?family=Baskervville:ital@0;1&family=Cinzel:wght@500;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    {clarityProjectId && (
+      <script is:inline define:vars={{ clarityProjectId }}>
+        (function (c, l, a, r, i, t, y) {
+          c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
+          t = l.createElement(r);
+          t.async = true;
+          t.src = 'https://www.clarity.ms/tag/' + i;
+          y = l.getElementsByTagName(r)[0];
+          y.parentNode.insertBefore(t, y);
+        })(window, document, 'clarity', 'script', clarityProjectId);
+      </script>
+    )}
 
     <style is:global>
       #root > astro-island {
