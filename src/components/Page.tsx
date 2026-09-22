@@ -254,6 +254,7 @@ const PageContent = React.forwardRef<HTMLElement, PageProps>(function Page(
               {illustrationSrc && (
                 <div className="entry-illustration-wrap" aria-hidden="true">
                   <img
+                    key={illustrationSrc}
                     className="entry-illustration"
                     src={illustrationSrc}
                     alt=""

@@ -1,6 +1,7 @@
 import manifest from '../data/illustration-manifest.json';
 import type { Term } from '../types/almanac';
 import { slugifyTerm } from './ogImage';
+import { APP_VERSION } from '../version';
 
 type IllustrationManifest = {
   termImages: Record<string, string>;
@@ -11,9 +12,12 @@ const typedManifest = manifest as IllustrationManifest;
 const illustrationPreloadCache = new Map<string, Promise<void>>();
 
 export function getTermIllustrationSource(term: Term): string | null {
-  return typedManifest.termImages[slugifyTerm(term.word)]
+  const source = typedManifest.termImages[slugifyTerm(term.word)]
     || typedManifest.categoryImages[term.category]
     || null;
+
+  // Illustration URLs use immutable CDN caching; APP_VERSION invalidates them on release.
+  return source ? `${source}?v=${encodeURIComponent(APP_VERSION)}` : null;
 }
 
 export function preloadTermIllustration(term: Term): void {

@@ -285,9 +285,15 @@ function createDestinationSnapshot(
   const illustrationWrap = clone.querySelector<HTMLElement>('.entry-illustration-wrap');
   const illustration = clone.querySelector<HTMLImageElement>('.entry-illustration');
   if (nextIllustrationSrc && illustration) {
-    illustration.src = nextIllustrationSrc;
-    illustration.loading = 'eager';
-    illustration.decoding = 'async';
+    const nextImage = document.createElement('img');
+    nextImage.className = 'entry-illustration';
+    nextImage.src = nextIllustrationSrc;
+    nextImage.alt = '';
+    nextImage.width = 512;
+    nextImage.height = 512;
+    nextImage.loading = 'eager';
+    nextImage.decoding = 'async';
+    illustration.replaceWith(nextImage);
   } else if (nextIllustrationSrc && definitionPrimary && !illustrationWrap) {
     const nextWrap = document.createElement('div');
     nextWrap.className = 'entry-illustration-wrap';
@@ -550,10 +556,9 @@ const AlmanacApp: React.FC = () => {
 
     const previous = sortedTerms[(termIndex - 1 + sortedTerms.length) % sortedTerms.length];
     const next = sortedTerms[(termIndex + 1) % sortedTerms.length];
-    preloadTermIllustration(currentTerm);
     preloadTermIllustration(previous);
     preloadTermIllustration(next);
-  }, [currentTerm, sortedTerms, termIndex]);
+  }, [sortedTerms, termIndex]);
 
   const searchIndex = useMemo(() => createSearchIndex(sortedTerms), [sortedTerms]);
 
