@@ -13856,8 +13856,11 @@ export const timeline: TimelineItem[] = [
 ];
 
 export const sortedTerms: Term[] = [...terms].sort((a, b) => a.word.localeCompare(b.word));
-export const termsByWord: Record<string, Term> = Object.fromEntries(
-  sortedTerms.map((t) => [t.word.toLowerCase(), t])
+// Null-prototype maps: lookups keyed by stored or URL-supplied words must never
+// hit Object.prototype members such as "constructor".
+export const termsByWord: Record<string, Term> = Object.assign(
+  Object.create(null) as Record<string, Term>,
+  Object.fromEntries(sortedTerms.map((t) => [t.word.toLowerCase(), t]))
 );
 
 const aliasTargets = new Map<string, Term | null>();
@@ -13874,8 +13877,11 @@ for (const term of sortedTerms) {
   }
 }
 
-export const termsByAlias: Record<string, Term> = Object.fromEntries(
-  [...aliasTargets.entries()].filter((entry): entry is [string, Term] => Boolean(entry[1]))
+export const termsByAlias: Record<string, Term> = Object.assign(
+  Object.create(null) as Record<string, Term>,
+  Object.fromEntries(
+    [...aliasTargets.entries()].filter((entry): entry is [string, Term] => Boolean(entry[1]))
+  )
 );
 
 export function resolveTerm(word: string): Term | null {

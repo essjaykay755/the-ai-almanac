@@ -17,7 +17,20 @@ import { CompareOverlay } from './components/overlays/CompareOverlay';
 import { NotFoundPage } from './components/NotFoundPage';
 import { TutorialOverlay } from './components/TutorialOverlay';
 import { TUTORIAL_STEPS } from './components/tutorialSteps';
-import { isAlmanacAppPath } from './i18n/catalog';
+import { isStrictAlmanacAppPath } from './i18n/appPath';
+import {
+  getLanguageSwitchPath,
+  getLocalizedEntryByKey,
+  localeMeta,
+  type SupportedLocale
+} from './i18n/catalog';
+import {
+  getLocalizedTermPresentation,
+  getModeLabels,
+  getRuntimeLocale,
+  getUiStrings
+} from './i18n/reactLocale';
+import { APP_VERSION } from './version';
 import {
   playPageTurnSound,
   playPaperTearSound,
@@ -26,8 +39,8 @@ import {
 } from './utils/sound';
 import { getPronunciation } from './utils/pronunciation';
 import { createSearchIndex } from './utils/search';
-import { getExplanationForTerm } from './utils/explanations';
 import { getTermIllustrationSource, preloadTermIllustration } from './utils/illustrations';
+import { scheduleAuthorVideoPrecache } from './utils/authorVideo';
 import {
   getPublicPath,
   getTermOgImagePath,
@@ -37,13 +50,6 @@ import {
 
 type AlmanacData = typeof import('./data/terms');
 const almanacDataPromise: Promise<AlmanacData> = import('./data/terms');
-
-const modeNames: Record<ExplanationMode, string> = {
-  dictionary: 'Dictionary',
-  plain: 'Plain English',
-  technical: 'Technical',
-  vibe: 'Vibe Coder'
-};
 
 type BookView = 'term' | 'about';
 
@@ -55,9 +61,14 @@ type TermSelectionOptions = {
 
 type Collections = Record<string, string[]>;
 
-const DEFAULT_PAGE_TITLE = 'The AI Almanac - Expanded Living Dictionary v0.7';
+// Mirrors the server-rendered metadata in src/pages so client navigation never
+// contradicts what the static HTML (and its hreflang alternates) declared.
+const DEFAULT_PAGE_TITLE = `The AI Almanac - Expanded Living Dictionary v${APP_VERSION}`;
 const DEFAULT_PAGE_DESCRIPTION =
   'An evolving reference book for AI enthusiasts & vibe coders. Living dictionary of artificial intelligence concepts, architectures and practices.';
+const ABOUT_PAGE_TITLE = 'About The AI Almanac';
+const ABOUT_PAGE_DESCRIPTION =
+  'About The AI Almanac, an evolving reference book for AI enthusiasts and vibe coders.';
 
 const legacyDefaultCollections: Collections = {
   'Vibe coder essentials': ['vibe coding', 'diff', 'ship loop', 'taste', 'eval'],
@@ -69,6 +80,21 @@ const defaultCollections: Collections = {
   'Build & ship': ['prompt-to-product', 'tool calling', 'workflow', 'observability', 'diff'],
   'Evaluation & safety': ['eval', 'benchmark', 'guardrail', 'safety eval', 'grounding']
 };
+
+type MetadataView = 'home' | 'term' | 'about';
+
+function locationNamesTerm(): boolean {
+  if (typeof window === 'undefined') return false;
+  return /\/term\/[^/]+\/?$/.test(window.location.pathname) || /(?:^#|&)term=/.test(window.location.hash);
+}
+
+// The edition-specific page for a term. Localized editions without a dedicated
+// page for the term keep it in the hash of their home route.
+function getTermPagePath(term: Pick<Term, 'word'>, locale: SupportedLocale): { path: string; hash: string } {
+  const path = getLanguageSwitchPath(locale, term.word);
+  const hasTermPage = locale === 'en' || path.includes('term/');
+  return { path, hash: hasTermPage ? '' : `#term=${encodeURIComponent(term.word)}` };
+}
 
 function getBookViewFromHash(): BookView {
   return typeof window !== 'undefined' && window.location.hash === '#about' ? 'about' : 'term';
@@ -99,17 +125,39 @@ function updateCanonicalUrl(href: string): void {
   canonical.href = href;
 }
 
-function updateDocumentMetadata(term: Term | null, bookView: BookView): void {
-  const isTermView = bookView === 'term' && Boolean(term);
-  const title = isTermView && term ? `${term.word} - The AI Almanac` : DEFAULT_PAGE_TITLE;
-  const description = isTermView && term ? term.definition : DEFAULT_PAGE_DESCRIPTION;
-  const imagePath = isTermView && term ? getTermOgImagePath(term) : 'og-image.svg';
-  const pagePath = isTermView && term ? getTermRoutePath(term) : '';
+function updateDocumentMetadata(term: Term, view: MetadataView, locale: SupportedLocale): void {
+  let title: string;
+  let description: string;
+  let pagePath: string;
+  let imagePath = 'og-image.svg';
+  let imageAlt = 'The AI Almanac - an evolving field guide to artificial intelligence.';
+
+  if (view === 'term') {
+    const entry = locale === 'en' ? null : getLocalizedEntryByKey(locale, term.word);
+    title = `${term.word} - The AI Almanac`;
+    description = entry?.definition || term.definition;
+    pagePath = getTermPagePath(term, locale).path;
+    imagePath = getTermOgImagePath(term);
+    imageAlt = `${term.word} definition card from The AI Almanac`;
+  } else if (view === 'about' && locale === 'en') {
+    title = ABOUT_PAGE_TITLE;
+    description = ABOUT_PAGE_DESCRIPTION;
+    pagePath = 'about/';
+  } else if (locale === 'en') {
+    title = DEFAULT_PAGE_TITLE;
+    description = DEFAULT_PAGE_DESCRIPTION;
+    pagePath = '';
+  } else {
+    // Localized About lives on the edition home (/<locale>/#about).
+    const meta = localeMeta[locale];
+    title = `${meta.homeHeading} | The AI Almanac`;
+    description = meta.siteDescription;
+    pagePath = `${locale}/`;
+  }
+
+  const isTermView = view === 'term';
   const pageUrl = getAbsoluteSiteUrl(pagePath);
   const imageUrl = getAbsoluteSiteUrl(imagePath);
-  const imageAlt = isTermView && term
-    ? `${term.word} definition card from The AI Almanac`
-    : 'The AI Almanac - an evolving field guide to artificial intelligence.';
 
   document.title = title;
   updateMetaTag('name', 'description', description);
@@ -231,6 +279,21 @@ function waitForIllustration(root: HTMLElement | null): Promise<void> {
   })).then(() => undefined);
 }
 
+function createElementWithText(tagName: string, text: string, className = ''): HTMLElement {
+  const element = document.createElement(tagName);
+  if (className) element.className = className;
+  if (text) element.textContent = text;
+  return element;
+}
+
+function createInertButton(label: string): HTMLButtonElement {
+  const button = createElementWithText('button', label) as HTMLButtonElement;
+  button.type = 'button';
+  button.tabIndex = -1;
+  button.setAttribute('aria-hidden', 'true');
+  return button;
+}
+
 function createDestinationSnapshot(
   term: Term,
   mode: ExplanationMode,
@@ -243,15 +306,20 @@ function createDestinationSnapshot(
   searchQueryValue: string = ''
 ): HTMLElement {
   const clone = cleanClone(sampleInner);
+  // Mirror Page.tsx exactly so the turning leaf already shows the edition's
+  // language instead of English copy that swaps once React renders.
+  const locale = getRuntimeLocale();
+  const strings = getUiStrings(locale);
+  const localizedTerm = getLocalizedTermPresentation(term, mode, data.specialModes, locale);
 
   // 1. Headword line
   const wordEl = clone.querySelector('.word');
   if (wordEl) {
-    wordEl.textContent = term.word;
+    wordEl.textContent = localizedTerm.word;
   }
   const partEl = clone.querySelector('.headword-line .part');
   if (partEl) {
-    partEl.textContent = term.part;
+    partEl.textContent = localizedTerm.part;
   }
 
   // 2. Pronunciation
@@ -263,19 +331,19 @@ function createDestinationSnapshot(
   // 3. Definition mode & text
   const defModeEl = clone.querySelector('.definition-mode');
   if (defModeEl) {
-    defModeEl.textContent = modeNames[mode] || 'Standard Dictionary';
+    defModeEl.textContent = getModeLabels(locale)[mode];
   }
   const defEl = clone.querySelector('.definition');
   if (defEl) {
-    defEl.textContent = getExplanationForTerm(term, mode, data.specialModes);
+    defEl.textContent = localizedTerm.definition;
     defEl.classList.toggle('search-hit', Boolean(fromSearchQuestion));
   }
 
   // 4. Example
   const exEl = clone.querySelector('.example') as HTMLElement | null;
   if (exEl) {
-    exEl.textContent = term.example || '';
-    exEl.style.display = term.example ? 'block' : 'none';
+    exEl.textContent = localizedTerm.example;
+    exEl.style.display = localizedTerm.example ? 'block' : 'none';
   }
 
   // 5. Illustration: update the animated destination before the live React
@@ -326,17 +394,14 @@ function createDestinationSnapshot(
   // 6. Lower grid (Origin & In Practice)
   const lowerGridPs = clone.querySelectorAll('.lower-grid p');
   if (lowerGridPs.length >= 2) {
-    lowerGridPs[0].textContent = term.origin || 'A standard term in modern AI practice.';
-    lowerGridPs[1].textContent = term.note || 'Use the term precisely in context.';
+    lowerGridPs[0].textContent = localizedTerm.origin;
+    lowerGridPs[1].textContent = localizedTerm.note;
   }
 
   // 7. Thread & Trail
   const trailEl = clone.querySelector('.trail');
   if (trailEl) {
-    trailEl.innerHTML = nextTrail
-      .slice(-10)
-      .map((w) => `<button type="button" tabindex="-1" aria-hidden="true">${w}</button>`)
-      .join('');
+    trailEl.replaceChildren(...nextTrail.slice(-10).map(createInertButton));
   }
 
   // 8. Margin sections: See also, Compare, Often confused with, Filed under, Marginalia
@@ -346,77 +411,46 @@ function createDestinationSnapshot(
     const seeRefs = term.related || [];
     const compareRefs = x.compare && x.compare.length > 0 ? x.compare : seeRefs.slice(0, 2);
     const confusedRefs = x.confused || [];
+    const sections: HTMLElement[] = [];
 
-    let marginHtml = '';
-    if (seeRefs.length > 0) {
-      marginHtml += `
-        <section class="margin-section">
-          <h3>See also</h3>
-          <div class="xref">
-            ${seeRefs.map((r) => `<button type="button" tabindex="-1" aria-hidden="true">${r}</button>`).join('')}
-          </div>
-        </section>
-      `;
-    }
-    if (compareRefs.length > 0) {
-      marginHtml += `
-        <section class="margin-section">
-          <h3>Compare</h3>
-          <div class="xref">
-            ${compareRefs.map((r) => `<button type="button" tabindex="-1" aria-hidden="true">${r}</button>`).join('')}
-          </div>
-        </section>
-      `;
-    }
-    if (confusedRefs.length > 0) {
-      marginHtml += `
-        <section class="margin-section">
-          <h3>Often confused with</h3>
-          <div class="xref">
-            ${confusedRefs.map((r) => `<button type="button" tabindex="-1" aria-hidden="true">${r}</button>`).join('')}
-          </div>
-        </section>
-      `;
-    }
-    marginHtml += `
-      <section class="margin-section">
-        <h3>Filed under</h3>
-        <p>${term.category || 'AI Concepts'}</p>
-      </section>
-      <aside class="margin-note">
-        <strong>Marginalia</strong>
-        <p>${term.note || ''}</p>
-      </aside>
-    `;
-    marginEl.innerHTML = marginHtml;
+    const addXrefSection = (heading: string, refs: string[]) => {
+      if (refs.length === 0) return;
+      const section = createElementWithText('section', '', 'margin-section');
+      const xref = createElementWithText('div', '', 'xref');
+      xref.append(...refs.map(createInertButton));
+      section.append(createElementWithText('h3', heading), xref);
+      sections.push(section);
+    };
+    addXrefSection(strings.seeAlso, seeRefs);
+    addXrefSection(strings.compare, compareRefs);
+    addXrefSection(strings.confused, confusedRefs);
 
-    const marginNote = marginEl.querySelector('.margin-note');
-    if (marginNote) {
-      const isSearchResult = Boolean(fromSearchQuestion);
-      marginNote.classList.toggle('search-note', isSearchResult);
+    const filedUnder = createElementWithText('section', '', 'margin-section');
+    filedUnder.append(
+      createElementWithText('h3', strings.filedUnder),
+      createElementWithText('p', localizedTerm.category || strings.aiConcepts)
+    );
+    sections.push(filedUnder);
 
-      const noteHeading = marginNote.querySelector('strong');
-      if (noteHeading) {
-        noteHeading.textContent = isSearchResult ? 'The AI Almanac suggests' : 'Marginalia';
-      }
+    const isSearchResult = Boolean(fromSearchQuestion);
+    const marginNote = createElementWithText('aside', '', `margin-note${isSearchResult ? ' search-note' : ''}`);
+    marginNote.append(
+      createElementWithText('strong', isSearchResult ? strings.almanacSuggests : strings.marginalia),
+      createElementWithText('p', isSearchResult ? strings.searchPointsToEntry(fromSearchQuestion) : localizedTerm.note)
+    );
+    sections.push(marginNote);
 
-      const noteText = marginNote.querySelector('p');
-      if (noteText) {
-        noteText.textContent = isSearchResult
-          ? `“${fromSearchQuestion}” points most closely to this entry.`
-          : term.note || '';
-      }
-    }
+    marginEl.replaceChildren(...sections);
   }
 
   // 9. Folio top, page counter
   const pageNumEl = clone.querySelector('#pageNumber') || clone.querySelector('.page-footer .center');
   if (pageNumEl) {
-    pageNumEl.textContent = `Page ${termIndex + 1}`;
+    pageNumEl.textContent = `${strings.page} ${termIndex + 1}`;
   }
   const folioTopEl = clone.querySelector('.folio-top');
   if (folioTopEl) {
-    folioTopEl.textContent = `Page ${termIndex + 1}`;
+    folioTopEl.textContent = `${strings.page} ${termIndex + 1}`;
   }
 
   // 10. Bookmark button
@@ -428,6 +462,37 @@ function createDestinationSnapshot(
   }
 
   return clone;
+}
+
+// The term named by a crawlable /term/<slug>/ route or a legacy #term= hash.
+// `requested` is true when the URL names a term at all, even an unknown one.
+function readRequestedTerm(
+  sortedTerms: readonly Term[],
+  resolveTerm: AlmanacData['resolveTerm']
+): { requested: boolean; term: Term | null } {
+  if (typeof window === 'undefined') return { requested: false, term: null };
+  const pathMatch = window.location.pathname.match(/\/term\/([^/]+)\/?$/);
+  const hashMatch = window.location.hash.match(/(?:^#|&)term=([^&]+)/);
+
+  if (pathMatch) {
+    try {
+      const decoded = decodeURIComponent(pathMatch[1].replace(/\+/g, ' '));
+      const fromSlug = sortedTerms.find((term) => slugifyTerm(term.word) === decoded) ||
+        resolveTerm(decoded.replace(/-/g, ' '));
+      if (fromSlug) return { requested: true, term: fromSlug };
+    } catch {
+      // Localized term slugs are resolved through the hash key set at bootstrap.
+    }
+  }
+
+  const requestedValue = hashMatch?.[1];
+  if (!requestedValue) return { requested: Boolean(pathMatch), term: null };
+
+  try {
+    return { requested: true, term: resolveTerm(decodeURIComponent(requestedValue.replace(/\+/g, ' '))) };
+  } catch {
+    return { requested: true, term: null };
+  }
 }
 
 const AlmanacApp: React.FC = () => {
@@ -446,31 +511,10 @@ const AlmanacApp: React.FC = () => {
   }, [today]);
 
   // Read the initial term from a crawlable route or the legacy hash link.
-  const getHashTerm = useCallback((): Term | null => {
-    if (typeof window === 'undefined') return null;
-    const pathMatch = window.location.pathname.match(/\/term\/([^/]+)\/?$/);
-    const hashMatch = window.location.hash.match(/(?:^#|&)term=([^&]+)/);
-
-    if (pathMatch) {
-      try {
-        const decoded = decodeURIComponent(pathMatch[1].replace(/\+/g, ' '));
-        const fromSlug = sortedTerms.find((term) => slugifyTerm(term.word) === decoded) ||
-          resolveTerm(decoded.replace(/-/g, ' '));
-        if (fromSlug) return fromSlug;
-      } catch {
-        // Localized term slugs are resolved through the hash key set at bootstrap.
-      }
-    }
-
-    const requestedValue = hashMatch?.[1];
-    if (!requestedValue) return null;
-
-    try {
-      return resolveTerm(decodeURIComponent(requestedValue.replace(/\+/g, ' ')));
-    } catch {
-      return null;
-    }
-  }, [resolveTerm, sortedTerms]);
+  const getHashTerm = useCallback(
+    (): Term | null => readRequestedTerm(sortedTerms, resolveTerm).term,
+    [resolveTerm, sortedTerms]
+  );
 
   const [currentTerm, setCurrentTerm] = useState<Term>(() => {
     return getHashTerm() || resolveTerm('artificial intelligence') || sortedTerms[0];
@@ -482,6 +526,9 @@ const AlmanacApp: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [fromSearchQuestion, setFromSearchQuestion] = useState<string>('');
   const [trail, setTrail] = useState<string[]>([currentTerm.word]);
+  // Whether the address bar names a term. The home route still shows a term
+  // page, but its URL and metadata must stay those of the home page.
+  const [isTermRoute, setIsTermRoute] = useState<boolean>(locationNamesTerm);
 
   // Persistent States
   const [bookmarks, setBookmarks] = useState<string[]>(() =>
@@ -527,8 +574,12 @@ const AlmanacApp: React.FC = () => {
   const pendingTermRef = useRef<{ term: Term; options?: TermSelectionOptions } | null>(null);
 
   useEffect(() => {
-    updateDocumentMetadata(bookView === 'term' ? currentTerm : null, bookView);
-  }, [bookView, currentTerm]);
+    const view: MetadataView = bookView === 'about' ? 'about' : isTermRoute ? 'term' : 'home';
+    updateDocumentMetadata(currentTerm, view, getRuntimeLocale());
+  }, [bookView, currentTerm, isTermRoute]);
+
+  // Fetch the About page's author clip while idle so its first hover plays from memory.
+  useEffect(() => scheduleAuthorVideoPrecache(), []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -612,6 +663,7 @@ const AlmanacApp: React.FC = () => {
     if (typeof window === 'undefined') return;
 
     const termMatch = hash.match(/^#term=([^&]+)/);
+    if (termMatch) setIsTermRoute(true);
     let routePath = getPublicPath(import.meta.env.BASE_URL || '/', '');
     if (termMatch) {
       try {
@@ -1339,6 +1391,7 @@ const AlmanacApp: React.FC = () => {
       }
 
       const target = getHashTerm();
+      if (!target) setIsTermRoute(false);
       if (bookViewRef.current === 'about') {
         pendingTermRef.current = target ? { term: target, options: { addTrail: false } } : null;
         animateAboutTurn('term', () => {
@@ -1385,7 +1438,8 @@ const AlmanacApp: React.FC = () => {
         if (bookViewRef.current === 'about') {
           handleCloseAbout();
         }
-      } else if (!isInputActive && !activeOverlay) {
+      } else if (!isInputActive && !activeOverlay && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        // Leave modified keys (Ctrl/Cmd+P print, Alt+Arrow history) to the browser.
         if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'p') {
           e.preventDefault();
           handlePrevTerm();
@@ -1461,7 +1515,7 @@ const AlmanacApp: React.FC = () => {
         return;
       }
 
-      const existing = collections[trimmed];
+      const existing = hasCollection(collections, trimmed) ? collections[trimmed] : null;
       if (existing && !existing.includes(currentTerm.word)) {
         const updated = { ...collections, [trimmed]: [...existing, currentTerm.word] };
         setCollections(updated);
@@ -1496,10 +1550,10 @@ const AlmanacApp: React.FC = () => {
       }
       if (trimmed === currentName) return true;
 
-      const updated: Collections = {};
-      Object.entries(collections).forEach(([name, words]) => {
-        updated[name === currentName ? trimmed : name] = words;
-      });
+      // fromEntries defines own properties, so a name like "__proto__" stays a key.
+      const updated: Collections = Object.fromEntries(
+        Object.entries(collections).map(([name, words]) => [name === currentName ? trimmed : name, words])
+      );
       setCollections(updated);
       saveStorage('aiAlmanacCollections', updated);
       triggerStamp(`COLLECTION RENAMED TO “${trimmed}”`);
@@ -1527,8 +1581,8 @@ const AlmanacApp: React.FC = () => {
     (collectionName: string, word: string) => {
       if (bookViewRef.current === 'about') return;
 
+      if (!hasCollection(collections, collectionName)) return;
       const existing = collections[collectionName];
-      if (!existing) return;
 
       const updated = {
         ...collections,
@@ -1565,7 +1619,8 @@ const AlmanacApp: React.FC = () => {
 
   // Copy deep link
   const handleCopyLink = useCallback(async () => {
-    const url = getAbsoluteSiteUrl(getTermRoutePath(currentTerm));
+    const { path, hash } = getTermPagePath(currentTerm, getRuntimeLocale());
+    const url = `${getAbsoluteSiteUrl(path)}${hash}`;
     try {
       await navigator.clipboard.writeText(url);
       triggerStamp('LINK COPIED');
@@ -1809,7 +1864,7 @@ const AlmanacApp: React.FC = () => {
             </div>
 
             <div className="solid-turn" ref={solidTurnRef} aria-hidden="true">
-              <AboutPage totalTerms={totalPages} />
+              <AboutPage totalTerms={totalPages} decorative />
             </div>
           </div>
         </section>
@@ -1895,11 +1950,18 @@ const AlmanacApp: React.FC = () => {
   );
 };
 
+const AlmanacRoute: React.FC = () => {
+  const { sortedTerms, resolveTerm } = use(almanacDataPromise);
+  // An unknown slug must not silently open a different entry.
+  const { requested, term } = readRequestedTerm(sortedTerms, resolveTerm);
+  return requested && !term ? <NotFoundPage /> : <AlmanacApp />;
+};
+
 export const App: React.FC = () => {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
-  const isKnownPath = isAlmanacAppPath(pathname, import.meta.env.BASE_URL || '/');
+  const isKnownPath = isStrictAlmanacAppPath(pathname, import.meta.env.BASE_URL || '/');
 
-  return isKnownPath ? <AlmanacApp /> : <NotFoundPage />;
+  return isKnownPath ? <AlmanacRoute /> : <NotFoundPage />;
 };
 
 export default App;

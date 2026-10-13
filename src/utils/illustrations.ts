@@ -1,6 +1,6 @@
 import manifest from '../data/illustration-manifest.json';
 import type { Term } from '../types/almanac';
-import { slugifyTerm } from './ogImage';
+import { getPublicPath, slugifyTerm } from './ogImage';
 import { APP_VERSION } from '../version';
 
 type IllustrationManifest = {
@@ -16,8 +16,12 @@ export function getTermIllustrationSource(term: Term): string | null {
     || typedManifest.categoryImages[term.category]
     || null;
 
+  if (!source) return null;
+
+  // Manifest paths are site-root relative; resolve them under the deploy base.
   // Illustration URLs use immutable CDN caching; APP_VERSION invalidates them on release.
-  return source ? `${source}?v=${encodeURIComponent(APP_VERSION)}` : null;
+  const publicPath = getPublicPath(import.meta.env?.BASE_URL || '/', source);
+  return `${publicPath}?v=${encodeURIComponent(APP_VERSION)}`;
 }
 
 export function preloadTermIllustration(term: Term): void {

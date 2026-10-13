@@ -22,21 +22,24 @@ const STOP_WORDS = new Set([
   'called', 'how', 'is', 'an', 'are'
 ]);
 
+// Patterns run against the normalized query and outrank every other match, so
+// each keyword is anchored with \b: unanchored, "api" fired on "rapid",
+// "cite" on "excited" and "regression" hijacked "linear regression".
 const SEMANTIC_RULES: ReadonlyArray<readonly [RegExp, string]> = [
-  [/makes? (things|stuff) up|false answer|invent(ed|s)?|fabricat|confident.*wrong/, 'hallucination'],
-  [/documents?.*(before|then).*answer|search.*before.*answer|retrieve.*answer|look.*up.*answer/, 'RAG'],
-  [/how much.*(read|remember)|memory limit|context length|how many tokens/, 'context window'],
-  [/ai.*(act|action).*own|autonom|multiple steps|does things for me/, 'agentic'],
-  [/api|external function|use tools?|call.*function/, 'tool calling'],
-  [/meaning.*vector|similar meaning|semantic.*numbers/, 'embedding'],
-  [/coding.*ai|natural language.*code|vibe coder|describe.*software/, 'vibe coding'],
-  [/test.*ai|quality.*test|evaluate|regression/, 'eval'],
-  [/trusted source|cite|evidence.*answer/, 'grounding'],
-  [/system instructions|hidden instructions|assistant rules/, 'system prompt'],
-  [/\bnlp\b|natural language processing/, 'natural language processing'],
-  [/vision language action|\bvla\b/, 'vision-language-action model'],
-  [/generative ai|\bgenai\b/, 'generative AI'],
-  [/\bmcp\b|model context protocol/, 'MCP']
+  [/\bmakes? (things|stuff) up\b|\bfalse answers?\b|\binvent(ed|s|ing)?\b|\bfabricat|\bconfident\b.*\bwrong\b/, 'hallucination'],
+  [/\bdocuments?\b.*\b(before|then)\b.*\banswer|\bsearch\b.*\bbefore\b.*\banswer|\bretrieve\b.*\banswer|\blook\b.*\bup\b.*\banswer/, 'RAG'],
+  [/\bhow much\b.*\b(read|remember)\b|\bmemory limit\b|\bcontext length\b|\bhow many tokens\b/, 'context window'],
+  [/\bai\b.*\b(acts?|actions?)\b.*\bown\b|\bautonom|\bmultiple steps\b|\bdoes things for me\b/, 'agentic'],
+  [/\bapis?\b|\bexternal functions?\b|\buse tools?\b|\bcall\b.*\bfunctions?\b/, 'tool calling'],
+  [/\bmeaning\b.*\bvectors?\b|\bsimilar meaning\b|\bsemantic\b.*\bnumbers\b/, 'embedding'],
+  [/\bcoding\b.*\bai\b|\bnatural language\b.*\bcode\b|\bvibe coder\b|\bdescribe\b.*\bsoftware\b/, 'vibe coding'],
+  [/\btest\b.*\bai\b|\bquality\b.*\btest|\bevaluat(e|es|ed|ing)\b|\bregression tests?\b/, 'eval'],
+  [/\btrusted sources?\b|\bcit(e|es|ed|ing|ation|ations)\b|\bevidence\b.*\banswer/, 'grounding'],
+  [/\bsystem instructions\b|\bhidden instructions\b|\bassistant rules\b/, 'system prompt'],
+  [/\bnlp\b|\bnatural language processing\b/, 'natural language processing'],
+  [/\bvision language action\b|\bvla\b/, 'vision-language-action model'],
+  [/\bgenerative ai\b|\bgenai\b/, 'generative AI'],
+  [/\bmcp\b|\bmodel context protocol\b/, 'MCP']
 ];
 
 export function normalizeText(text: string = ''): string {
@@ -90,11 +93,14 @@ function scoreIndexedTerm(index: SearchIndexEntry, query: string, tokens: string
     score = 1.35;
   }
 
+  // An alias found inside the query must be a whole word or phrase there:
+  // otherwise short aliases match everywhere ("rl" in "world", "em" in "temperature").
+  const paddedQuery = ` ${query} `;
   if (aliases.some((alias) => alias === query)) {
     score = Math.min(score, 0.25);
-  } else if (aliases.some((alias) => alias.startsWith(query) || query.startsWith(alias))) {
+  } else if (aliases.some((alias) => alias.startsWith(query) || paddedQuery.startsWith(` ${alias} `))) {
     score = Math.min(score, 0.9);
-  } else if (aliases.some((alias) => alias.includes(query) || query.includes(alias))) {
+  } else if (aliases.some((alias) => alias.includes(query) || paddedQuery.includes(` ${alias} `))) {
     score = Math.min(score, 1.4);
   }
 

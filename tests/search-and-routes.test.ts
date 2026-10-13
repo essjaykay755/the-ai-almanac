@@ -175,3 +175,31 @@ test('sound effects default to off until the user opts in', () => {
     'Sound effects must default to disabled when no saved preference exists.'
   );
 });
+
+test('term lookup ignores Object.prototype member names', async () => {
+  const { resolveTerm, termsByWord, sortedTerms } = await import('../src/data/terms.ts');
+  for (const key of ['constructor', '__proto__', 'toString', 'hasOwnProperty', 'valueOf']) {
+    assert.equal(resolveTerm(key), null, `${key} must not resolve to a term`);
+    assert.equal(termsByWord[key], undefined);
+  }
+  assert.equal(resolveTerm('Context Window')?.word, 'context window');
+  assert.ok(sortedTerms.length > 0);
+});
+
+test('semantic shortcuts and aliases only match whole words in the query', async () => {
+  const { sortedTerms } = await import('../src/data/terms.ts');
+  const corpusIndex = createSearchIndex(sortedTerms);
+  const top = (query: string) => findBestMatch(query, corpusIndex)?.word;
+
+  assert.notEqual(top('linear regression'), 'eval');
+  assert.notEqual(top('rapid prototyping'), 'tool calling');
+  assert.equal(top('inventory'), 'model inventory');
+  assert.notEqual(top('excited'), 'grounding');
+  assert.ok(!searchTerms('world model', corpusIndex).some((match) => match.term.word === 'reinforcement learning'));
+  assert.ok(!searchTerms('temperature', corpusIndex).some((match) => match.term.word === 'exact match'));
+
+  assert.equal(top('which api lets the model call a function'), 'tool calling');
+  assert.equal(top('regression test for my agent'), 'eval');
+  assert.equal(top('cite sources'), 'grounding');
+  assert.equal(top('rl'), 'reinforcement learning');
+});

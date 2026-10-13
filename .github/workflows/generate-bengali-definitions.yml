@@ -1,12 +1,9 @@
 name: Generate Bengali Definitions
 
+# Manual only: the branch this used to watch (fix/bengali-localized-corpus) is
+# gone. Run it from the Actions tab on a working branch, never on main.
 on:
-  push:
-    branches:
-      - fix/bengali-localized-corpus
-    paths:
-      - scripts/generate-bengali-definitions.py
-      - .github/workflows/generate-bengali-definitions.yml
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,6 +14,8 @@ concurrency:
 
 jobs:
   translate:
+    # The job commits and pushes generated files; keep it off the default branch.
+    if: github.ref_name != github.event.repository.default_branch
     runs-on: ubuntu-latest
     timeout-minutes: 30
 

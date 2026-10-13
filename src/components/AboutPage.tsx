@@ -2,66 +2,51 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Ornament } from './Ornament';
 import { APP_VERSION } from '../version';
 import { getRuntimeLocale, getUiStrings } from '../i18n/reactLocale';
+import { authorVideoPosterUrl, precacheAuthorVideo } from '../utils/authorVideo';
 import essjaykayLogoUrl from '../assets/essjaykay-logo.svg?url';
 
 interface AboutPageProps {
   totalTerms: number;
   onClose?: () => void;
+  // The copy painted on the cover-turn leaf is never hovered, so it skips the video.
+  decorative?: boolean;
 }
 
-const AUTHOR_VIDEO_VERSION = '1';
-const authorVideoUrl = `${import.meta.env.BASE_URL || '/'}author-video.mp4?v=${AUTHOR_VIDEO_VERSION}`;
-
-export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => {
+export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose, decorative = false }) => {
   const strings = getUiStrings(getRuntimeLocale());
   const [showVideo, setShowVideo] = useState(false);
   const [touchPreviewOpen, setTouchPreviewOpen] = useState(false);
-  const [videoRequested, setVideoRequested] = useState(false);
-  const [videoReady, setVideoReady] = useState(false);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const authorCreditRef = useRef<HTMLDivElement>(null);
   const authorVideoRef = useRef<HTMLVideoElement>(null);
   const firstTouchTap = useRef(false);
   const wantsVideoPreview = showVideo || touchPreviewOpen;
-  const videoShouldPlay = wantsVideoPreview && videoReady;
 
+  // The clip is usually already cached by the app-level idle precache; this
+  // attaches the local blob: URL as soon as the About page mounts.
   useEffect(() => {
-    const connection = (navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string };
-    }).connection;
-    const shouldAvoidIdlePreload = connection?.saveData || connection?.effectiveType === 'slow-2g' || connection?.effectiveType === '2g';
-    if (shouldAvoidIdlePreload) return;
-
-    const startPreload = () => setVideoRequested(true);
-    const idleWindow = window as Window & {
-      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
-      cancelIdleCallback?: (handle: number) => void;
+    if (decorative) return;
+    let cancelled = false;
+    void precacheAuthorVideo().then((source) => {
+      if (!cancelled) setVideoSrc(source);
+    });
+    return () => {
+      cancelled = true;
     };
-    if (idleWindow.requestIdleCallback) {
-      const handle = idleWindow.requestIdleCallback(startPreload, { timeout: 1800 });
-      return () => idleWindow.cancelIdleCallback?.(handle);
-    }
-    const handle = window.setTimeout(startPreload, 900);
-    return () => window.clearTimeout(handle);
-  }, []);
+  }, [decorative]);
 
   useEffect(() => {
     const video = authorVideoRef.current;
-    if (!video || !videoRequested) return;
-    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) setVideoReady(true);
-    else video.load();
-  }, [videoRequested]);
-
-  useEffect(() => {
-    const video = authorVideoRef.current;
-    if (!video) return;
-    if (videoShouldPlay) void video.play().catch(() => {});
+    if (!video || !videoSrc) return;
+    if (wantsVideoPreview) void video.play().catch(() => {});
     else {
       video.pause();
-      if (!wantsVideoPreview) video.currentTime = 0;
+      video.currentTime = 0;
     }
-  }, [videoShouldPlay, wantsVideoPreview]);
+  }, [videoSrc, wantsVideoPreview]);
 
   useEffect(() => {
+    if (decorative) return;
     const handleTouchOutside = (event: PointerEvent) => {
       if (
         event.pointerType !== 'touch' ||
@@ -74,23 +59,31 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
     };
     document.addEventListener('pointerdown', handleTouchOutside);
     return () => document.removeEventListener('pointerdown', handleTouchOutside);
-  }, []);
+  }, [decorative]);
+
+  const startPreview = () => {
+    // Start decoding in the same frame as the hover instead of waiting for the
+    // React commit, so motion begins as the popup fades in.
+    const video = authorVideoRef.current;
+    if (video?.src) void video.play().catch(() => {});
+  };
 
   const handleAuthorMouseEnter = () => {
-    setVideoRequested(true);
+    if (decorative) return;
+    startPreview();
     setShowVideo(true);
   };
 
   const handleAuthorPointerDown = (event: React.PointerEvent<HTMLAnchorElement>) => {
     const isMobileTouch = event.pointerType === 'touch' && window.matchMedia('(max-width: 760px)').matches;
-    if (!isMobileTouch) {
+    if (decorative || !isMobileTouch) {
       firstTouchTap.current = false;
       return;
     }
     if (!touchPreviewOpen) {
       firstTouchTap.current = true;
       event.preventDefault();
-      setVideoRequested(true);
+      startPreview();
       setTouchPreviewOpen(true);
     } else firstTouchTap.current = false;
   };
@@ -143,27 +136,20 @@ export const AboutPage: React.FC<AboutPageProps> = ({ totalTerms, onClose }) => 
               </svg>
               <span> by </span>
               <div ref={authorCreditRef} className="author-credit" onMouseEnter={handleAuthorMouseEnter} onMouseLeave={() => setShowVideo(false)}>
-                <a href="https://x.com/essjaykay755" target="_blank" rel="noreferrer" aria-expanded={wantsVideoPreview} aria-controls="author-video-popup" onPointerDown={handleAuthorPointerDown} onClick={handleAuthorClick}>Subhojit Karmakar</a>
-                <div id="author-video-popup" className={`author-video-popup${wantsVideoPreview ? ' is-visible' : ''}`} aria-hidden={!wantsVideoPreview}>
-                  <img
-                    src={essjaykayLogoUrl}
-                    alt=""
-                    aria-hidden="true"
-                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', padding: '24px', background: '#000', opacity: videoReady ? 0 : 1, transition: 'opacity 120ms ease' }}
-                  />
-                  <video
-                    ref={authorVideoRef}
-                    src={videoRequested ? authorVideoUrl : undefined}
-                    preload={videoRequested ? 'auto' : 'none'}
-                    style={{ opacity: videoReady ? 1 : 0, transition: 'opacity 120ms ease' }}
-                    onLoadedData={() => setVideoReady(true)}
-                    onCanPlay={() => setVideoReady(true)}
-                    onError={() => setVideoReady(false)}
-                    muted
-                    loop
-                    playsInline
-                  />
-                </div>
+                <a href="https://x.com/essjaykay755" target="_blank" rel="noreferrer" aria-expanded={decorative ? undefined : wantsVideoPreview} aria-controls={decorative ? undefined : 'author-video-popup'} onPointerDown={handleAuthorPointerDown} onClick={handleAuthorClick}>Subhojit Karmakar</a>
+                {!decorative && (
+                  <div id="author-video-popup" className={`author-video-popup${wantsVideoPreview ? ' is-visible' : ''}`} aria-hidden={!wantsVideoPreview}>
+                    <video
+                      ref={authorVideoRef}
+                      src={videoSrc ?? undefined}
+                      poster={authorVideoPosterUrl}
+                      preload="auto"
+                      muted
+                      loop
+                      playsInline
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -587,20 +587,6 @@ export function getLocaleFromPathname(pathname: string, baseUrl = '/'): Supporte
   return (localizedLocales as readonly string[]).includes(first) ? first as LocalizedLocale : 'en';
 }
 
-export function isAlmanacAppPath(pathname: string, baseUrl = '/'): boolean {
-  const normalized = stripBasePath(pathname, baseUrl).replace(/\/+$/, '') || '/';
-  if (normalized === '/' || normalized === '/index.html' || normalized === '/about') return true;
-
-  const segments = normalized.replace(/^\/+/, '').split('/');
-  const isLocale = (value: string): value is LocalizedLocale =>
-    (localizedLocales as readonly string[]).includes(value);
-
-  if (segments.length === 1 && isLocale(segments[0])) return true;
-  if (segments[0] === 'term' && Boolean(segments[1])) return true;
-  if (isLocale(segments[0]) && segments[1] === 'term' && Boolean(segments[2])) return true;
-  return false;
-}
-
 export function getHomeAlternateLinks(): Array<{ locale: SupportedLocale; path: string }> {
   return allLocaleCodes.map((locale) => ({
     locale,
